@@ -1,0 +1,21 @@
+{
+  "name": "to-do-electron",
+  "version": "0.0.1",
+  "description": "Electron test",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "repository": "https://github.com/electron/electron-quick-start",
+  "keywords": [
+    "Electron",
+    "quick",
+    "start",
+    "tutorial",
+    "demo"
+  ],
+  "author": "TheNumerus",
+  "devDependencies": {
+    "electron": "~1.6.2"
+  }
+}
