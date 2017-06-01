@@ -9,11 +9,18 @@ tlacitko.addEventListener('click',function () {
 	uhm(5);
 	ipcRenderer.send("trelloAuthorize");
 })
+document.querySelector('#vypis').addEventListener('click', function () {
+	ipcRenderer.send('trelloGet')
+})
 function uhm(kolik){
 	var seznam = document.querySelector("#seznam")
 	seznam.innerHTML = "";
 	for(var i = 0;i<kolik;i++){
 		seznam.innerHTML+= ("<p>ayyy</p>")
 	}
-
 }
+var webik = document.querySelector("#webik")
+webik.setAttribute("src",'https://trello.com/1/authorize?expiration=never&callback_method=postMessage&response_type=token&key='+'01ad9ee9ec7a92b20ddd261ff55820f4'+'&name=ToDoElectron')
+webik.addEventListener('message',(event) =>{
+	console.log(event)
+})

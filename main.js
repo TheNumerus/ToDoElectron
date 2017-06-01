@@ -6,11 +6,12 @@ const BrowserWindow = electron.BrowserWindow
 
 const path = require('path')
 const url = require('url')
+const requestURL = "https://trello.com/1/OAuthGetRequestToken";
+const accessURL = "https://trello.com/1/OAuthGetAccessToken";
+const authorizeURL = "https://trello.com/1/OAuthAuthorizeToken";
 
 const ipcMain = require('electron').ipcMain
-const TrelloAPI = require('./trelloApi');
-const trelloAPIKey = "01ad9ee9ec7a92b20ddd261ff55820f4"
-let trello = new TrelloAPI(trelloAPIKey)
+const trelloAPI = require('./trelloApiHandler')
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow
@@ -37,15 +38,20 @@ function createWindow() {
 	})
 }
 function createTrelloAuthWindow(){
-	var lesserWindow = new BrowserWindow({ width: 800, height: 600 ,'web-security': false, webPreferences: {nodeIntegration: false}})
+	var lesserWindow = new BrowserWindow({ width: 800, height: 600, webPreferences: {nodeIntegration: false, webSecurity: false,allowRunningInsecureContent: true}})
 	// and load the index.html of the app.
-	lesserWindow.loadURL('https://trello.com/1/authorize?expiration=never&callback_method=postMessage&key='+trelloAPIKey+'&name=ToDoElectron')
+	lesserWindow.loadURL('https://trello.com/1/authorize?expiration=never&callback_method=postMessage&response_type=token&key='+trelloAPI.trelloAPIKey+'&name=ToDoElectron')
 	lesserWindow.webContents.on('did-finish-load',function() {
 		lesserWindow.webContents.executeJavaScript('document.getElementsByTagName("pre")[0].innerHTML').then((result) => {
-			if(result != null){
-				trello.token = result
+			if(result != null || result != "App not found"){
+				trelloAPI.authorize(result)
 				lesserWindow.close()}
 		})
+		/*lesserWindow.webContents.executeJavaScript('document.getElementsByTagName("pre")[0].innerHTML').then((result) => {
+			if(result != null || result != "App not found"){
+				trelloAPI.authorize(result)
+				lesserWindow.close()}
+		})*/
 	})
 }
 // This method will be called when Electron has finished
@@ -77,3 +83,4 @@ ipcMain.on('trelloAuthorize', (event, arg) => {
 })
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.
+require('./trelloApiHandler').handleApiCalls()
