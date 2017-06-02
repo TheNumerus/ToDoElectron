@@ -1,0 +1,14 @@
+{
+    "extends": "standard",
+    "plugins": [
+        "standard",
+        "promise"
+    ],
+    "env": {
+        "node": true
+    },
+    "rules": {
+        "indent": ["error", "tab"],
+        "no-tabs": 0
+    }
+}
