@@ -4,9 +4,10 @@ const app = electron.app
 // Module to create native browser window.
 const BrowserWindow = electron.BrowserWindow
 
-const {protocol} = require('electron')
 const path = require('path')
 const url = require('url')
+const protocols = require('./protocols')
+const trelloApiHandler = require('./trelloApiHandler')
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -38,25 +39,8 @@ function createWindow () {
 // Some APIs can only be used after this event occurs.
 app.on('ready', function () {
 	createWindow()
-	// here we register custom protocol which calls function by name
-	protocol.registerStringProtocol('todoapp', (request, callback) => {
-		// remove todoapp:// part and check for function call
-		const url = request.url.substr(10)
-		const regex = /\S+\?/
-		var match = regex.exec(url)
-		if (match === null) {
-			console.log('match in ' + url + ' not found')
-			return
-		}
-		switch (match[0]) {
-		case 'trelloauth?': {
-			require('./trelloApiHandler').authorizeCallback(request.url)
-			break
-		}
-		}
-	}, (error) => {
-		if (error) console.error('Failed to register protocol')
-	})
+	protocols.registerToDoProtocol()
+	trelloApiHandler.loadToken()
 })
 
 // Quit when all windows are closed.
@@ -78,4 +62,4 @@ app.on('activate', function () {
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.
-require('./trelloApiHandler').handleApiCalls()
+trelloApiHandler.handleIpcCalls()

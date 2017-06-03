@@ -1,4 +1,5 @@
 const {net} = require('electron')
+const trelloIO = require('./trelloApiInputOutput')
 var appKey = ''
 var token = ''
 
@@ -10,6 +11,7 @@ var token = ''
 function intialize (appKeyNew, tokenNew) {
 	appKey = appKeyNew
 	token = tokenNew
+	saveToken()
 }
 
 /**
@@ -32,7 +34,16 @@ function getUser (callback) {
 	})
 	request.end()
 }
+
+function saveToken () {
+	trelloIO.writeToken(token)
+}
+function loadToken () {
+	trelloIO.openToken((value) => { token = value })
+}
+
 module.exports = {
 	intialize: intialize,
-	getUser: getUser
+	getUser: getUser,
+	loadToken: loadToken
 }
