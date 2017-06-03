@@ -3,17 +3,22 @@
   <head>
     <meta charset="UTF-8">
     <title>To-Do app in Electron</title>
+    <link rel="stylesheet" href="css/myMainCss.css">
   </head>
   <body>
     <h1>Hello World!</h1>
-    <!-- All of the Node.js APIs are available in this renderer process. -->
-    We are using Node.js <script>document.write(process.versions.node)</script>,
-    Chromium <script>document.write(process.versions.chrome)</script>,
-    and Electron <script>document.write(process.versions.electron)</script>.
-    <button id="ayyy">Klikni</button>
-    <button id="vypis">Klikni pro vypis</button>
-    <p id="text"><p>
-    <div id="seznam">
+    <div>
+      <!-- All of the Node.js APIs are available in this renderer process. -->
+      We are using Node.js <script>document.write(process.versions.node)</script>,
+      Chromium <script>document.write(process.versions.chrome)</script>,
+      and Electron <script>document.write(process.versions.electron)</script>.
+    </div>
+    <button id="authorizeTrello">Authorize Trello</button>
+    <button id="userInfo">Get user info</button>
+    <div>
+      <p id="data">
+
+      </p>
     </div>
   </body>
 

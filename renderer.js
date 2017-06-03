@@ -1,21 +1,13 @@
-// This file is required by the index.html file and will
-// be executed in the renderer process for that window.
-// All of the Node.js APIs are available in this process.
 const ipcRenderer = require('electron').ipcRenderer
-var tlacitko = document.querySelector('#ayyy')
-tlacitko.addEventListener('click', function () {
-	var text = document.querySelector('#text')
-	text.textContent = 'whaaaaa'
-	uhm(5)
+
+document.querySelector('#authorizeTrello').addEventListener('click', function () {
 	ipcRenderer.send('trelloAuthorize')
 })
-document.querySelector('#vypis').addEventListener('click', function () {
-	ipcRenderer.send('trelloGet')
+
+document.querySelector('#userInfo').addEventListener('click', function () {
+	ipcRenderer.send('trelloGetUser')
 })
-function uhm (kolik) {
-	var seznam = document.querySelector('#seznam')
-	seznam.innerHTML = ''
-	for (var i = 0; i < kolik; i++) {
-		seznam.innerHTML += ('<p>ayyy</p>')
-	}
-}
+
+ipcRenderer.on('trelloGetUserData', (event, arg) => {
+	document.querySelector('#data').innerHTML = JSON.stringify(arg)
+})

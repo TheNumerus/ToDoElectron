@@ -4,11 +4,10 @@ const app = electron.app
 // Module to create native browser window.
 const BrowserWindow = electron.BrowserWindow
 
+const {protocol} = require('electron')
 const path = require('path')
 const url = require('url')
 
-const ipcMain = require('electron').ipcMain
-const trelloAPI = require('./trelloApiHandler')
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow
@@ -34,28 +33,31 @@ function createWindow () {
 		mainWindow = null
 	})
 }
-function createTrelloAuthWindow () {
-	var lesserWindow = new BrowserWindow({ width: 800, height: 600, webPreferences: { nodeIntegration: false, webSecurity: false, allowRunningInsecureContent: true } })
-	// and load the index.html of the app.
-	lesserWindow.loadURL('https://trello.com/1/authorize?expiration=never&callback_method=postMessage&response_type=token&key=' + trelloAPI.trelloAPIKey + '&name=ToDoElectron')
-	lesserWindow.webContents.on('did-finish-load', function () {
-		lesserWindow.webContents.executeJavaScript('document.getElementsByTagName("pre")[0].innerHTML').then((result) => {
-			if (result != null || result !== 'App not found') {
-				trelloAPI.authorize(result)
-				lesserWindow.close()
-			}
-		})
-		/* lesserWindow.webContents.executeJavaScript('document.getElementsByTagName("pre")[0].innerHTML').then((result) => {
-			if(result != null || result != "App not found"){
-				trelloAPI.authorize(result)
-				lesserWindow.close()}
-		}) */
-	})
-}
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.on('ready', createWindow)
+app.on('ready', function () {
+	createWindow()
+	// here we register custom protocol which calls function by name
+	protocol.registerStringProtocol('todoapp', (request, callback) => {
+		// remove todoapp:// part and check for function call
+		const url = request.url.substr(10)
+		const regex = /\S+\?/
+		var match = regex.exec(url)
+		if (match === null) {
+			console.log('match in ' + url + ' not found')
+			return
+		}
+		switch (match[0]) {
+		case 'trelloauth?': {
+			require('./trelloApiHandler').authorizeCallback(request.url)
+			break
+		}
+		}
+	}, (error) => {
+		if (error) console.error('Failed to register protocol')
+	})
+})
 
 // Quit when all windows are closed.
 app.on('window-all-closed', function () {
@@ -74,10 +76,6 @@ app.on('activate', function () {
 	}
 })
 
-module.exports.createWindowFromUrl = function createWindowFromUrl (url) {
-	var lesserWindow = new BrowserWindow({ width: 800, height: 600 })
-	lesserWindow.loadURL(url)
-}
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.
 require('./trelloApiHandler').handleApiCalls()
