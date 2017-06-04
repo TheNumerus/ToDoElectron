@@ -9,7 +9,9 @@
     },
     "rules": {
         "indent": ["error", "tab"],
-        "no-tabs": 0
+        "no-unused-vars":"warn",
+        "no-tabs": 0,
+        "no-path-concat":"off"
     },
     "parserOptions": {
         "ecmaVersion": 8

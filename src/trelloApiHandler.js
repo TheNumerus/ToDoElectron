@@ -1,5 +1,5 @@
 const {BrowserWindow, ipcMain} = require('electron')
-const URL = require('url')
+const URL = require('url').URL
 const OAuth = require('oauth').OAuth
 const TrelloAPI = require('./trelloApi')
 const trelloAppKey = '01ad9ee9ec7a92b20ddd261ff55820f4'
@@ -19,20 +19,40 @@ var authorizeWindow
  * Handler for ipc calls from renderer process
  */
 function handleIpcCalls () {
+	ipcMain.on('trelloAuthorize', () => {
+		authorize()
+	})
+
 	ipcMain.on('trelloGetAllUserInfo', (event) => {
 		TrelloAPI.getAllUserInfo((json) => {
 			event.sender.send('trelloGetAllUserInfo-reply', json)
 		})
 	})
 
-	ipcMain.on('trelloAuthorize', () => {
-		authorize()
-	})
-
 	ipcMain.on('trelloGetBoards', (event) => {
 		TrelloAPI.getBoards((json) => {
 			event.sender.send('trelloGetBoards-reply', json)
 		})
+	})
+
+	ipcMain.on('trelloGetBoardData', (event, boardId) => {
+		TrelloAPI.getBoardData(boardId, (json) => {
+			event.sender.send('trelloGetBoardData-reply', json)
+		})
+	})
+
+	ipcMain.on('trelloGetBatchListData', (event, lists) => {
+		var listsSubset = []
+		for (var i = 0; i < lists.length; i += 10) {
+			listsSubset.push(lists.slice(i, i + 10 > lists.length ? lists.length : i + 10))
+		}
+		TrelloAPI.getBatchListData(listsSubset, (json) => {
+			event.sender.send('trelloGetBatchListData-reply', json)
+		})
+	})
+
+	ipcMain.on('trelloOpenBoard', (event, arg) => {
+		require('./windowManager').openURL(new URL('file://' + __dirname + '/board.html?id=' + arg).toString())
 	})
 }
 

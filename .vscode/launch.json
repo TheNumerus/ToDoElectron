@@ -8,11 +8,15 @@
       "cwd": "${workspaceRoot}",
       "preLaunchTask": "watch",
       "sourceMaps": true,
+      "outFiles": [ "${workspaceRoot}/bin/**/*.js" ],
+      "skipFiles": [
+        "<node_internals>/**/*.js"
+      ],
       "runtimeExecutable": "${workspaceRoot}/node_modules/.bin/electron",
       "windows": {
         "runtimeExecutable": "${workspaceRoot}/node_modules/.bin/electron.cmd"
       },
-      "program": "${workspaceRoot}/main.js",
+      "program": "${workspaceRoot}/bin/main.js",
       "protocol": "legacy"
     }
   ]

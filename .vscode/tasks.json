@@ -4,11 +4,12 @@
     "isShellCommand": true,
     "tasks": [
         {
-            "args": ["src", "--out-dir", "lib", "-w", "--source-maps"],
+            "args": ["src", "--out-dir", "bin", "--source-maps", "--copy-files"],
             "taskName": "watch",
             "suppressTaskName": true,
             "isBuildCommand": true,
-            "isBackground": false
+            "isBackground": false,
+            "showOutput": "never"
         }
     ]
 }
