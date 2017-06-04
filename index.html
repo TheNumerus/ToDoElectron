@@ -14,7 +14,8 @@
       and Electron <script>document.write(process.versions.electron)</script>.
     </div>
     <button id="authorizeTrello">Authorize Trello</button>
-    <button id="userInfo">Get user info</button>
+    <button id="userInfo">Get all user info</button>
+    <button id="getBoards">Get boards</button>
     <div>
       <p id="data">
 
@@ -24,6 +25,6 @@
 
   <script>
     // You can also require other files to run in this process
-    require('./renderer.js')
+    require('./lib/renderer.js')
   </script>
 </html>

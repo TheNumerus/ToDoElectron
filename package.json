@@ -4,12 +4,20 @@
   "description": "Electron test",
   "main": "main.js",
   "scripts": {
+    "build": "babel src -d lib",
     "start": "electron ."
   },
   "repository": "https://github.com/TheNumerus/ToDoElectron",
   "author": "TheNumerus",
   "devDependencies": {
-    "electron": "~1.6.2",
+    "babel-cli": "^6.24.1",
+    "babel-preset-es2017": "^6.24.1",
+    "babel-preset-react": "^6.24.1",
+    "electron": "~1.6.10",
     "oauth": "0.9.15"
+  },
+  "dependencies": {
+    "react": "^15.5.4",
+    "react-dom": "^15.5.4"
   }
 }

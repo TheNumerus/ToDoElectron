@@ -6,8 +6,8 @@ const BrowserWindow = electron.BrowserWindow
 
 const path = require('path')
 const url = require('url')
-const protocols = require('./protocols')
-const trelloApiHandler = require('./trelloApiHandler')
+const protocols = require('./lib/protocols')
+const trelloApiHandler = require('./lib/trelloApiHandler')
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.

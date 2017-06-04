@@ -19,13 +19,20 @@ var authorizeWindow
  * Handler for ipc calls from renderer process
  */
 function handleIpcCalls () {
-	ipcMain.on('trelloGetUser', (event, args) => {
-		TrelloAPI.getUser(function (value) {
-			event.sender.send('trelloGetUserData', value)
+	ipcMain.on('trelloGetAllUserInfo', (event) => {
+		TrelloAPI.getAllUserInfo((json) => {
+			event.sender.send('trelloGetAllUserInfo-reply', json)
 		})
 	})
-	ipcMain.on('trelloAuthorize', (event, arg) => {
+
+	ipcMain.on('trelloAuthorize', () => {
 		authorize()
+	})
+
+	ipcMain.on('trelloGetBoards', (event) => {
+		TrelloAPI.getBoards((json) => {
+			event.sender.send('trelloGetBoards-reply', json)
+		})
 	})
 }
 
@@ -53,7 +60,7 @@ function authorizeCallback (url) {
 	var query = URL.parse(url, true).query
 	const oauthToken = query.oauth_token
 	const oauthVerifier = query.oauth_verifier
-	oauth.getOAuthAccessToken(oauthToken, verificationToken, oauthVerifier, function (error, accessToken, accessTokenSecret, results) {
+	oauth.getOAuthAccessToken(oauthToken, verificationToken, oauthVerifier, (error, accessToken, accessTokenSecret, results) => {
 		if (error !== null) {
 			console.log(`${error}`)
 		}
