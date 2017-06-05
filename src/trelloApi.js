@@ -19,7 +19,9 @@ function intialize (appKeyNew, tokenNew) {
  * @param {function} callback
  */
 function getAllUserInfo (callback) {
-	trelloApiRequest('/1/member/me?&key=' + appKey + '&token=' + token, callback)
+	trelloApiRequest('/1/member/me?&key=' + appKey + '&token=' + token, callback).then((result) => {
+		callback(result)
+	})
 }
 
 /**
@@ -27,15 +29,20 @@ function getAllUserInfo (callback) {
  * @param {function} callback
  */
 function getBoards (callback) {
-	trelloApiRequest('/1/member/me/boards?&key=' + appKey + '&token=' + token + '&fields=name,id&filter=open', callback)
+	trelloApiRequest('/1/member/me/boards?&key=' + appKey + '&token=' + token + '&fields=name,id&filter=open', callback).then((result) => {
+		callback(result)
+	})
 }
 
 /**
  * Get board data
+ * @param {string} idBoard
  * @param {function} callback
  */
 function getBoardData (idBoard, callback) {
-	trelloApiRequest('/1/boards/' + idBoard + '/?&key=' + appKey + '&token=' + token + '&fields=id,name&lists=open&list_fields=id,name', callback)
+	trelloApiRequest('/1/boards/' + idBoard + '/?&key=' + appKey + '&token=' + token + '&fields=id,name&lists=open&list_fields=id,name').then((result) => {
+		callback(result)
+	})
 }
 
 /**
@@ -45,6 +52,9 @@ function getBoardData (idBoard, callback) {
  * @todo remove buffeNumber from {@link trelloApiRequest} by calling event when all batches are finished
  */
 function getBatchListData (batches, callback) {
+	// @type {Object}
+	var json = {'values': []}
+	var batchesRecieved = []
 	for (var i = 0; i < batches.length; ++i) {
 		var batchString = '/1/batch/?urls='
 		batches[i].forEach((idList) => {
@@ -53,37 +63,48 @@ function getBatchListData (batches, callback) {
 		// delete last comma
 		batchString = batchString.slice(0, -1)
 		batchString += '&key=' + appKey + '&token=' + token
-		trelloApiRequest(batchString, callback, i)
+		// merge all batches into one object
+		trelloApiRequest(batchString, i).then((result) => {
+			// parse only interestnig values
+			result.forEach((idList) => {
+				json.values.push(idList['200'])
+			}, this)
+			batchesRecieved.push(i)
+			// check if all batches aare fiinished
+			if (batchesRecieved.length === batches.length) {
+				callback(json)
+			}
+		})
 	}
 }
 /**
  * Sends request to TrelloAPI
  * @param {string} path - path to send request to
- * @param {function} callback - callback
- * @param {integer} batchNumber - used for batches, default is 1
+ * @param {integer} batchNumber - used for batches, default is 0
  */
-function trelloApiRequest (path, callback, batchNumber = 1) {
-	const request = net.request({ method: 'GET', hostname: 'trello.com', path: path })
-	var json = ''
-	request.on('response', (response) => {
-		var completeResponse = ''
-		response.on('data', (chunk) => {
-			if (chunk.toString() === 'invalid token') {
-				console.log(token + ' - invalid token ')
-				return
-			}
-			completeResponse += chunk.toString()
+function trelloApiRequest (path) {
+	return new Promise((resolve, reject) => {
+		const request = net.request({ method: 'GET', hostname: 'trello.com', path: path })
+		var json = ''
+		request.on('response', (response) => {
+			var completeResponse = ''
+			response.on('data', (chunk) => {
+				if (chunk.toString() === 'invalid token') {
+					console.log(token + ' - invalid token ')
+					return
+				}
+				completeResponse += chunk.toString()
+			})
+			// long responses usually take more than one buffer, so we wait for all data to arrive
+			response.on('end', () => {
+				// convert to JSON
+				json = JSON.parse(completeResponse)
+				resolve(json)
+			})
 		})
-		// long responses usually take more than one buffer, so we wait for all data to arrive
-		response.on('end', () => {
-			// convert to JSON
-			json = JSON.parse(completeResponse)
-			callback(json, batchNumber)
-		})
+		request.end()
 	})
-	request.end()
 }
-
 
 function saveToken () {
 	trelloIO.writeToken(token)
