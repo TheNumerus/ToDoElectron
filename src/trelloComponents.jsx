@@ -8,9 +8,9 @@ class BoardButton extends React.Component {
 class ListComponent extends React.Component {
 	render () {
 		return (
-			<div className='listComponent' id={this.props.id}>
+			<div className='listComponent'>
 				<h3>{this.props.name}</h3>
-				<div className='cardContainer'></div>
+				<div className='cardContainer' id={this.props.id}></div>
 			</div>
 		)
 	}
