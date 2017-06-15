@@ -9,7 +9,7 @@ class ListComponent extends React.Component {
 	render () {
 		return (
 			<div className='listComponent'>
-				<h3>{this.props.name}</h3>
+				<h3 className='listTitle'>{this.props.name}</h3>
 				<div className='cardContainer' id={this.props.id}></div>
 			</div>
 		)
@@ -20,7 +20,7 @@ class CardComponent extends React.Component {
 	render () {
 		return (
 			<div className='cardComponent' id={this.props.id}>
-				<p>{this.props.name}</p>
+				<div className='cardTitle'>{this.props.name}</div>
 			</div>
 		)
 	}
