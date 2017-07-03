@@ -1,5 +1,7 @@
-const {net} = require('electron')
+const {net, session} = require('electron')
 const trelloIO = require('./trelloApiInputOutput')
+const URL = require('url').URL
+const path = require('path')
 var appKey = ''
 var token = ''
 
@@ -11,7 +13,7 @@ var token = ''
 function intialize (appKeyNew, tokenNew) {
 	appKey = appKeyNew
 	token = tokenNew
-	saveToken()
+	trelloIO.writeToken(token)
 }
 
 /**
@@ -40,8 +42,25 @@ function getBoards (callback) {
  * @param {function} callback
  */
 function getBoardData (idBoard, callback) {
-	trelloApiRequest('/1/boards/' + idBoard + '/?&key=' + appKey + '&token=' + token + '&fields=id,name&lists=open&list_fields=id,name').then((result) => {
+	trelloApiRequest('/1/boards/' + idBoard + '/?&key=' + appKey + '&token=' + token + '&fields=id,name,background&lists=open&list_fields=id,name').then((result) => {
 		callback(result)
+	})
+}
+/**
+ * 	Get background image and save it
+ * @param {string} idBoard
+ * @param {function} callback
+ */
+function getBackground (idBoard, callback) {
+	trelloApiRequest('/1/boards/' + idBoard + '/prefs/' + '?&key=' + appKey + '&token=' + token).then((response) => {
+		downloadBackgroundImage(response.backgroundImage).then((imageData) => {
+			// seperate path into chunks and select last part
+			var pathnames = new URL(response.backgroundImage).pathname.split('/')
+			var name = pathnames[pathnames.length - 1] + '.png'
+			trelloIO.saveImage(name, imageData).then((value) => {
+				callback(value)
+			})
+		})
 	})
 }
 
@@ -70,7 +89,7 @@ function getBatchListData (batches, callback) {
 				json.values.push(idList['200'])
 			}, this)
 			batchesRecieved.push(i)
-			// check if all batches aare fiinished
+			// check if all batches are fiinished
 			if (batchesRecieved.length === batches.length) {
 				callback(json)
 			}
@@ -106,8 +125,28 @@ function trelloApiRequest (path) {
 	})
 }
 
-function saveToken () {
-	trelloIO.writeToken(token)
+function downloadBackgroundImage (path) {
+	return new Promise((resolve, reject) => {
+		var url = new URL(path)
+		const request = net.request({method: 'GET', hostname: url.hostname, path: url.pathname})
+		// create empty buffer for later use
+		var data = Buffer.alloc(0)
+		request.on('response', (response) => {
+			response.on('data', (chunk) => {
+				if (chunk.toString() === 'invalid token') {
+					console.log(token + ' - invalid token ')
+					return
+				}
+				// merge data into one buffer
+				data = Buffer.concat([data, chunk])
+			})
+			// long responses usually take more than one buffer, so we wait for all data to arrive
+			response.on('end', () => {
+				resolve(data)
+			})
+		})
+		request.end()
+	})
 }
 
 function loadToken () {
@@ -120,5 +159,6 @@ module.exports = {
 	getBoards: getBoards,
 	loadToken: loadToken,
 	getBoardData: getBoardData,
-	getBatchListData: getBatchListData
+	getBatchListData: getBatchListData,
+	getBackground: getBackground
 }

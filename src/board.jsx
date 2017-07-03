@@ -23,6 +23,7 @@ ipcRenderer.on('trelloGetBoardData-reply', (event, boardData) => {
 		listIds.push(list.id)
 	}, this)
 	ipcRenderer.send('trelloGetBatchListData', listIds)
+	ipcRenderer.send('trelloGetBackground', boardData.id)
 })
 
 ipcRenderer.on('trelloGetBatchListData-reply', (event, listData) => {
@@ -45,4 +46,8 @@ ipcRenderer.on('trelloGetBatchListData-reply', (event, listData) => {
 		})
 		ReactDOM.render(<div>{cardComponents}</div>, target)
 	}, this)
+})
+
+ipcRenderer.on('trelloGetBackground-reply', (event, imagePath) => {
+	document.querySelector('body').background = imagePath
 })

@@ -101,14 +101,28 @@ function checkExistence () {
 	return new Promise(function (resolve, reject) {
 		fs.access(path, fs.constants.F_OK, (error) => {
 			if (error !== null && error.code === 'ENOENT') {
-				resolve(false)
+				reject(error.code)
 			} else {
-				resolve(true)
+				resolve()
 			}
 		})
 	})
 }
+
+function saveImage (filename, data) {
+	return new Promise(function (resolve, reject) {
+		fs.writeFile(path + filename, data, (error) => {
+			if (error !== null && error.code === 'ENOENT') {
+				reject(error.code)
+			} else {
+				resolve(path + filename)
+			}
+		})
+	})
+}
+
 module.exports = {
 	writeToken: writeToken,
-	openToken: openToken
+	openToken: openToken,
+	saveImage: saveImage
 }

@@ -54,6 +54,12 @@ function handleIpcCalls () {
 	ipcMain.on('trelloOpenBoard', (event, arg) => {
 		require('./windowManager').openURL(new URL('file://' + __dirname + '/board.html?id=' + arg).toString())
 	})
+
+	ipcMain.on('trelloGetBackground', (event, arg) => {
+		TrelloAPI.getBackground(arg, (value) => {
+			event.sender.send('trelloGetBackground-reply', value)
+		})
+	})
 }
 
 /**
@@ -71,7 +77,7 @@ function authorize () {
 }
 /**
  * Callback function for authorizing Trello API
- * @param {custom adress to parse data from} url
+ * @param {} url - custom adress to parse data from
  */
 function authorizeCallback (url) {
 	// close authentification window, because we don't need it at this point
