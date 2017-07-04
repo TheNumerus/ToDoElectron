@@ -5,9 +5,12 @@ const ListCompoment = require('./trelloComponents').ListComponent
 const ipcRenderer = require('electron').ipcRenderer
 const URL = require('url').URL
 const boardId = new URL(window.location.href).searchParams.get('id')
+const boardName = new URL(window.location.href).searchParams.get('name')
 
 ipcRenderer.send('trelloGetBoardData', boardId)
 ipcRenderer.on('trelloGetBoardData-reply', (event, boardData) => {
+	// set board name
+	document.querySelector('#boardName').innerHTML = boardData.name
 	// render empty lists
 	var listComponents = []
 	boardData.lists.forEach((list) => {
@@ -49,5 +52,10 @@ ipcRenderer.on('trelloGetBatchListData-reply', (event, listData) => {
 })
 
 ipcRenderer.on('trelloGetBackground-reply', (event, imagePath) => {
-	document.querySelector('body').background = imagePath
+	// handle solid color background
+	if (imagePath[0] === '#') {
+		document.querySelector('body').style.backgroundColor = imagePath
+	} else {
+		document.querySelector('body').background = imagePath
+	}
 })

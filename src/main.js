@@ -1,5 +1,7 @@
 const electron = require('electron')
 const app = electron.app
+// enable backdrop blur in css
+app.commandLine.appendSwitch('--enable-experimental-web-platform-features')
 const BrowserWindow = electron.BrowserWindow
 
 const path = require('path')
@@ -10,7 +12,7 @@ const trelloApiHandler = require('./trelloApiHandler')
 let mainWindow
 
 function createWindow () {
-	mainWindow = new BrowserWindow({ width: 1280, height: 720 })
+	mainWindow = new BrowserWindow({ width: 1280, height: 720, experimentalFeatures: true})
 	require('./windowManager').initialize(mainWindow)
 	mainWindow.loadURL(url.format({
 		pathname: path.join(__dirname, 'index.html'),

@@ -1,7 +1,7 @@
 const React = require('react')
 class BoardButton extends React.Component {
 	render () {
-		return <button className={this.props.class} id={this.props.id}>{this.props.name}</button>
+		return <button className={`${this.props.class} button`} id={this.props.id}>{this.props.name}</button>
 	}
 }
 
@@ -11,6 +11,7 @@ class ListComponent extends React.Component {
 			<div className='listComponent'>
 				<h3 className='listTitle'>{this.props.name}</h3>
 				<div className='cardContainer' id={this.props.id}></div>
+				<button className={`button`}>+</button>
 			</div>
 		)
 	}

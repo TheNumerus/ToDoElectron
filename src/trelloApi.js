@@ -46,21 +46,27 @@ function getBoardData (idBoard, callback) {
 		callback(result)
 	})
 }
+
 /**
- * 	Get background image and save it
+ * 	Get background and save it
  * @param {string} idBoard
  * @param {function} callback
  */
 function getBackground (idBoard, callback) {
 	trelloApiRequest('/1/boards/' + idBoard + '/prefs/' + '?&key=' + appKey + '&token=' + token).then((response) => {
-		downloadBackgroundImage(response.backgroundImage).then((imageData) => {
-			// seperate path into chunks and select last part
-			var pathnames = new URL(response.backgroundImage).pathname.split('/')
-			var name = pathnames[pathnames.length - 1] + '.png'
-			trelloIO.saveImage(name, imageData).then((value) => {
-				callback(value)
+		// handle solid color
+		if (response.backgroundImage === null) {
+			callback(response.backgroundColor)
+		} else {
+			downloadBackgroundImage(response.backgroundImage).then((imageData) => {
+				// seperate path into chunks and select last part
+				var pathnames = new URL(response.backgroundImage).pathname.split('/')
+				var name = pathnames[pathnames.length - 1] + '.png'
+				trelloIO.saveImage(name, imageData).then((value) => {
+					callback(value)
+				})
 			})
-		})
+		}
 	})
 }
 
@@ -68,7 +74,6 @@ function getBackground (idBoard, callback) {
  * Get list data in batches
  * @param {Array} batches - list ids to call in batches of 10
  * @param {function} callback - callback
- * @todo remove buffeNumber from {@link trelloApiRequest} by calling event when all batches are finished
  */
 function getBatchListData (batches, callback) {
 	// @type {Object}
@@ -96,6 +101,7 @@ function getBatchListData (batches, callback) {
 		})
 	}
 }
+
 /**
  * Sends request to TrelloAPI
  * @param {string} path - path to send request to
@@ -125,6 +131,10 @@ function trelloApiRequest (path) {
 	})
 }
 
+/**
+ *  Downloads image from provided url and returns buffer
+ * @param {string} path - url to download image from
+ */
 function downloadBackgroundImage (path) {
 	return new Promise((resolve, reject) => {
 		var url = new URL(path)

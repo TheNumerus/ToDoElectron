@@ -1,6 +1,6 @@
 .listComponent{
     margin: 5px;
-    background: #EEE;
+    background: rgba(0,0,0,0.5);
     white-space: nowrap;
     box-shadow: 0px 5px 10px rgba(0,0,0,0.25);
     border-radius: 3px;
@@ -9,13 +9,18 @@
     display: inline-block;
     vertical-align: top;
     padding: 5px;
+    backdrop-filter: blur(30px);
 }
 .cardComponent{
-    background: #FFF;
+    background: rgba(255,255,255,0.5);
     margin: 0px 0px 5px 0px;
     box-shadow: 0px 5px 10px rgba(0,0,0,0.125);
     padding: 5px;
 }
 #lists{
     white-space: nowrap;
+}
+#header{
+    white-space: nowrap;
+    display: inline-block;
 }
