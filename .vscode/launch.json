@@ -6,7 +6,7 @@
       "type": "node",
       "request": "launch",
       "cwd": "${workspaceRoot}",
-      "preLaunchTask": "watch",
+      "preLaunchTask": "Build",
       "sourceMaps": true,
       "outFiles": [ "${workspaceRoot}/bin/**/*.js" ],
       "skipFiles": [

@@ -2,5 +2,9 @@
   "presets": [
       "es2017",
       "react"
+  ],
+  "ignore": [
+    "*.css",
+    "*.scss"
   ]
 }

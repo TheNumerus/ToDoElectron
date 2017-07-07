@@ -1,14 +1,16 @@
+$font-stack: 'RobotoSlab', 'Arial', sans-serif;
+
 @font-face {
     font-family: RobotoSlab;
     src: url(RobotoSlab-Regular.ttf);
 }
 
 body{
-    font-family: 'RobotoSlab', 'Arial', sans-serif;
+    font-family: $font-stack;
 }
 
 .button{
-    font-family: 'RobotoSlab', 'Arial', sans-serif;
+    font-family: $font-stack;
     background-color: #fff;
     border: 0px none #fff;
     border-radius: 3px;
