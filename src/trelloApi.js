@@ -2,16 +2,14 @@ const {net, session} = require('electron')
 const trelloIO = require('./trelloApiInputOutput')
 const URL = require('url').URL
 const path = require('path')
-var appKey = ''
+var appKey = require('./globalProperties').trelloAppKey
 var token = ''
 
 /**
  * Initializes variables required for connection to Trello API
- * @param {applicaion key for connection} appKeyNew
  * @param {token for acces} tokenNew
  */
-function intialize (appKeyNew, tokenNew) {
-	appKey = appKeyNew
+function intialize (tokenNew) {
 	token = tokenNew
 	trelloIO.writeToken(token)
 }
@@ -122,6 +120,9 @@ function trelloApiRequest (path) {
 			})
 			// long responses usually take more than one buffer, so we wait for all data to arrive
 			response.on('end', () => {
+				if (completeResponse === '') {
+					reject(new Error('Empty response'))
+				}
 				// convert to JSON
 				json = JSON.parse(completeResponse)
 				resolve(json)
