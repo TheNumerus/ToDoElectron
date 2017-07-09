@@ -1,5 +1,5 @@
 const fs = require('fs')
-var path = ''
+var pathToFolder = ''
 var token = ''
 const filename = 'trelloToken'
 
@@ -12,41 +12,49 @@ function writeToken (tokenToWrite) {
 	if (tokenToWrite === null || tokenToWrite === undefined || tokenToWrite === '') return
 	token = tokenToWrite
 	createPath()
-	// create folder if non-existent
-	checkExistence(path).then((value) => {
-		if (!value) {
-			createAppFolder()
-		}
+	// check for folder
+	checkExistence().then((value) => {
 		// check for existence of token save
-		checkExistence(path + filename).then((value) => {
+		checkExistence(pathToFolder + filename).then((value) => {
 			writeFile()
 		})
+	}).catch((error) => {
+		if (error.code !== 'ENOENT') {
+			console.log(error)
+		}
+		// create folder
+		createAppFolder()
 	})
 }
+
 /**
  * Control function for opening
  * @param {callback} callback
  */
 function openToken (callback) {
 	createPath()
-	// create folder if non-existent
-	checkExistence(path).then((value) => {
-		if (!value) {
-			createAppFolder()
-		}
+	// check for folder
+	checkExistence().then((value) => {
 		// check for existence of token save and then read token
-		Promise.all([checkExistence(path + filename), openFile()]).then((values) => {
+		Promise.all([checkExistence(filename), openFile()]).then((values) => {
 			callback(values[1])
 		})
+	}).catch((error) => {
+		if (error.code !== 'ENOENT') {
+			console.log(error)
+		}
+		// create folder
+		createAppFolder()
 	})
 }
+
 /**
  * Writes token to file
  */
 function writeFile () {
 	var saveData = {}
 	saveData.token = token
-	fs.writeFile(path + filename, JSON.stringify(saveData), (error) => {
+	fs.writeFile(pathToFolder + filename, JSON.stringify(saveData), (error) => {
 		if (error !== null) {
 			console.log(error)
 		} else {
@@ -60,7 +68,7 @@ function writeFile () {
  */
 function openFile () {
 	return new Promise(function (resolve, reject) {
-		fs.readFile(path + filename, (error, data) => {
+		fs.readFile(pathToFolder + filename, (error, data) => {
 			if (error !== null) {
 				console.log(error)
 			} else {
@@ -75,7 +83,7 @@ function createPath () {
 	// TODO add other OSs
 	switch (process.platform) {
 	case 'win32': {
-		path = 'C:\\Users\\' + require('os').userInfo().username + '\\AppData\\Roaming\\ToDoElectron\\'
+		pathToFolder = 'C:\\Users\\' + require('os').userInfo().username + '\\AppData\\Roaming\\ToDoElectron\\'
 		break
 	}
 	}
@@ -86,7 +94,7 @@ function createPath () {
  */
 function createAppFolder () {
 	console.log('creating folder')
-	fs.mkdir(path, (error) => {
+	fs.mkdir(pathToFolder, (error) => {
 		if (error !== null) {
 			console.log(error)
 		}
@@ -94,28 +102,34 @@ function createAppFolder () {
 }
 
 /**
- * asynchronusly checks for existence of file/folder on path
+ * asynchronusly checks for existence of file/folder in set path
+ * @param {path} path to check
  * @return {Promise} Promise
  */
-function checkExistence () {
+function checkExistence (path = '') {
 	return new Promise(function (resolve, reject) {
-		fs.access(path, fs.constants.F_OK, (error) => {
+		fs.access(pathToFolder + path, fs.constants.F_OK, (error) => {
 			if (error !== null && error.code === 'ENOENT') {
 				reject(error.code)
 			} else {
-				resolve()
+				resolve(pathToFolder + path)
 			}
 		})
 	})
 }
 
+/**
+ * saves image to location if needed
+ * @param {string} filename - saves to this path
+ * @param {Buffer} data - data to save
+ */
 function saveImage (filename, data) {
 	return new Promise(function (resolve, reject) {
-		fs.writeFile(path + filename, data, (error) => {
+		fs.writeFile(pathToFolder + filename, data, (error) => {
 			if (error !== null && error.code === 'ENOENT') {
 				reject(error.code)
 			} else {
-				resolve(path + filename)
+				resolve(pathToFolder + filename)
 			}
 		})
 	})
@@ -124,5 +138,6 @@ function saveImage (filename, data) {
 module.exports = {
 	writeToken: writeToken,
 	openToken: openToken,
-	saveImage: saveImage
+	saveImage: saveImage,
+	checkExistence: checkExistence
 }

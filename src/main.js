@@ -12,7 +12,7 @@ const trelloApiHandler = require('./trelloApiHandler')
 let mainWindow
 
 function createWindow () {
-	mainWindow = new BrowserWindow({ width: 1280, height: 720, experimentalFeatures: true})
+	mainWindow = new BrowserWindow({ width: 1280, height: 720, experimentalFeatures: true })
 	require('./windowManager').initialize(mainWindow)
 	mainWindow.loadURL(url.format({
 		pathname: path.join(__dirname, 'index.html'),

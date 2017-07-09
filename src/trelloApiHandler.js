@@ -68,7 +68,7 @@ function authorize () {
 			console.log(`${error}`)
 		}
 		verificationToken = tokenSecret
-		authorizeWindow = new BrowserWindow({ width: 800, height: 600, webPreferences: { nodeIntegration: false, webSecurity: false, allowRunningInsecureContent: true }})
+		authorizeWindow = new BrowserWindow({ width: 800, height: 600, webPreferences: { nodeIntegration: false, webSecurity: false, allowRunningInsecureContent: true } })
 		authorizeWindow.loadURL(`${authorizeURL}?oauth_token=${token}&name=${require('./globalProperties').appName}&expires=never`)
 	})
 }
