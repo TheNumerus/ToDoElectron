@@ -1,3 +1,4 @@
+//chrome currently (chromium 56 -61) cannot render backdrop blur properly with box shadow
 $useblur: true;
 $shadow: 0px 5px 10px rgba(0,0,0,0.125);
 $blur: if($useblur, blur(30px), none);
@@ -15,16 +16,38 @@ $blur: if($useblur, blur(30px), none);
     padding: 5px;
     backdrop-filter: $blur;
 }
+
 .cardComponent{
     background: rgba(255,255,255,0.5);
-    margin: 0px 0px 5px 0px;
+    margin-bottom: 5px;
     box-shadow: $shadow;
     padding: 5px;
+    .cardLabel{
+        margin-left: 10px;
+        color: white;
+        font-size: 66%;
+        text-shadow: 0px 0px 5px rgba(0,0,0,0.5);
+        font-weight: bold;
+        border-radius: 2px;
+        padding: 3px;
+        display: inline-block;
+    }
 }
+
 #lists{
     white-space: nowrap;
 }
+
 #header{
     white-space: nowrap;
     display: inline-block;
+}
+
+body{
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+#boardName{
+    color: white;
 }
