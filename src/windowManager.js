@@ -1,3 +1,6 @@
+const {ipcMain} = require('electron')
+let previousURL
+let currentURL
 /**
  * @type {Electron.BrowserWindow}
  */
@@ -14,8 +17,17 @@ function initialize (broswerWindow) {
  * @param {url.URL} url - url to load
  */
 function openURL (url) {
+	previousURL = currentURL
+	currentURL = url
 	window.loadURL(url)
 }
+
+ipcMain.on('goBack', (event) => {
+	if (previousURL !== undefined) {
+		window.loadURL(previousURL)
+		[currentURL, previousURL] = [previousURL, currentURL]
+	}
+})
 
 module.exports = {
 	initialize: initialize,

@@ -46,6 +46,7 @@ $blur: if($useblur, blur(30px), none);
 body{
     background-repeat: no-repeat;
     background-size: cover;
+    background-attachment: fixed;
 }
 
 #boardName{

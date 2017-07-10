@@ -59,3 +59,7 @@ ipcRenderer.on('trelloGetBackground-reply', (event, imagePath) => {
 		document.querySelector('body').background = imagePath
 	}
 })
+
+document.querySelector('.button.back').addEventListener('click', (event) => {
+	ipcRenderer.send('goBack')
+})
