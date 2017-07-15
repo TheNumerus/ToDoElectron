@@ -3,24 +3,41 @@
     "tasks": [
         {
             "command": "${workspaceRoot}/node_modules/.bin/babel",
-            "args": ["src", "--out-dir", "bin", "--source-maps", "--copy-files"],
+            "args": [
+                "src",
+                "--out-dir",
+                "bin",
+                "--source-maps",
+                "--copy-files"
+            ],
             "taskName": "compile",
             "suppressTaskName": true,
             "isBackground": false,
-            "isShellCommand": true,
+            "isShellCommand": true
         },
         {
             "command": "node-sass",
-            "args": ["src/css", "-o", "bin/css"],
+            "args": [
+                "src/css",
+                "-o",
+                "bin/css"
+            ],
             "taskName": "css",
             "suppressTaskName": true,
             "isBackground": false,
-            "isShellCommand":true
+            "isShellCommand": true
         },
         {
             "taskName": "Build",
-            "dependsOn": ["compile", "css"],
-            "isBuildCommand": true
+            "dependsOn": [
+                "compile",
+                "css"
+            ],
+            "isBuildCommand": true,
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
         }
     ]
 }

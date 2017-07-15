@@ -19,13 +19,20 @@ class ListComponent extends React.Component {
 
 class CardComponent extends React.Component {
 	render () {
-		const labelStyle = {
-			backgroundColor: this.props.label.color
+		var card = this.props.card
+		var hasLabel = card.labels.length > 0
+		const labelStyle = hasLabel
+		? {
+			backgroundColor: card.labels[0].color
 		}
+		: {
+			display: 'none'
+		}
+		var name = hasLabel ? card.labels[0].name : ''
 		return (
-			<div className='cardComponent' id={this.props.id}>
-				<div className='cardLabel' style={labelStyle}>{this.props.label.name}</div>
-				<div className='cardTitle'>{this.props.name}</div>
+			<div className='cardComponent' id={card.id}>
+				<div className='cardLabel' style={labelStyle}>{name}</div>
+				<div className='cardTitle'>{card.name}</div>
 			</div>
 		)
 	}

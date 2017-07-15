@@ -13,9 +13,6 @@
         "<node_internals>/**/*.js"
       ],
       "runtimeExecutable": "${workspaceRoot}/node_modules/.bin/electron",
-      "windows": {
-        "runtimeExecutable": "${workspaceRoot}/node_modules/.bin/electron.cmd"
-      },
       "program": "${workspaceRoot}/bin/main.js",
       "protocol": "legacy"
     }

@@ -55,25 +55,26 @@ function getBackground (idBoard, callback) {
 		// handle solid color
 		if (response.backgroundImage === null) {
 			callback(response.backgroundColor)
-		}
-		// seperate path into chunks and select last part
-		var pathnames = new URL(response.backgroundImage).pathname.split('/')
-		var name = pathnames[pathnames.length - 1] + '.png'
-		// check for existing file
-		trelloIO.checkExistence(name).then((resolve) => {
-			callback(resolve)
-		}).catch((error) => {
-			// handle error different than non-existent path
-			if (error.code !== 'ENOENT') {
-				console.log(error)
-			}
-			// download if needed
-			downloadBackgroundImage(response.backgroundImage).then((imageData) => {
-				trelloIO.saveImage(name, imageData).then((value) => {
-					callback(value)
+		} else {
+			// seperate path into chunks and select last part
+			var pathnames = new URL(response.backgroundImage).pathname.split('/')
+			var name = pathnames[pathnames.length - 1] + '.png'
+			// check for existing file
+			trelloIO.checkExistence(name).then((resolve) => {
+				callback(resolve)
+			}).catch((error) => {
+				// handle error different than non-existent path
+				if (error.code !== 'ENOENT') {
+					console.log(error)
+				}
+				// download if needed
+				downloadBackgroundImage(response.backgroundImage).then((imageData) => {
+					trelloIO.saveImage(name, imageData).then((value) => {
+						callback(value)
+					})
 				})
 			})
-		})
+		}
 	})
 }
 

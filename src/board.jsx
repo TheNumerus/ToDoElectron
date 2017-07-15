@@ -44,7 +44,7 @@ ipcRenderer.on('trelloGetBatchListData-reply', (event, listData) => {
 		list.forEach((card) => {
 			// handle archived cards
 			if (card.closed) { return }
-			var element = <CardCompoment label={card.labels[0]} name={card.name} id={card.id}/>
+			var element = <CardCompoment card={card}/>
 			cardComponents.push(element)
 		})
 		ReactDOM.render(<div>{cardComponents}</div>, target)
