@@ -5,7 +5,6 @@ const ListCompoment = require('./trelloComponents').ListComponent
 const ipcRenderer = require('electron').ipcRenderer
 const URL = require('url').URL
 const boardId = new URL(window.location.href).searchParams.get('id')
-const boardName = new URL(window.location.href).searchParams.get('name')
 
 ipcRenderer.send('trelloGetBoardData', boardId)
 ipcRenderer.on('trelloGetBoardData-reply', (event, boardData) => {

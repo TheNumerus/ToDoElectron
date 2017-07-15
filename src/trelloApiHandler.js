@@ -2,12 +2,13 @@ const {BrowserWindow, ipcMain} = require('electron')
 const URL = require('url').URL
 const OAuth = require('oauth').OAuth
 const TrelloAPI = require('./trelloApi')
+const GlobalProperties = require('./globalProperties')
 
 // constants and variables for connection to trello api
 const requestURL = 'https://trello.com/1/OAuthGetRequestToken'
 const accessURL = 'https://trello.com/1/OAuthGetAccessToken'
 const authorizeURL = 'https://trello.com/1/OAuthAuthorizeToken'
-const oauth = new OAuth(requestURL, accessURL, require('./globalProperties').trelloAppKey, require('./globalProperties').trelloSecretKey, '1.0A', 'todoapp://trelloauth', 'HMAC-SHA1')
+const oauth = new OAuth(requestURL, accessURL, GlobalProperties.trelloAppKey, GlobalProperties.trelloSecretKey, '1.0A', 'todoapp://trelloauth', 'HMAC-SHA1')
 var verificationToken = ''
 // store authentification window variable here, so we can close it from another function
 var authorizeWindow
@@ -69,7 +70,7 @@ function authorize () {
 		}
 		verificationToken = tokenSecret
 		authorizeWindow = new BrowserWindow({ width: 800, height: 600, webPreferences: { nodeIntegration: false, webSecurity: false, allowRunningInsecureContent: true } })
-		authorizeWindow.loadURL(`${authorizeURL}?oauth_token=${token}&name=${require('./globalProperties').appName}&expires=never`)
+		authorizeWindow.loadURL(`${authorizeURL}?oauth_token=${token}&name=${GlobalProperties.appName}&expires=never`)
 	})
 }
 /**
@@ -97,7 +98,6 @@ function authorizeCallback (url) {
  * Loads token from storage
  */
 function loadToken () {
-	TrelloAPI.intialize('')
 	TrelloAPI.loadToken()
 }
 
@@ -106,5 +106,4 @@ module.exports = {
 	authorize: authorize,
 	authorizeCallback: authorizeCallback,
 	loadToken: loadToken
-
 }

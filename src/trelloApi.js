@@ -1,9 +1,9 @@
-const {net, session} = require('electron')
+const {net} = require('electron')
 const trelloIO = require('./trelloApiInputOutput')
 const URL = require('url').URL
 const path = require('path')
-var appKey = require('./globalProperties').trelloAppKey
-var token = ''
+const appKey = require('./globalProperties').trelloAppKey
+var token
 
 /**
  * Initializes variables required for connection to Trello API
@@ -118,7 +118,7 @@ function getBatchListData (batches, callback) {
 function trelloApiRequest (path) {
 	return new Promise((resolve, reject) => {
 		const request = net.request({ method: 'GET', hostname: 'trello.com', path: path })
-		var json = ''
+		var json
 		request.on('response', (response) => {
 			var completeResponse = ''
 			response.on('data', (chunk) => {

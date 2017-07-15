@@ -8,13 +8,14 @@ const path = require('path')
 const url = require('url')
 const protocols = require('./protocols')
 const trelloApiHandler = require('./trelloApiHandler')
+const windowManager = require('./windowManager')
 
 let mainWindow
 
 function createWindow () {
 	mainWindow = new BrowserWindow({ width: 1280, height: 720, experimentalFeatures: true })
-	require('./windowManager').initialize(mainWindow)
-	require('./windowManager').openURL(url.format({
+	windowManager.initialize(mainWindow)
+	windowManager.openURL(url.format({
 		pathname: path.join(__dirname, 'index.html'),
 		protocol: 'file:',
 		slashes: true
