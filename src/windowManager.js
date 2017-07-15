@@ -1,6 +1,5 @@
 const {ipcMain} = require('electron')
-let previousURL
-let currentURL
+let history = []
 /**
  * @type {Electron.BrowserWindow}
  */
@@ -17,15 +16,14 @@ function initialize (broswerWindow) {
  * @param {url.URL} url - url to load
  */
 function openURL (url) {
-	previousURL = currentURL
-	currentURL = url
+	history.push(url)
 	window.loadURL(url)
 }
 
 ipcMain.on('goBack', (event) => {
-	if (previousURL !== undefined) {
-		window.loadURL(previousURL)
-		[currentURL, previousURL] = [previousURL, currentURL]
+	if (history.length > 0) {
+		history.pop()
+		window.loadURL(history[history.length - 1])
 	}
 })
 
