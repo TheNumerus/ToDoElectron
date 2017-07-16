@@ -11,34 +11,27 @@ ipcRenderer.on('trelloGetBoardData-reply', (event, boardData) => {
 	// set board name
 	document.querySelector('#boardName').innerHTML = boardData.name
 	// render empty lists
-	var listComponents = []
+	var lists = {ids: [], components: []}
 	boardData.lists.forEach((list) => {
 		var element = <ListCompoment name={list.name} id={list.id}/>
-		// pair lists with ids for later use
-		listComponents.push(element)
+		lists.components.push(element)
+		// get ids for later use
+		lists.ids.push(list.id)
 	}, this)
-	ReactDOM.render(<div>{listComponents}</div>, document.querySelector('#lists'))
-
-	// now we get list data and render it
-	var listIds = []
-	boardData.lists.forEach((list) => {
-		listIds.push(list.id)
-	}, this)
-	ipcRenderer.send('trelloGetBatchListData', listIds)
+	ReactDOM.render(<div>{lists.components}</div>, document.querySelector('#lists'))
+	ipcRenderer.send('trelloGetBatchListData', lists.ids)
 	ipcRenderer.send('trelloGetBackground', boardData.id)
 })
 
 ipcRenderer.on('trelloGetBatchListData-reply', (event, listData) => {
-	// first get lists array paired with ids
-	var cardContainers = { elements: [], ids: [] }
-	cardContainers.elements = document.querySelectorAll('.cardContainer')
-	cardContainers.elements.forEach((cardContainer) => {
-		cardContainers.ids.push(cardContainer.id)
+	var cardContainers = {}
+	document.querySelectorAll('.cardContainer').forEach((element) => {
+		cardContainers[element.id] = element
 	})
 	listData.values.forEach((list) => {
 		// handle empty lists
 		if (list.length < 1) { return }
-		var target = cardContainers['elements'][(cardContainers['ids'].indexOf(list[0].idList))]
+		var target = cardContainers[list[0].idList]
 		var cardComponents = []
 		list.forEach((card) => {
 			// handle archived cards

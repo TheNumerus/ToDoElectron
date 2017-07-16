@@ -11,7 +11,7 @@ function writeToken (tokenToWrite) {
 	// handle empty token
 	if (tokenToWrite === null || tokenToWrite === undefined || tokenToWrite === '') return
 	token = tokenToWrite
-	createPath()
+	createPathString()
 	// check for folder
 	checkExistence().then((value) => {
 		// check for existence of token save
@@ -22,7 +22,6 @@ function writeToken (tokenToWrite) {
 		if (error.code !== 'ENOENT') {
 			console.log(error)
 		}
-		// create folder
 		createAppFolder()
 	})
 }
@@ -32,7 +31,7 @@ function writeToken (tokenToWrite) {
  * @param {callback} callback
  */
 function openToken (callback) {
-	createPath()
+	createPathString()
 	// check for folder
 	checkExistence().then((value) => {
 		// check for existence of token save and then read token
@@ -43,7 +42,6 @@ function openToken (callback) {
 		if (error.code !== 'ENOENT') {
 			console.log(error)
 		}
-		// create folder
 		createAppFolder()
 	})
 }
@@ -78,9 +76,12 @@ function openFile () {
 		})
 	})
 }
-function createPath () {
-	// create path depending on OS
-	// TODO add other OSs
+
+/**
+ * creates string with path to folder, depending on OS
+ * @todo add other OSs
+ */
+function createPathString () {
 	switch (process.platform) {
 	case 'win32': {
 		pathToFolder = 'C:\\Users\\' + require('os').userInfo().username + '\\AppData\\Roaming\\ToDoElectron\\'
