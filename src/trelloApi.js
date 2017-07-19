@@ -1,185 +1,137 @@
-const {net} = require('electron')
-const trelloIO = require('./trelloApiInputOutput')
+const {BrowserWindow, ipcMain} = require('electron')
 const URL = require('url').URL
-const path = require('path')
-const appKey = require('./globalProperties').trelloAppKey
-var token
+const OAuth = require('oauth').OAuth
+const TrelloAPI = require('./trelloApiNet')
+const GlobalProperties = require('./globalProperties')
+const cacheModule = require('./cache')
+
+// constants and variables for connection to trello api
+const requestURL = 'https://trello.com/1/OAuthGetRequestToken'
+const accessURL = 'https://trello.com/1/OAuthGetAccessToken'
+const authorizeURL = 'https://trello.com/1/OAuthAuthorizeToken'
+const oauth = new OAuth(requestURL, accessURL, GlobalProperties.trelloAppKey, GlobalProperties.trelloSecretKey, '1.0A', 'todoapp://trelloauth', 'HMAC-SHA1')
+var verificationToken = ''
+// store authentification window variable here, so we can close it from another function
+var authorizeWindow
 
 /**
- * Initializes variables required for connection to Trello API
- * @param {token for acces} tokenNew
+ * Handler for ipc calls from renderer process
  */
-function intialize (tokenNew) {
-	token = tokenNew
-	trelloIO.writeToken(token)
-}
-
-/**
- * Get all user info
- * @param {function} callback
- */
-function getAllUserInfo (callback) {
-	trelloApiRequest('/1/member/me?&key=' + appKey + '&token=' + token, callback).then((result) => {
-		callback(result)
+function handleIpcCalls () {
+	ipcMain.on('trelloAuthorize', () => {
+		authorize()
 	})
-}
 
-/**
- * Get all boards
- * @param {function} callback
- */
-function getBoards (callback) {
-	trelloApiRequest('/1/member/me/boards?&key=' + appKey + '&token=' + token + '&fields=name,id&filter=open', callback).then((result) => {
-		callback(result)
+	ipcMain.on('trelloGetAllUserInfo', (event) => {
+		TrelloAPI.getAllUserInfo((json) => {
+			event.sender.send('trelloGetAllUserInfo-reply', json)
+		})
 	})
-}
 
-/**
- * Get board data
- * @param {string} idBoard
- * @param {function} callback
- */
-function getBoardData (idBoard, callback) {
-	trelloApiRequest('/1/boards/' + idBoard + '/?&key=' + appKey + '&token=' + token + '&fields=id,name,background&lists=open&list_fields=id,name').then((result) => {
-		callback(result)
-	})
-}
-
-/**
- * 	Get background, save it and return its path
- * @param {string} idBoard
- * @param {function} callback
- */
-function getBackground (idBoard, callback) {
-	trelloApiRequest('/1/boards/' + idBoard + '/prefs/' + '?&key=' + appKey + '&token=' + token).then((response) => {
-		// handle solid color
-		if (response.backgroundImage === null) {
-			callback(response.backgroundColor)
-		} else {
-			// seperate path into chunks and select last part
-			var pathnames = new URL(response.backgroundImage).pathname.split('/')
-			var name = pathnames[pathnames.length - 1] + '.png'
-			// check for existing file
-			trelloIO.checkExistence(name).then((resolve) => {
-				callback(resolve)
-			}).catch((error) => {
-				// handle error different than non-existent path
-				if (error.code !== 'ENOENT') {
-					console.log(error)
-				}
-				// download if needed
-				downloadBackgroundImage(response.backgroundImage).then((imageData) => {
-					trelloIO.saveImage(name, imageData).then((value) => {
-						callback(value)
-					})
-				})
+	ipcMain.on('trelloGetBoards', (event) => {
+		var boards = cacheModule.cache.sources.trello.boards
+		// handle empty cache
+		if (boards.values === undefined) {
+			let now = Date.now()
+			TrelloAPI.getBoards((json) => {
+				boards.values = json
+				boards.date = now
+				cacheModule.cache.sources.trello.boards = boards
+				cacheModule.saveCache()
+				event.sender.send('trelloGetBoards-reply', json)
 			})
+		} else {
+			let now = Date.now()
+			let then = new Date(boards.date).valueOf()
+			// handle cache older than day
+			if (now - then > 86400000) {
+				TrelloAPI.getBoards((json) => {
+					boards.values = json
+					boards.date = now
+					cacheModule.saveCache()
+					event.sender.send('trelloGetBoards-reply', json)
+				})
+			} else {
+				event.sender.send('trelloGetBoards-reply', boards.values)
+			}
 		}
 	})
-}
 
-/**
- * Get list data in batches
- * @param {Array} batches - list ids to call in batches of 10
- * @param {function} callback - callback
- */
-function getBatchListData (batches, callback) {
-	// @type {Object}
-	var json = {'values': []}
-	var batchesRecieved = []
-	for (var i = 0; i < batches.length; ++i) {
-		var batchString = '/1/batch/?urls='
-		batches[i].forEach((idList) => {
-			batchString += '/lists/' + idList + '/cards,'
-		}, this)
-		// delete last comma
-		batchString = batchString.slice(0, -1)
-		batchString += '&key=' + appKey + '&token=' + token
-		// merge all batches into one object
-		trelloApiRequest(batchString, i).then((result) => {
-			// parse only interestnig values
-			result.forEach((idList) => {
-				json.values.push(idList['200'])
-			}, this)
-			batchesRecieved.push(i)
-			// check if all batches are fiinished
-			if (batchesRecieved.length === batches.length) {
-				callback(json)
-			}
+	ipcMain.on('trelloGetBoardData', (event, boardId) => {
+		TrelloAPI.getBoardData(boardId, (json) => {
+			event.sender.send('trelloGetBoardData-reply', json)
 		})
-	}
-}
+	})
 
-/**
- * Sends request to TrelloAPI
- * @param {string} path - path to send request to
- * @param {integer} batchNumber - used for batches, default is 0
- */
-function trelloApiRequest (path) {
-	return new Promise((resolve, reject) => {
-		const request = net.request({ method: 'GET', hostname: 'trello.com', path: path })
-		var json
-		request.on('response', (response) => {
-			var completeResponse = ''
-			response.on('data', (chunk) => {
-				if (chunk.toString() === 'invalid token') {
-					console.log(token + ' - invalid token ')
-					return
-				}
-				completeResponse += chunk.toString()
-			})
-			// long responses usually take more than one buffer, so we wait for all data to arrive
-			response.on('end', () => {
-				if (completeResponse === '') {
-					reject(new Error('Empty response'))
-				}
-				// convert to JSON
-				json = JSON.parse(completeResponse)
-				resolve(json)
-			})
+	ipcMain.on('trelloGetBatchListData', (event, lists) => {
+		var listsSubset = []
+		for (var i = 0; i < lists.length; i += 10) {
+			listsSubset.push(lists.slice(i, i + 10 > lists.length ? lists.length : i + 10))
+		}
+		TrelloAPI.getBatchListData(listsSubset, (json) => {
+			event.sender.send('trelloGetBatchListData-reply', json)
 		})
-		request.end()
+	})
+
+	ipcMain.on('trelloOpenBoard', (event, arg) => {
+		require('./windowManager').openURL(new URL('file://' + __dirname + '/board.html?id=' + arg).toString())
+	})
+
+	ipcMain.on('trelloGetBackground', (event, arg) => {
+		TrelloAPI.getBackground(arg, (value) => {
+			event.sender.send('trelloGetBackground-reply', value)
+		})
 	})
 }
 
 /**
- *  Downloads image from provided url and returns buffer
- * @param {string} path - url to download image from
+ * Function for authorizing Trello API
  */
-function downloadBackgroundImage (path) {
-	return new Promise((resolve, reject) => {
-		var url = new URL(path)
-		const request = net.request({method: 'GET', hostname: url.hostname, path: url.pathname})
-		// create empty buffer for later use
-		var data = Buffer.alloc(0)
-		request.on('response', (response) => {
-			response.on('data', (chunk) => {
-				if (chunk.toString() === 'invalid token') {
-					console.log(token + ' - invalid token ')
-					return
-				}
-				// merge data into one buffer
-				data = Buffer.concat([data, chunk])
-			})
-			// long responses usually take more than one buffer, so we wait for all data to arrive
-			response.on('end', () => {
-				resolve(data)
-			})
-		})
-		request.end()
+function authorize () {
+	oauth.getOAuthRequestToken(function (error, token, tokenSecret, results) {
+		if (error !== null) {
+			console.log(`${error}`)
+		}
+		verificationToken = tokenSecret
+		authorizeWindow = new BrowserWindow({ width: 800, height: 600, webPreferences: { nodeIntegration: false, webSecurity: false, allowRunningInsecureContent: true } })
+		authorizeWindow.loadURL(`${authorizeURL}?oauth_token=${token}&name=${GlobalProperties.appName}&expires=never`)
+	})
+}
+/**
+ * Callback function for authorizing Trello API
+ * @param {} url - custom adress to parse data from
+ */
+function authorizeCallback (url) {
+	// close authentification window, because we don't need it at this point
+	authorizeWindow.close()
+	// parse oauth values
+	var query = new URL(url)
+	const oauthToken = query.searchParams.get('oauth_token')
+	const oauthVerifier = query.searchParams.get('oauth_verifier')
+	oauth.getOAuthAccessToken(oauthToken, verificationToken, oauthVerifier, (error, accessToken, accessTokenSecret, results) => {
+		if (error !== null) {
+			console.log(`${error}`)
+		}
+		// regenerate trello api access with new access tokens
+		console.log('Trello api authorized')
+		TrelloAPI.intialize(accessToken)
+		cacheModule.cache.sources.trello['token'] = accessToken
+		cacheModule.cache.sources.trello.used = true
+		cacheModule.saveCache()
 	})
 }
 
+/**
+ * Loads token from storage
+ */
 function loadToken () {
-	trelloIO.openToken((value) => { token = value })
+	TrelloAPI.loadToken()
 }
 
+handleIpcCalls()
 module.exports = {
-	intialize: intialize,
-	getAllUserInfo: getAllUserInfo,
-	getBoards: getBoards,
-	loadToken: loadToken,
-	getBoardData: getBoardData,
-	getBatchListData: getBatchListData,
-	getBackground: getBackground
+	handleIpcCalls: handleIpcCalls,
+	authorize: authorize,
+	authorizeCallback: authorizeCallback,
+	loadToken: loadToken
 }

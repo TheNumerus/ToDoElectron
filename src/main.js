@@ -7,8 +7,9 @@ const BrowserWindow = electron.BrowserWindow
 const path = require('path')
 const url = require('url')
 const protocols = require('./protocols')
-const trelloApiHandler = require('./trelloApiHandler')
+const trelloApi = require('./trelloApi')
 const windowManager = require('./windowManager')
+const dataController = require('./dataController')
 
 let mainWindow
 
@@ -30,7 +31,7 @@ function createWindow () {
 app.on('ready', function () {
 	createWindow()
 	protocols.registerToDoProtocol()
-	trelloApiHandler.loadToken()
+	trelloApi.loadToken()
 })
 
 app.on('window-all-closed', function () {
@@ -45,6 +46,3 @@ app.on('activate', function () {
 		createWindow()
 	}
 })
-
-// handle ipc calls for trello
-trelloApiHandler.handleIpcCalls()

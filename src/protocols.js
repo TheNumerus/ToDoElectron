@@ -1,4 +1,5 @@
 const {protocol} = require('electron')
+const trelloApi = require('./trelloApi')
 
 /**
  * Resisters todoapp:// protocol used for callbacks
@@ -15,12 +16,12 @@ function registerToDoProtocol () {
 		}
 		switch (match[0]) {
 		case 'trelloauth?': {
-			require('./trelloApiHandler').authorizeCallback(request.url)
+			trelloApi.authorizeCallback(request.url)
 			break
 		}
 		}
 	}, (error) => {
-		if (error) console.error('Failed to register protocol')
+		if (error) console.error('Failed to register protocol,' + error)
 	})
 }
 

@@ -15,13 +15,11 @@ function writeToken (tokenToWrite) {
 	// check for folder
 	checkExistence().then((value) => {
 		// check for existence of token save
-		checkExistence(pathToFolder + filename).then((value) => {
+		checkExistence(filename).then((value) => {
 			writeFile()
 		})
 	}).catch((error) => {
-		if (error.code !== 'ENOENT') {
-			console.log(error)
-		}
+		if (error) throw error
 		createAppFolder()
 	})
 }
@@ -39,9 +37,7 @@ function openToken (callback) {
 			callback(values[1])
 		})
 	}).catch((error) => {
-		if (error.code !== 'ENOENT') {
-			console.log(error)
-		}
+		if (error) throw error
 		createAppFolder()
 	})
 }
@@ -53,11 +49,7 @@ function writeFile () {
 	var saveData = {}
 	saveData.token = token
 	fs.writeFile(pathToFolder + filename, JSON.stringify(saveData), (error) => {
-		if (error !== null) {
-			console.log(error)
-		} else {
-			console.log('file with token saved successfuly')
-		}
+		if (error) throw error
 	})
 }
 /**
@@ -67,8 +59,8 @@ function writeFile () {
 function openFile () {
 	return new Promise(function (resolve, reject) {
 		fs.readFile(pathToFolder + filename, (error, data) => {
-			if (error !== null) {
-				console.log(error)
+			if (error) {
+				throw error
 			} else {
 				var object = JSON.parse(data.toString())
 				resolve(object['token'])
@@ -96,9 +88,7 @@ function createPathString () {
 function createAppFolder () {
 	console.log('creating folder')
 	fs.mkdir(pathToFolder, (error) => {
-		if (error !== null) {
-			console.log(error)
-		}
+		if (error) throw error
 	})
 }
 
@@ -110,7 +100,7 @@ function createAppFolder () {
 function checkExistence (path = '') {
 	return new Promise(function (resolve, reject) {
 		fs.access(pathToFolder + path, fs.constants.F_OK, (error) => {
-			if (error !== null && error.code === 'ENOENT') {
+			if (error) {
 				reject(error.code)
 			} else {
 				resolve(pathToFolder + path)
@@ -127,7 +117,7 @@ function checkExistence (path = '') {
 function saveImage (filename, data) {
 	return new Promise(function (resolve, reject) {
 		fs.writeFile(pathToFolder + filename, data, (error) => {
-			if (error !== null && error.code === 'ENOENT') {
+			if (error) {
 				reject(error.code)
 			} else {
 				resolve(pathToFolder + filename)
