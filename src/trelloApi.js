@@ -1,7 +1,8 @@
 const {BrowserWindow, ipcMain} = require('electron')
 const URL = require('url').URL
 const OAuth = require('oauth').OAuth
-const TrelloAPI = require('./trelloApiNet')
+const TrelloApiNet = require('./trelloApiNet')
+const TrelloApiIO = require('./trelloApiIO')
 const GlobalProperties = require('./globalProperties')
 const windowManager = require('./windowManager')
 const cacheModule = require('./cache')
@@ -24,7 +25,7 @@ function handleIpcCalls () {
 	})
 
 	ipcMain.on('trelloGetAllUserInfo', (event) => {
-		TrelloAPI.getAllUserInfo((json) => {
+		TrelloApiNet.getAllUserInfo((json) => {
 			event.sender.send('trelloGetAllUserInfo-reply', json)
 		})
 	})
@@ -33,7 +34,7 @@ function handleIpcCalls () {
 		var boards = cacheModule.calls.trello.getBoards()
 		// handle empty cache and old cache
 		if (boards.values === undefined || cacheModule.calls.helper.isOld(boards)) {
-			TrelloAPI.getBoards((json) => {
+			TrelloApiNet.getBoards((json) => {
 				boards.values = json
 				boards.date = Date.now()
 				cacheModule.calls.trello.setBoards(boards)
@@ -46,7 +47,7 @@ function handleIpcCalls () {
 	})
 
 	ipcMain.on('trelloGetBoardData', (event, boardId) => {
-		TrelloAPI.getBoardData(boardId, (json) => {
+		TrelloApiNet.getBoardData(boardId, (json) => {
 			event.sender.send('trelloGetBoardData-reply', json)
 		})
 	})
@@ -56,7 +57,7 @@ function handleIpcCalls () {
 		for (var i = 0; i < lists.length; i += 10) {
 			listsSubset.push(lists.slice(i, i + 10 > lists.length ? lists.length : i + 10))
 		}
-		TrelloAPI.getBatchListData(listsSubset, (json) => {
+		TrelloApiNet.getBatchListData(listsSubset, (json) => {
 			event.sender.send('trelloGetBatchListData-reply', json)
 		})
 	})
@@ -66,7 +67,7 @@ function handleIpcCalls () {
 	})
 
 	ipcMain.on('trelloGetBackground', (event, arg) => {
-		TrelloAPI.getBackground(arg, (value) => {
+		TrelloApiNet.getBackground(arg, (value) => {
 			event.sender.send('trelloGetBackground-reply', value)
 		})
 	})
@@ -77,9 +78,7 @@ function handleIpcCalls () {
  */
 function authorize () {
 	oauth.getOAuthRequestToken(function (error, token, tokenSecret, results) {
-		if (error !== null) {
-			console.log(`${error}`)
-		}
+		if (error) throw error
 		verificationToken = tokenSecret
 		authorizeWindow = new BrowserWindow({ width: 800, height: 600, webPreferences: { nodeIntegration: false, webSecurity: false, allowRunningInsecureContent: true } })
 		authorizeWindow.loadURL(`${authorizeURL}?oauth_token=${token}&name=${GlobalProperties.appName}&expires=never`)
@@ -97,29 +96,22 @@ function authorizeCallback (url) {
 	const oauthToken = query.searchParams.get('oauth_token')
 	const oauthVerifier = query.searchParams.get('oauth_verifier')
 	oauth.getOAuthAccessToken(oauthToken, verificationToken, oauthVerifier, (error, accessToken, accessTokenSecret, results) => {
-		if (error !== null) {
-			console.log(`${error}`)
-		}
+		if (error) throw error
 		// regenerate trello api access with new access tokens
-		console.log('Trello api authorized')
-		TrelloAPI.intialize(accessToken)
-		cacheModule.cache.sources.trello['token'] = accessToken
-		cacheModule.cache.sources.trello.used = true
+		cacheModule.calls.trello.setToken(accessToken)
+		cacheModule.calls.trello.setUsed(true)
+		TrelloApiNet.initialize()
 		cacheModule.saveCache()
 	})
 }
 
-/**
- * Loads token from storage
- */
-function loadToken () {
-	TrelloAPI.loadToken()
+function initialize () {
+	handleIpcCalls()
+	TrelloApiNet.initialize()
+	TrelloApiIO.initialize()
 }
-
-handleIpcCalls()
 module.exports = {
-	handleIpcCalls: handleIpcCalls,
 	authorize: authorize,
 	authorizeCallback: authorizeCallback,
-	loadToken: loadToken
+	initialize: initialize
 }

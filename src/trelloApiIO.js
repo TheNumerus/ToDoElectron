@@ -1,96 +1,6 @@
 const fs = require('fs')
-var pathToFolder = ''
-var token = ''
-const filename = 'trelloToken'
-
-/**
- * Control function for saving
- * @param {token to write} token
- */
-function writeToken (tokenToWrite) {
-	// handle empty token
-	if (tokenToWrite === null || tokenToWrite === undefined || tokenToWrite === '') return
-	token = tokenToWrite
-	createPathString()
-	// check for folder
-	checkExistence().then((value) => {
-		// check for existence of token save
-		checkExistence(filename).then((value) => {
-			writeFile()
-		})
-	}).catch((error) => {
-		if (error) throw error
-		createAppFolder()
-	})
-}
-
-/**
- * Control function for opening
- * @param {callback} callback
- */
-function openToken (callback) {
-	createPathString()
-	// check for folder
-	checkExistence().then((value) => {
-		// check for existence of token save and then read token
-		Promise.all([checkExistence(filename), openFile()]).then((values) => {
-			callback(values[1])
-		})
-	}).catch((error) => {
-		if (error) throw error
-		createAppFolder()
-	})
-}
-
-/**
- * Writes token to file
- */
-function writeFile () {
-	var saveData = {}
-	saveData.token = token
-	fs.writeFile(pathToFolder + filename, JSON.stringify(saveData), (error) => {
-		if (error) throw error
-	})
-}
-/**
- * Opens asynchonusly file and reads token from it
- * @return {Promise} promise
- */
-function openFile () {
-	return new Promise(function (resolve, reject) {
-		fs.readFile(pathToFolder + filename, (error, data) => {
-			if (error) {
-				throw error
-			} else {
-				var object = JSON.parse(data.toString())
-				resolve(object['token'])
-			}
-		})
-	})
-}
-
-/**
- * creates string with path to folder, depending on OS
- * @todo add other OSs
- */
-function createPathString () {
-	switch (process.platform) {
-	case 'win32': {
-		pathToFolder = 'C:\\Users\\' + require('os').userInfo().username + '\\AppData\\Roaming\\ToDoElectron\\'
-		break
-	}
-	}
-}
-
-/**
- * Creates folder for data
- */
-function createAppFolder () {
-	console.log('creating folder')
-	fs.mkdir(pathToFolder, (error) => {
-		if (error) throw error
-	})
-}
+const globalProperties = require('./globalProperties')
+var pathToFolder
 
 /**
  * asynchronusly checks for existence of file/folder in set path
@@ -125,10 +35,11 @@ function saveImage (filename, data) {
 		})
 	})
 }
-
+function initialize () {
+	pathToFolder = globalProperties.path
+}
 module.exports = {
-	writeToken: writeToken,
-	openToken: openToken,
 	saveImage: saveImage,
+	initialize: initialize,
 	checkExistence: checkExistence
 }

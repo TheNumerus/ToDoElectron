@@ -2,15 +2,15 @@ const {net} = require('electron')
 const trelloIO = require('./trelloApiIO')
 const URL = require('url').URL
 const appKey = require('./globalProperties').trelloAppKey
+const cacheModule = require('./cache')
 var token
 
 /**
  * Initializes variables required for connection to Trello API
  * @param {token for acces} tokenNew
  */
-function intialize (tokenNew) {
-	token = tokenNew
-	trelloIO.writeToken(token)
+function initialize () {
+	token = cacheModule.calls.trello.getToken()
 }
 
 /**
@@ -62,10 +62,7 @@ function getBackground (idBoard, callback) {
 			trelloIO.checkExistence(name).then((resolve) => {
 				callback(resolve)
 			}).catch((error) => {
-				// handle error different than non-existent path
-				if (error.code !== 'ENOENT') {
-					console.log(error)
-				}
+				if (error) throw error
 				// download if needed
 				downloadBackgroundImage(response.backgroundImage).then((imageData) => {
 					trelloIO.saveImage(name, imageData).then((value) => {
@@ -170,15 +167,10 @@ function downloadBackgroundImage (path) {
 	})
 }
 
-function loadToken () {
-	trelloIO.openToken((value) => { token = value })
-}
-
 module.exports = {
-	intialize: intialize,
+	initialize: initialize,
 	getAllUserInfo: getAllUserInfo,
 	getBoards: getBoards,
-	loadToken: loadToken,
 	getBoardData: getBoardData,
 	getBatchListData: getBatchListData,
 	getBackground: getBackground

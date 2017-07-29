@@ -4,13 +4,17 @@ const cacheModule = require('./cache')
 var path
 
 function initialize () {
-	createPathString()
-	checkForFolder().then(() => {
-		cacheModule.loadCache()
-	}).catch((error) => {
-		if (error.code === 'ENOENT') {
-			createFolder()
-		}
+	return new Promise((resolve, reject) => {
+		createPathString()
+		checkForFolder().then(() => {
+			cacheModule.loadCache().then(() => {
+				resolve()
+			})
+		}).catch((error) => {
+			if (error.code === 'ENOENT') {
+				createFolder()
+			}
+		})
 	})
 }
 
@@ -41,7 +45,7 @@ function createPathString () {
  * @return {Promise} Promise
  */
 function checkForFolder () {
-	return new Promise(function (resolve, reject) {
+	return new Promise((resolve, reject) => {
 		fs.access(path, fs.constants.F_OK, (error) => {
 			if (error !== null) {
 				reject(error.code)
@@ -56,8 +60,11 @@ function checkForFolder () {
  * Creates folder for data
  */
 function createFolder () {
-	fs.mkdir(path, (error) => {
-		if (error) throw error
+	return new Promise((resolve, reject) => {
+		fs.mkdir(path, (error) => {
+			if (error) throw error
+			resolve()
+		})
 	})
 }
 

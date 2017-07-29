@@ -35,9 +35,9 @@ function loadCache () {
 				// handle non-existing file
 				if (error.code === 'ENOENT') {
 					saveCache()
-					return
+				} else {
+					reject(error)
 				}
-				reject(error)
 			} else {
 				if (data.length === 0) {
 					reject(Error('Empty file'))
@@ -62,6 +62,18 @@ const calls = {
 		},
 		setBoards: (data) => {
 			cache.sources.trello.boards = data
+		},
+		getToken: () => {
+			return cache.sources.trello.token
+		},
+		setToken: (data) => {
+			cache.sources.trello.token = data
+		},
+		getUsed: () => {
+			return cache.sources.trello.used
+		},
+		setUsed: (value) => {
+			cache.sources.trello.used = value
 		}
 	},
 	helper: {
