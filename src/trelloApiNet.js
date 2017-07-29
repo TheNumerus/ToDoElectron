@@ -62,7 +62,7 @@ function getBackground (idBoard, callback) {
 			trelloIO.checkExistence(name).then((resolve) => {
 				callback(resolve)
 			}).catch((error) => {
-				if (error) throw error
+				if (error !== 'ENOENT') throw error
 				// download if needed
 				downloadBackgroundImage(response.backgroundImage).then((imageData) => {
 					trelloIO.saveImage(name, imageData).then((value) => {

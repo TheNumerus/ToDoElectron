@@ -16,7 +16,7 @@
             "isShellCommand": true
         },
         {
-            "command": "node-sass",
+            "command": "${workspaceRoot}/node_modules/.bin/node-sass",
             "args": [
                 "src/css",
                 "-o",

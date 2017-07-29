@@ -28,10 +28,11 @@ function createPathString () {
 		path = 'C:\\Users\\' + require('os').userInfo().username + '\\AppData\\Roaming\\ToDoElectron\\'
 		break
 	}
-	case 'darwin': {
+	case 'darwin': {		
 		break
 	}
 	case 'linux': {
+		path = '/home/' + require('os').userInfo().username + '/.todoelectron/'
 		break
 	}
 	}
