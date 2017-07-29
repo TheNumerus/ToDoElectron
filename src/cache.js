@@ -29,24 +29,48 @@ function saveCache () {
 }
 
 function loadCache () {
-	fs.readFile(globalProperties.path + 'cache', (error, data) => {
-		if (error) {
-			// handle non-existing file
-			if (error.code === 'ENOENT') {
-				saveCache()
-				return
+	return new Promise(function (resolve, reject) {
+		fs.readFile(globalProperties.path + 'cache', (error, data) => {
+			if (error) {
+				// handle non-existing file
+				if (error.code === 'ENOENT') {
+					saveCache()
+					return
+				}
+				reject(error)
+			} else {
+				if (data.length === 0) {
+					reject(Error('Empty file'))
+				}
+				cache = JSON.parse(data.toString())
+				resolve()
 			}
-			throw error
-		} else {
-			if (data.length === 0) {
-				throw new Error('Empty file')
-			}
-			cache = JSON.parse(data.toString())
-		}
+		})
 	})
+}
+
+function isOld (object) {
+	if (object === undefined) return
+	var now = Date.now()
+	var then = new Date(object.date).valueOf()
+	return now - then > 86400000
+}
+const calls = {
+	trello: {
+		getBoards: () => {
+			return cache.sources.trello.boards
+		},
+		setBoards: (data) => {
+			cache.sources.trello.boards = data
+		}
+	},
+	helper: {
+		isOld: isOld
+	}
 }
 module.exports = {
 	cache: cache,
 	loadCache: loadCache,
-	saveCache: saveCache
+	saveCache: saveCache,
+	calls: calls
 }

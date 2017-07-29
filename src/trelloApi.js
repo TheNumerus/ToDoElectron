@@ -3,6 +3,7 @@ const URL = require('url').URL
 const OAuth = require('oauth').OAuth
 const TrelloAPI = require('./trelloApiNet')
 const GlobalProperties = require('./globalProperties')
+const windowManager = require('./windowManager')
 const cacheModule = require('./cache')
 
 // constants and variables for connection to trello api
@@ -29,31 +30,18 @@ function handleIpcCalls () {
 	})
 
 	ipcMain.on('trelloGetBoards', (event) => {
-		var boards = cacheModule.cache.sources.trello.boards
-		// handle empty cache
-		if (boards.values === undefined) {
-			let now = Date.now()
+		var boards = cacheModule.calls.trello.getBoards()
+		// handle empty cache and old cache
+		if (boards.values === undefined || cacheModule.calls.helper.isOld(boards)) {
 			TrelloAPI.getBoards((json) => {
 				boards.values = json
-				boards.date = now
-				cacheModule.cache.sources.trello.boards = boards
+				boards.date = Date.now()
+				cacheModule.calls.trello.setBoards(boards)
 				cacheModule.saveCache()
 				event.sender.send('trelloGetBoards-reply', json)
 			})
 		} else {
-			let now = Date.now()
-			let then = new Date(boards.date).valueOf()
-			// handle cache older than day
-			if (now - then > 86400000) {
-				TrelloAPI.getBoards((json) => {
-					boards.values = json
-					boards.date = now
-					cacheModule.saveCache()
-					event.sender.send('trelloGetBoards-reply', json)
-				})
-			} else {
-				event.sender.send('trelloGetBoards-reply', boards.values)
-			}
+			event.sender.send('trelloGetBoards-reply', boards.values)
 		}
 	})
 
@@ -74,7 +62,7 @@ function handleIpcCalls () {
 	})
 
 	ipcMain.on('trelloOpenBoard', (event, arg) => {
-		require('./windowManager').openURL(new URL('file://' + __dirname + '/board.html?id=' + arg).toString())
+		windowManager.openURL(new URL('file://' + __dirname + '/board.html?id=' + arg).toString())
 	})
 
 	ipcMain.on('trelloGetBackground', (event, arg) => {

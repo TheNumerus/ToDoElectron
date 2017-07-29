@@ -30,6 +30,7 @@ function createWindow () {
  */
 app.on('ready', function () {
 	createWindow()
+	dataController.initialize()
 	protocols.registerToDoProtocol()
 	trelloApi.loadToken()
 })

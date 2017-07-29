@@ -32,7 +32,7 @@ function createPathString () {
 	}
 	}
 	// save it, so we can use it anywhere
-	globalProperties['path'] = path
+	globalProperties.path = path
 }
 
 /**
@@ -61,4 +61,6 @@ function createFolder () {
 	})
 }
 
-initialize()
+module.exports = {
+	initialize: initialize
+}
