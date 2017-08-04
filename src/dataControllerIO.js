@@ -9,6 +9,10 @@ function initialize () {
 		checkForFolder().then(() => {
 			cacheModule.loadCache().then(() => {
 				resolve()
+			}).catch((error) => {
+				if (error.code === 'Empty file') {
+					cacheModule.saveCache()
+				}
 			})
 		}).catch((error) => {
 			if (error.code === 'ENOENT') {
@@ -28,7 +32,7 @@ function createPathString () {
 		path = 'C:\\Users\\' + require('os').userInfo().username + '\\AppData\\Roaming\\ToDoElectron\\'
 		break
 	}
-	case 'darwin': {		
+	case 'darwin': {
 		break
 	}
 	case 'linux': {

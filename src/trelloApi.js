@@ -33,9 +33,13 @@ function handleIpcCalls () {
 	ipcMain.on('trelloGetBoards', (event) => {
 		var boards = cacheModule.calls.trello.getBoards()
 		// handle empty cache and old cache
-		if (boards.values === undefined || cacheModule.calls.helper.isOld(boards)) {
+		if (cacheModule.calls.helper.checkInvalidity(boards)) {
 			TrelloApiNet.getBoards((json) => {
-				boards.values = json
+				// format data for internal use
+				boards.values = []
+				json.forEach((element) => {
+					boards.values.push({id: element.id, name: element.name})
+				})
 				boards.date = Date.now()
 				cacheModule.calls.trello.setBoards(boards)
 				cacheModule.saveCache()
@@ -47,9 +51,18 @@ function handleIpcCalls () {
 	})
 
 	ipcMain.on('trelloGetBoardData', (event, boardId) => {
-		TrelloApiNet.getBoardData(boardId, (json) => {
-			event.sender.send('trelloGetBoardData-reply', json)
-		})
+		var boardData = cacheModule.calls.trello.getBoardData(boardId)
+		if (cacheModule.calls.helper.checkInvalidity(boardData)) {
+			TrelloApiNet.getBoardData(boardId, (json) => {
+				boardData.values = json.lists
+				boardData.date = Date.now()
+				cacheModule.calls.trello.setBoardData(boardId, boardData)
+				cacheModule.saveCache()
+				event.sender.send('trelloGetBoardData-reply', boardData, boardId)
+			})
+		} else {
+			event.sender.send('trelloGetBoardData-reply', boardData)
+		}
 	})
 
 	ipcMain.on('trelloGetBatchListData', (event, lists) => {
@@ -106,9 +119,12 @@ function authorizeCallback (url) {
 }
 
 function initialize () {
-	handleIpcCalls()
-	TrelloApiNet.initialize()
-	TrelloApiIO.initialize()
+	return new Promise((resolve, reject) => {
+		handleIpcCalls()
+		TrelloApiNet.initialize()
+		TrelloApiIO.initialize()
+		resolve()
+	})
 }
 module.exports = {
 	authorize: authorize,

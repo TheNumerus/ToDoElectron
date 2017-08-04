@@ -12,7 +12,7 @@ ipcRenderer.on('trelloGetBoardData-reply', (event, boardData) => {
 	document.querySelector('#boardName').innerHTML = boardData.name
 	// render empty lists
 	var lists = {ids: [], components: []}
-	boardData.lists.forEach((list) => {
+	boardData.values.forEach((list) => {
 		var element = <ListCompoment name={list.name} id={list.id}/>
 		lists.components.push(element)
 		// get ids for later use

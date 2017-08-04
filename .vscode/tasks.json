@@ -13,7 +13,7 @@
             "taskName": "compile",
             "suppressTaskName": true,
             "isBackground": false,
-            "isShellCommand": true
+            "type": "shell"
         },
         {
             "command": "${workspaceRoot}/node_modules/.bin/node-sass",
@@ -25,7 +25,7 @@
             "taskName": "css",
             "suppressTaskName": true,
             "isBackground": false,
-            "isShellCommand": true
+            "type": "shell"
         },
         {
             "taskName": "Build",
@@ -33,7 +33,6 @@
                 "compile",
                 "css"
             ],
-            "isBuildCommand": true,
             "group": {
                 "kind": "build",
                 "isDefault": true

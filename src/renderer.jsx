@@ -15,6 +15,10 @@ document.querySelector('#getBoards').addEventListener('click', () => {
 	ipcRenderer.send('trelloGetBoards')
 })
 
+document.querySelector('#clearCache').addEventListener('click', () => {
+	ipcRenderer.send('clearCache')
+})
+
 ipcRenderer.on('trelloGetAllUserInfo-reply', (event, value) => {
 	document.querySelector('#data').innerHTML = JSON.stringify(value)
 })
@@ -24,7 +28,7 @@ ipcRenderer.on('trelloGetBoards-reply', (event, value) => {
 	value.forEach((board) => {
 		var element = <BoardButton class='boardRedirectButton' name={board.name} id={board.id}/>
 		boardComponents.push(element)
-	}, this)
+	})
 	ReactDOM.render(<div>{boardComponents}</div>, document.querySelector('#data'))
 	// we need to add listener afterwards, because it will otherwise fire event upon creation
 	var list = document.querySelectorAll('.boardRedirectButton')

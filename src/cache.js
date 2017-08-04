@@ -4,15 +4,15 @@ const globalProperties = require('./globalProperties')
 var cache = {
 	sources: {
 		trello: {
-			used: undefined,
-			token: undefined,
+			used: null,
+			token: null,
 			boards: {
-				date: undefined,
-				values: undefined
+				date: null,
+				values: []
 			}
 		},
 		googlecal: {
-			used: undefined,
+			used: null,
 			values: {}
 		},
 		nologin: {
@@ -55,6 +55,19 @@ function isOld (object) {
 	var then = new Date(object.date).valueOf()
 	return now - then > 86400000
 }
+
+function checkInvalidity (object) {
+	if (object === undefined || object.values === undefined || object.values === null || object.values.length === 0 || isOld(object)) {
+		return true
+	}
+	return false
+}
+
+function clearCache () {
+	cache.sources.trello.boards = {date: null, values: []}
+	saveCache()
+}
+
 const calls = {
 	trello: {
 		getBoards: () => {
@@ -74,15 +87,35 @@ const calls = {
 		},
 		setUsed: (value) => {
 			cache.sources.trello.used = value
+		},
+		getBoardData: (id) => {
+			var found = false
+			var value = null
+			cache.sources.trello.boards.values.forEach((element) => {
+				if (!found || element.id === id) {
+					found = true
+					value = element
+				}
+			})
+			return value
+		},
+		setBoardData: (id, data) => {
+			cache.sources.trello.boards.values.forEach((element) => {
+				if (element.id === id) {
+					element = data
+				}
+			})
 		}
 	},
 	helper: {
-		isOld: isOld
+		isOld: isOld,
+		checkInvalidity: checkInvalidity
 	}
 }
 module.exports = {
 	cache: cache,
 	loadCache: loadCache,
 	saveCache: saveCache,
-	calls: calls
+	calls: calls,
+	clearCache: clearCache
 }

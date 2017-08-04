@@ -92,7 +92,7 @@ function getBatchListData (batches, callback) {
 		batchString = batchString.slice(0, -1)
 		batchString += '&key=' + appKey + '&token=' + token
 		// merge all batches into one object
-		trelloApiRequest(batchString, i).then((result) => {
+		trelloApiRequest(batchString).then((result) => {
 			// parse only interestnig values
 			result.forEach((idList) => {
 				json.values.push(idList['200'])
@@ -109,7 +109,6 @@ function getBatchListData (batches, callback) {
 /**
  * Sends request to TrelloAPI
  * @param {string} path - path to send request to
- * @param {integer} batchNumber - used for batches, default is 0
  */
 function trelloApiRequest (path) {
 	return new Promise((resolve, reject) => {
@@ -120,6 +119,9 @@ function trelloApiRequest (path) {
 			response.on('data', (chunk) => {
 				if (chunk.toString() === 'invalid token') {
 					reject(new Error('Invalid token'))
+				}
+				if (chunk.toString() === 'invalid id') {
+					reject(new Error('Invalid id'))
 				}
 				completeResponse += chunk.toString()
 			})
