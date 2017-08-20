@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Board | To-Do app in Electron</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link href="css/myMainCss.css" rel="stylesheet">
+        <link rel="stylesheet" href="css/calendar.css">
+    </head>
+    <body>
+        <div id="header">
+          <button id="goBack" class="button back">BACK</button>
+          <button id="goLeft" class="button">&lt;-</button>
+          <button id="goRight" class="button">-&gt;</button>
+          <h1 id="calendarName"></h1>
+          <h2 id="date"></h2>
+        </div>
+        <div>
+          <div id="calendarRoot">
+          </div>
+        </div>
+        <script>
+            require('./calendar.js')
+        </script>
+      </body>
+</html>
