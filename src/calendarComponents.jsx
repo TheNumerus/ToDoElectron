@@ -33,7 +33,8 @@ class CalendarRoot extends React.Component {
 			let element = <WeekRow intendedMonth={month} date={new Date(year, month, i * 7 + 1 - firstDayInMonth.getDay())}/>
 			weekRows.push(element)
 		}
-		var dayNames = []
+		// we add one empty element for week number column
+		var dayNames = [<th></th>]
 		for (let i = 0; i < 7; i++) {
 			let element = <th>{days[i]}</th>
 			dayNames.push(element)
@@ -50,12 +51,9 @@ class CalendarRoot extends React.Component {
 class WeekRow extends React.Component {
 	render () {
 		var date = this.props.date
-		var year = date.getFullYear()
-		var month = date.getMonth()
-		var day = date.getDate()
-		var elements = []
+		var elements = [<td className='weekNumber'>{getWeekNumber(date)}</td>]
 		for (var i = 0; i < 7; i++) {
-			var dateDay = new Date(year, month, day + i)
+			var dateDay = new Date(date.getFullYear(), date.getMonth(), date.getDate() + i)
 			elements.push(<DayTile intendedMonth={this.props.intendedMonth} date={dateDay}/>)
 		}
 		return (
@@ -68,12 +66,12 @@ function getFirstWeekInYear (year) {
 	var firstDayInYear = new Date(year, 0)
 	if (firstDayInYear.getDay() > 4) {
 		// start of the year isn't a week 1
-		let offsetToStart = 10 - firstDayInYear.getDay()
-		return new Date(year, 0, firstDayInYear.getDate + offsetToStart)
+		let offsetToStart = 7 - firstDayInYear.getDay()
+		return new Date(year, 0, firstDayInYear.getDate() + offsetToStart)
 	} else if (firstDayInYear.getDay < 4) {
 		// start of the year is a week 1
 		let offsetToStart = -2 - firstDayInYear.getDay()
-		return new Date(year, 0, firstDayInYear.getDate + offsetToStart)
+		return new Date(year, 0, firstDayInYear.getDate() + offsetToStart)
 	} else {
 		// year starts on thursday
 		return firstDayInYear
@@ -104,11 +102,8 @@ function getWeeksToRender (date) {
 
 function getWeekNumber (date) {
 	var year = date.getFullYear()
-	var month = date.getMonth()
-	var firstDayInMonth = new Date(year, month)
-	var firstWeekinMonthStart = new Date(year, month, 1 - firstDayInMonth.getDay())
 	var firstWeekStart = getFirstWeekInYear(year)
-	var weekNumber = Math.floor((firstDayInMonth - firstWeekStart) / 604800000)
+	var weekNumber = Math.ceil((date - firstWeekStart) / 604800000)
 	return weekNumber
 }
 
