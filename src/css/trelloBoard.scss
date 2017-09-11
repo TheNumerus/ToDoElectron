@@ -1,5 +1,5 @@
 //chrome currently (chromium 56 -61) cannot render backdrop blur properly with box shadow
-$useblur: true;
+$useblur: false; //so far broken as fuck
 $shadow: 0px 5px 10px rgba(0,0,0,0.125);
 $blur: if($useblur, blur(30px), none);
 
@@ -52,4 +52,12 @@ body{
 
 #boardName{
     color: white;
+}
+
+.cardContainer{
+    min-height: 10px;
+}
+
+.card-ghost{
+    opacity: 0.5;
 }

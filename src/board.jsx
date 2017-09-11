@@ -1,22 +1,24 @@
 const ReactDOM = require('react-dom')
 const React = require('react')
-const CardComponent = require('./trelloComponents').CardComponent
-const ListComponent = require('./trelloComponents').ListComponent
 const Board = require('./trelloComponents').Board
 const ipcRenderer = require('electron').ipcRenderer
 const URL = require('url').URL
+const Sortable = require('sortablejs')
 const boardId = new URL(window.location.href).searchParams.get('id')
 
 ipcRenderer.send('trelloGetBoardData', boardId)
 ipcRenderer.on('trelloGetBoardData-reply', (event, boardData) => {
-	var lists = []
-	boardData.values.forEach((list) => {
-		lists.push(list.id)
-	}, this)
 	ipcRenderer.send('trelloGetBackground', boardData.id)
 	ReactDOM.render(<Board boardData={boardData}/>, document.querySelector('#lists'))
+	postRender()
 })
 
+function postRender () {
+	var lists = document.querySelectorAll('.cardContainer')
+	lists.forEach((list) => {
+		Sortable.create(list, {group: 'cards', animation: 150, ghostClass: 'card-ghost'})
+	})
+}
 ipcRenderer.on('trelloGetBackground-reply', (event, imagePath) => {
 	// handle solid color background
 	if (imagePath[0] === '#') {

@@ -14,11 +14,12 @@
     "babel-preset-es2017": "^6.24.1",
     "babel-preset-react": "^6.24.1",
     "electron": "~1.6.10",
-    "node-sass":"4.5.3"  
+    "node-sass": "4.5.3"
   },
   "dependencies": {
+    "oauth": "0.9.15",
     "react": "^15.5.4",
     "react-dom": "^15.5.4",
-    "oauth": "0.9.15"
+    "sortablejs": "^1.6.1"
   }
 }

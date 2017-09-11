@@ -34,7 +34,7 @@ class CardComponent extends React.Component {
 		}
 		var name = hasLabel ? card.labels[0].name : ''
 		return (
-			<div className='cardComponent' id={card.id}>
+			<div className='cardComponent' id={card.id} draggable='true'>
 				<div className='cardLabel' style={labelStyle}>{name}</div>
 				<div className='cardTitle'>{card.name}</div>
 			</div>
