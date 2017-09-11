@@ -39,7 +39,7 @@ function getBoards (callback) {
  * @param {function} callback
  */
 function getBoardData (idBoard, callback) {
-	trelloApiRequest('/1/boards/' + idBoard + '/?&key=' + appKey + '&token=' + token + '&fields=id,name,background&lists=open&list_fields=id,name').then((result) => {
+	trelloApiRequest('/1/boards/' + idBoard + '/?&key=' + appKey + '&token=' + token + '&fields=id,name,background&lists=open&list_fields=id,name&cards=open').then((result) => {
 		callback(result)
 	})
 }
@@ -72,38 +72,6 @@ function getBackground (idBoard, callback) {
 			})
 		}
 	})
-}
-
-/**
- * Get list data in batches
- * @param {Array} batches - list ids to call in batches of 10
- * @param {function} callback - callback
- */
-function getBatchListData (batches, callback) {
-	// @type {Object}
-	var json = {'values': []}
-	var batchesRecieved = []
-	for (var i in batches) {
-		var batchString = '/1/batch/?urls='
-		batches[i].forEach((idList) => {
-			batchString += '/lists/' + idList + '/cards,'
-		}, this)
-		// delete last comma
-		batchString = batchString.slice(0, -1)
-		batchString += '&key=' + appKey + '&token=' + token
-		// merge all batches into one object
-		trelloApiRequest(batchString).then((result) => {
-			// parse only interestnig values
-			result.forEach((idList) => {
-				json.values.push(idList['200'])
-			}, this)
-			batchesRecieved.push(i)
-			// check if all batches are fiinished
-			if (batchesRecieved.length === batches.length) {
-				callback(json)
-			}
-		})
-	}
 }
 
 /**
@@ -174,6 +142,5 @@ module.exports = {
 	getAllUserInfo: getAllUserInfo,
 	getBoards: getBoards,
 	getBoardData: getBoardData,
-	getBatchListData: getBatchListData,
 	getBackground: getBackground
 }

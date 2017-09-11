@@ -1,4 +1,5 @@
 const React = require('react')
+const ipcRenderer = require('electron').ipcRenderer
 class BoardButton extends React.Component {
 	render () {
 		return <button className={`${this.props.class} button`} id={this.props.id}>{this.props.name}</button>
@@ -7,10 +8,13 @@ class BoardButton extends React.Component {
 
 class ListComponent extends React.Component {
 	render () {
+		var elements = this.props.cards.map((card) =>
+			<CardComponent card={card}/>
+		)
 		return (
 			<div className='listComponent'>
 				<h3 className='listTitle'>{this.props.name}</h3>
-				<div className='cardContainer' id={this.props.id}></div>
+				<div className='cardContainer' id={this.props.id}>{elements}</div>
 				<button className={`button`}>+</button>
 			</div>
 		)
@@ -38,8 +42,25 @@ class CardComponent extends React.Component {
 	}
 }
 
+class Board extends React.Component {
+	render () {
+		// render empty lists
+		var lists = {ids: [], components: []}
+		this.props.boardData.values.forEach((list) => {
+			var element = <ListComponent cards={list.cards} name={list.name} id={list.id} key={list.id}/>
+			lists.components.push(element)
+			// get ids for later use
+			lists.ids.push(list.id)
+		}, this)
+		return (
+			<div className='boardRoot'>{lists.components}</div>
+		)
+	}
+}
+
 module.exports = {
 	BoardButton: BoardButton,
 	ListComponent: ListComponent,
-	CardComponent: CardComponent
+	CardComponent: CardComponent,
+	Board: Board
 }

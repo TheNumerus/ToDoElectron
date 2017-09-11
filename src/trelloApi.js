@@ -55,6 +55,15 @@ function handleIpcCalls () {
 		if (cacheModule.calls.helper.checkInvalidity(boardData)) {
 			TrelloApiNet.getBoardData(boardId, (json) => {
 				boardData.values = json.lists
+				// sort cards
+				for (var i = 0; i < boardData.values.length; i++) {
+					boardData.values[i].cards = []
+					json.cards.forEach((card) => {
+						if (card.idList === boardData.values[i].id) {
+							boardData.values[i].cards.push(card)
+						}
+					})
+				}
 				boardData.date = Date.now()
 				cacheModule.calls.trello.setBoardData(boardId, boardData)
 				cacheModule.saveCache()
@@ -63,16 +72,6 @@ function handleIpcCalls () {
 		} else {
 			event.sender.send('trelloGetBoardData-reply', boardData)
 		}
-	})
-
-	ipcMain.on('trelloGetBatchListData', (event, lists) => {
-		var listsSubset = []
-		for (var i = 0; i < lists.length; i += 10) {
-			listsSubset.push(lists.slice(i, i + 10 > lists.length ? lists.length : i + 10))
-		}
-		TrelloApiNet.getBatchListData(listsSubset, (json) => {
-			event.sender.send('trelloGetBatchListData-reply', json)
-		})
 	})
 
 	ipcMain.on('trelloOpenBoard', (event, arg) => {

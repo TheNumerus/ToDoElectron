@@ -6,12 +6,10 @@ $blur: if($useblur, blur(30px), none);
 .listComponent{
     margin: 5px;
     background: rgba(180,180,180,0.5);
-    white-space: nowrap;
     box-shadow: $shadow;
     border-radius: 3px;
-    height: 100%;
     width: 320px;
-    display: inline-block;
+    flex: none;
     vertical-align: top;
     padding: 5px;
     backdrop-filter: $blur;
@@ -34,8 +32,11 @@ $blur: if($useblur, blur(30px), none);
     }
 }
 
-#lists{
-    white-space: nowrap;
+.boardRoot{
+    display: flex;
+    flex-wrap: nowrap;
+    flex-direction: row;
+    align-items: flex-start;
 }
 
 #header{
