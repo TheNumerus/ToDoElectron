@@ -1,8 +1,12 @@
 const isOnline = require('is-online')
+const {ipcMain} = require('electron')
+var currentState = true
 
 function checkConnection () {
 	isOnline().then((online) => {
-		console.log(online)
+		if (currentState !== online) {
+			ipcMain.send('changeOnlineState', online)
+		}
 	})
 }
 
@@ -13,5 +17,7 @@ function startCheck () {
 }
 
 module.exports = {
-	startCheck: startCheck
+	startCheck: startCheck,
+	checkConnection: checkConnection,
+	currentState: currentState
 }

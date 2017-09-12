@@ -50,25 +50,14 @@ function handleIpcCalls () {
 		}
 	})
 
-	ipcMain.on('trelloGetBoardData', (event, boardId) => {
+	ipcMain.on('trelloGetBoardData', (event, boardId, forceUpdate) => {
 		var boardData = cacheModule.calls.trello.getBoardData(boardId)
+		if (forceUpdate === true) {
+			getBoardData(boardId, boardData, event)
+			return
+		}
 		if (cacheModule.calls.helper.checkInvalidity(boardData)) {
-			TrelloApiNet.getBoardData(boardId, (json) => {
-				boardData.values = json.lists
-				// sort cards
-				for (var i = 0; i < boardData.values.length; i++) {
-					boardData.values[i].cards = []
-					json.cards.forEach((card) => {
-						if (card.idList === boardData.values[i].id) {
-							boardData.values[i].cards.push(card)
-						}
-					})
-				}
-				boardData.date = Date.now()
-				cacheModule.calls.trello.setBoardData(boardId, boardData)
-				cacheModule.saveCache()
-				event.sender.send('trelloGetBoardData-reply', boardData, boardId)
-			})
+			getBoardData(boardId, boardData, event)
 		} else {
 			event.sender.send('trelloGetBoardData-reply', boardData)
 		}
@@ -83,6 +72,25 @@ function handleIpcCalls () {
 			event.sender.send('trelloGetBackground-reply', value)
 		})
 	})
+
+	function getBoardData (boardId, boardData, event) {
+		TrelloApiNet.getBoardData(boardId, (json) => {
+			boardData.values = json.lists
+			// sort cards
+			for (var i = 0; i < boardData.values.length; i++) {
+				boardData.values[i].cards = []
+				json.cards.forEach((card) => {
+					if (card.idList === boardData.values[i].id) {
+						boardData.values[i].cards.push(card)
+					}
+				})
+			}
+			boardData.date = Date.now()
+			cacheModule.calls.trello.setBoardData(boardId, boardData)
+			cacheModule.saveCache()
+			event.sender.send('trelloGetBoardData-reply', boardData, boardId)
+		})
+	}
 }
 
 /**

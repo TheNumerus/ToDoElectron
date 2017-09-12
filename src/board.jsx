@@ -6,7 +6,7 @@ const URL = require('url').URL
 const Sortable = require('sortablejs')
 const boardId = new URL(window.location.href).searchParams.get('id')
 
-ipcRenderer.send('trelloGetBoardData', boardId)
+ipcRenderer.send('trelloGetBoardData', boardId, false)
 ipcRenderer.on('trelloGetBoardData-reply', (event, boardData) => {
 	ipcRenderer.send('trelloGetBackground', boardData.id)
 	ReactDOM.render(<Board boardData={boardData}/>, document.querySelector('#lists'))
@@ -30,4 +30,8 @@ ipcRenderer.on('trelloGetBackground-reply', (event, imagePath) => {
 
 document.querySelector('.button.back').addEventListener('click', (event) => {
 	ipcRenderer.send('goBack')
+})
+
+document.querySelector('#update.button').addEventListener('click', (event) => {
+	ipcRenderer.send('trelloGetBoardData', boardId, true)
 })

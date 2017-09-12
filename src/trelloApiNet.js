@@ -85,22 +85,12 @@ function trelloApiRequest (path) {
 		request.on('response', (response) => {
 			var completeResponse = ''
 			response.on('data', (chunk) => {
-				if (chunk.toString() === 'invalid token') {
-					reject(new Error('Invalid token'))
-				}
-				if (chunk.toString() === 'invalid id') {
-					reject(new Error('Invalid id'))
-				}
+				handleResponseErrors(chunk, reject)
 				completeResponse += chunk.toString()
 			})
 			// long responses usually take more than one buffer, so we wait for all data to arrive
 			response.on('end', () => {
-				if (completeResponse === '') {
-					reject(new Error('Empty response'))
-				}
-				if (completeResponse === 'Request Timeout') {
-					reject(new Error('Request Timeout'))
-				}
+				handleResponseErrors(completeResponse, reject)
 				// convert to JSON
 				json = JSON.parse(completeResponse)
 				resolve(json)
@@ -122,9 +112,7 @@ function downloadBackgroundImage (path) {
 		var data = Buffer.alloc(0)
 		request.on('response', (response) => {
 			response.on('data', (chunk) => {
-				if (chunk.toString() === 'invalid token') {
-					reject(new Error('Invalid token'))
-				}
+				handleResponseErrors(chunk, reject)
 				// merge data into one buffer
 				data = Buffer.concat([data, chunk])
 			})
@@ -135,6 +123,18 @@ function downloadBackgroundImage (path) {
 		})
 		request.end()
 	})
+}
+
+function handleResponseErrors (chunk, reject) {
+	if (chunk.toString() === 'invalid token') {
+		reject(new Error('Invalid token'))
+	} else if (chunk.toString() === 'invalid id') {
+		reject(new Error('Invalid id'))
+	} else if (chunk === '') {
+		reject(new Error('Empty response'))
+	} else if (chunk === 'Request Timeout') {
+		reject(new Error('Request Timeout'))
+	}
 }
 
 module.exports = {
