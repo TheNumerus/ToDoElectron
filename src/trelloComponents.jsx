@@ -14,7 +14,7 @@ class ListComponent extends React.Component {
 			<div className='listComponent'>
 				<h3 className='listTitle'>{this.props.name}</h3>
 				<div className='cardContainer' id={this.props.id}>{elements}</div>
-				<button className={`button`}><i className="fa fa-plus-square-o" aria-hidden="true"></i></button>
+				<button className={`button`}><i className="fa fa-plus" aria-hidden="true"></i></button>
 			</div>
 		)
 	}

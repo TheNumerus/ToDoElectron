@@ -8,12 +8,14 @@ const boardId = new URL(window.location.href).searchParams.get('id')
 
 ipcRenderer.send('trelloGetBoardData', boardId, false)
 ipcRenderer.on('trelloGetBoardData-reply', (event, boardData) => {
+	document.querySelector('#boardName').innerHTML = boardData.name
 	ipcRenderer.send('trelloGetBackground', boardData.id)
 	ReactDOM.render(<Board boardData={boardData}/>, document.querySelector('#lists'))
 	postRender()
 })
 
 function postRender () {
+	document.querySelector('#updateIcon').classList.remove('fa-spin')
 	var lists = document.querySelectorAll('.cardContainer')
 	lists.forEach((list) => {
 		Sortable.create(list, {group: 'cards', animation: 150, ghostClass: 'card-ghost'})
@@ -33,5 +35,6 @@ document.querySelector('.button.back').addEventListener('click', (event) => {
 })
 
 document.querySelector('#update.button').addEventListener('click', (event) => {
+	document.querySelector('#updateIcon').classList.add('fa-spin')
 	ipcRenderer.send('trelloGetBoardData', boardId, true)
 })

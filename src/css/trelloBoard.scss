@@ -39,15 +39,27 @@ $blur: if($useblur, blur(30px), none);
     align-items: flex-start;
 }
 
-#header{
+#headerBoard{
+    background: rgba(0,0,0,0.5);
     white-space: nowrap;
-    display: inline-block;
+    display: flex;
+    h1{
+        margin: 10px;
+    }
 }
-
+button.button.header{
+    background: rgba(0,0,0,0);
+    border: 0;
+    margin: 4px;
+    i{
+        color: white;
+    }
+}
 body{
     background-repeat: no-repeat;
     background-size: cover;
     background-attachment: fixed;
+    margin: 0;
 }
 
 #boardName{
