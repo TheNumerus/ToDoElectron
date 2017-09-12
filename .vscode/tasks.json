@@ -18,9 +18,9 @@
         {
             "command": "${workspaceRoot}/node_modules/.bin/node-sass",
             "args": [
-                "src/css",
+                "src/",
                 "-o",
-                "bin/css"
+                "bin/"
             ],
             "taskName": "css",
             "suppressTaskName": true,

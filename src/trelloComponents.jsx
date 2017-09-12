@@ -1,5 +1,4 @@
 const React = require('react')
-const ipcRenderer = require('electron').ipcRenderer
 class BoardButton extends React.Component {
 	render () {
 		return <button className={`${this.props.class} button`} id={this.props.id}>{this.props.name}</button>
@@ -15,7 +14,7 @@ class ListComponent extends React.Component {
 			<div className='listComponent'>
 				<h3 className='listTitle'>{this.props.name}</h3>
 				<div className='cardContainer' id={this.props.id}>{elements}</div>
-				<button className={`button`}>+</button>
+				<button className={`button`}><i className="fa fa-plus-square-o" aria-hidden="true"></i></button>
 			</div>
 		)
 	}
