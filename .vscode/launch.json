@@ -14,7 +14,7 @@
       ],
       "runtimeExecutable": "${workspaceRoot}/node_modules/.bin/electron",
       "program": "${workspaceRoot}/bin/main.js",
-      "protocol": "inspector"
+      "protocol": "legacy"
     }
   ]
 }

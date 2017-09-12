@@ -9,6 +9,7 @@ const url = require('url')
 const protocols = require('./protocols')
 const windowManager = require('./windowManager')
 const dataController = require('./dataController')
+const connectionChecker = require('./connectionChecker')
 
 let mainWindow
 
@@ -31,6 +32,7 @@ app.on('ready', function () {
 	createWindow()
 	dataController.initialize()
 	protocols.registerToDoProtocol()
+	connectionChecker.startCheck()
 })
 
 app.on('window-all-closed', function () {
