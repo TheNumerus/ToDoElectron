@@ -15,6 +15,10 @@ $blur: if($useblur, blur(30px), none);
     backdrop-filter: $blur;
 }
 
+#lists{
+    padding-top: 58px;
+}
+
 .cardComponent{
     background: rgba(255,255,255,0.5);
     margin-bottom: 5px;
@@ -43,6 +47,8 @@ $blur: if($useblur, blur(30px), none);
     background: rgba(0,0,0,0.5);
     white-space: nowrap;
     display: flex;
+    position: fixed;
+    width: 100%;
     h1{
         margin: 10px;
     }
