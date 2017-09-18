@@ -7,21 +7,14 @@ const Sortable = require('sortablejs')
 const boardId = new URL(window.location.href).searchParams.get('id')
 
 ipcRenderer.send('trelloGetBoardData', boardId, false)
-ipcRenderer.on('trelloGetBoardData-reply', (event, boardData) => {
+ipcRenderer.on('trelloGetBoardData-reply', (event, boardData, imagePath) => {
 	document.querySelector('#boardName').innerHTML = boardData.name
-	ipcRenderer.send('trelloGetBackground', boardData.id)
 	ReactDOM.render(<Board boardData={boardData}/>, document.querySelector('#lists'))
-	postRender()
+	// stop spinning refresh icon
+	document.querySelector('#updateIcon').classList.remove('fa-spin')
 })
 
-function postRender () {
-	document.querySelector('#updateIcon').classList.remove('fa-spin')
-	var lists = document.querySelectorAll('.cardContainer')
-	lists.forEach((list) => {
-		Sortable.create(list, {group: 'cards', animation: 150, ghostClass: 'card-ghost'})
-	})
-}
-ipcRenderer.on('trelloGetBackground-reply', (event, imagePath) => {
+ipcRenderer.on('trelloSetBackground', (event, imagePath) => {
 	// handle solid color background
 	if (imagePath[0] === '#') {
 		document.querySelector('body').style.backgroundColor = imagePath

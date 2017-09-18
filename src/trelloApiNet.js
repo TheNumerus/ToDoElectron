@@ -39,38 +39,31 @@ function getBoards (callback) {
  * @param {function} callback
  */
 function getBoardData (idBoard, callback) {
-	trelloApiRequest('/1/boards/' + idBoard + '/?&key=' + appKey + '&token=' + token + '&fields=id,name,background&lists=open&list_fields=id,name&cards=open').then((result) => {
+	trelloApiRequest('/1/boards/' + idBoard + '/?&key=' + appKey + '&token=' + token + '&fields=id,name,prefs&lists=open&list_fields=id,name&cards=open').then((result) => {
 		callback(result)
 	})
 }
 
 /**
  * 	Get background, save it and return its path
- * @param {string} idBoard
+ * @param {string} urlToImage - url to download image from
  * @param {function} callback
  */
-function getBackground (idBoard, callback) {
-	trelloApiRequest('/1/boards/' + idBoard + '/prefs/' + '?&key=' + appKey + '&token=' + token).then((response) => {
-		// handle solid color
-		if (response.backgroundImage === null) {
-			callback(response.backgroundColor)
-		} else {
-			// seperate path into chunks and select last part
-			var pathnames = new URL(response.backgroundImage).pathname.split('/')
-			var name = pathnames[pathnames.length - 1] + '.png'
-			// check for existing file
-			trelloIO.checkExistence(name).then((resolve) => {
-				callback(resolve)
-			}).catch((error) => {
-				if (error !== 'ENOENT') throw error
-				// download if needed
-				downloadBackgroundImage(response.backgroundImage).then((imageData) => {
-					trelloIO.saveImage(name, imageData).then((value) => {
-						callback(value)
-					})
-				})
+function getBackground (urlToImage, callback) {
+	// seperate path into chunks and select last part
+	var pathnames = new URL(urlToImage).pathname.split('/')
+	var name = pathnames[pathnames.length - 1] + '.png'
+	// check for existing file
+	trelloIO.checkExistence(name).then((resolve) => {
+		callback(resolve)
+	}).catch((error) => {
+		if (error !== 'ENOENT') throw error
+		// download if needed
+		downloadBackgroundImage(urlToImage).then((imageData) => {
+			trelloIO.saveImage(name, imageData).then((value) => {
+				callback(value)
 			})
-		}
+		})
 	})
 }
 

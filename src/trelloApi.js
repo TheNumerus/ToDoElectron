@@ -59,6 +59,7 @@ function handleIpcCalls () {
 		if (cacheModule.calls.helper.checkInvalidity(boardData)) {
 			getBoardData(boardId, boardData, event)
 		} else {
+			getBackground(boardData.prefs, event)
 			event.sender.send('trelloGetBoardData-reply', boardData)
 		}
 	})
@@ -67,15 +68,10 @@ function handleIpcCalls () {
 		windowManager.openURL(new URL('file://' + __dirname + '/board.html?id=' + arg).toString())
 	})
 
-	ipcMain.on('trelloGetBackground', (event, arg) => {
-		TrelloApiNet.getBackground(arg, (value) => {
-			event.sender.send('trelloGetBackground-reply', value)
-		})
-	})
-
 	function getBoardData (boardId, boardData, event) {
 		TrelloApiNet.getBoardData(boardId, (json) => {
 			boardData.values = json.lists
+			boardData.prefs = json.prefs
 			// sort cards
 			for (var i = 0; i < boardData.values.length; i++) {
 				boardData.values[i].cards = []
@@ -85,11 +81,23 @@ function handleIpcCalls () {
 					}
 				})
 			}
+			getBackground(boardData.prefs, event)
 			boardData.date = Date.now()
 			cacheModule.calls.trello.setBoardData(boardId, boardData)
 			cacheModule.saveCache()
 			event.sender.send('trelloGetBoardData-reply', boardData, boardId)
 		})
+	}
+
+	function getBackground (prefs, event) {
+		// download background if necessary
+		if (prefs.backgroundImage !== null) {
+			TrelloApiNet.getBackground(prefs.backgroundImage, (path) => {
+				event.sender.send('trelloSetBackground', path)
+			})
+		} else if (prefs.backgroundColor !== null) {
+			event.sender.send('trelloSetBackground', prefs.backgroundColor)
+		}
 	}
 }
 
