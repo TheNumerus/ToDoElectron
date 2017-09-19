@@ -130,10 +130,39 @@ function handleResponseErrors (chunk, reject) {
 	}
 }
 
+function addCard (data, callback) {
+	trelloApiPostRequest('/1/cards?name=' + data.name + '&idList=' + data.idList + '&key=' + appKey + '&token=' + token).then((result) => {
+		callback(result)
+	})
+}
+
+function trelloApiPostRequest (path) {
+	return new Promise((resolve, reject) => {
+		const request = net.request({ method: 'POST', protocol: 'https:', hostname: 'api.trello.com', path: path })
+		var json
+		request.on('response', (response) => {
+			var completeResponse = ''
+			response.on('data', (chunk) => {
+				handleResponseErrors(chunk, reject)
+				completeResponse += chunk.toString()
+			})
+			// long responses usually take more than one buffer, so we wait for all data to arrive
+			response.on('end', () => {
+				handleResponseErrors(completeResponse, reject)
+				// convert to JSON
+				json = JSON.parse(completeResponse)
+				resolve(json)
+			})
+		})
+		request.write(JSON.stringify(false))
+		request.end()
+	})
+}
 module.exports = {
 	initialize: initialize,
 	getAllUserInfo: getAllUserInfo,
 	getBoards: getBoards,
 	getBoardData: getBoardData,
-	getBackground: getBackground
+	getBackground: getBackground,
+	addCard: addCard
 }

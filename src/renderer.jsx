@@ -24,6 +24,7 @@ ipcRenderer.on('trelloGetAllUserInfo-reply', (event, value) => {
 })
 
 ipcRenderer.on('trelloGetBoards-reply', (event, value) => {
+	// TODO - rewrite this
 	var boardComponents = []
 	value.forEach((board) => {
 		var element = <BoardButton class='boardRedirectButton' name={board.name} id={board.id}/>

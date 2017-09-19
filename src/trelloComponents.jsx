@@ -8,6 +8,17 @@ class BoardButton extends React.Component {
 }
 
 class ListComponent extends React.Component {
+	constructor (props) {
+		super(props)
+		this.handleAddCard = this.handleAddCard.bind(this)
+		this.state = {cards: this.props.cards}
+	}
+
+	handleAddCard () {
+		this.state.cards.push({name: 'new card'})
+		ipcRenderer.send('trelloAddCard', this.props.id)
+	}
+
 	render () {
 		var elements = this.props.cards.map((card) =>
 			<CardComponent card={card}/>
@@ -16,7 +27,7 @@ class ListComponent extends React.Component {
 			<div className='listComponent'>
 				<h3 className='listTitle'>{this.props.name}</h3>
 				<div className='cardContainer' ref={(input) => { Sortable.create(input, {group: 'cards', animation: 150, ghostClass: 'card-ghost'}) }} id={this.props.id}>{elements}</div>
-				<AddCardButton listId={this.props.id}/>
+				<AddCardButton handleClick={this.handleAddCard} listId={this.props.id}/>
 			</div>
 		)
 	}
@@ -45,22 +56,22 @@ class CardComponent extends React.Component {
 
 class Board extends React.Component {
 	render () {
-		// render empty lists
-		var lists = {ids: [], components: []}
-		this.props.boardData.values.forEach((list) => {
-			var element = <ListComponent cards={list.cards} name={list.name} id={list.id} key={list.id}/>
-			lists.components.push(element)
-			// get ids for later use
-			lists.ids.push(list.id)
-		}, this)
+		var components = this.props.boardData.values.map((list) => {
+			return <ListComponent cards={list.cards} name={list.name} id={list.id} key={list.id}/>
+		})
 		return (
-			<div className='boardRoot'>{lists.components}</div>
+			<div className='boardRoot'>{components}</div>
 		)
 	}
 }
 
 class AddCardButton extends React.Component {
+	constructor (props) {
+		super(props)
+		this.handleClick = this.handleClick.bind(this)
+	}
 	handleClick () {
+		this.props.handleClick()
 		ipcRenderer.send('trelloAddCart', this.props.listId)
 	}
 

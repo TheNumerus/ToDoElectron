@@ -68,6 +68,11 @@ function handleIpcCalls () {
 		windowManager.openURL(new URL('file://' + __dirname + '/board.html?id=' + arg).toString())
 	})
 
+	ipcMain.on('trelloAddCard', (event, idList, boardId) => {
+		// TODO add offline card adding
+		TrelloApiNet.addCard({name: 'testCard', idList: idList})
+	})
+
 	function getBoardData (boardId, boardData, event) {
 		TrelloApiNet.getBoardData(boardId, (json) => {
 			boardData.values = json.lists
@@ -109,7 +114,7 @@ function authorize () {
 		if (error) throw error
 		verificationToken = tokenSecret
 		authorizeWindow = new BrowserWindow({ width: 800, height: 600, webPreferences: { nodeIntegration: false, webSecurity: false, allowRunningInsecureContent: true } })
-		authorizeWindow.loadURL(`${authorizeURL}?oauth_token=${token}&name=${GlobalProperties.appName}&expires=never`)
+		authorizeWindow.loadURL(`${authorizeURL}?oauth_token=${token}&name=${GlobalProperties.appName}&expires=never&scope=read,write,account`)
 	})
 }
 /**

@@ -3,7 +3,6 @@ const React = require('react')
 const Board = require('./trelloComponents').Board
 const ipcRenderer = require('electron').ipcRenderer
 const URL = require('url').URL
-const Sortable = require('sortablejs')
 const boardId = new URL(window.location.href).searchParams.get('id')
 
 ipcRenderer.send('trelloGetBoardData', boardId, false)
