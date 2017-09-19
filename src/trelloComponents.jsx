@@ -20,9 +20,10 @@ class ListComponent extends React.Component {
 	}
 
 	render () {
-		var elements = this.props.cards.map((card) =>
+		var elements = this.state.cards.map((card) =>
 			<CardComponent card={card}/>
 		)
+		// TODO fix bug with sortable and refreshing
 		return (
 			<div className='listComponent'>
 				<h3 className='listTitle'>{this.props.name}</h3>

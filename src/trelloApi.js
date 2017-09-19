@@ -68,7 +68,8 @@ function handleIpcCalls () {
 		windowManager.openURL(new URL('file://' + __dirname + '/board.html?id=' + arg).toString())
 	})
 
-	ipcMain.on('trelloAddCard', (event, idList, boardId) => {
+	ipcMain.on('trelloAddCard', (event, idList, name) => {
+		cacheModule.calls.trello.addCard(idList, name)
 		// TODO add offline card adding
 		TrelloApiNet.addCard({name: 'testCard', idList: idList})
 	})

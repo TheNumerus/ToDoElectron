@@ -105,6 +105,18 @@ const calls = {
 					element = data
 				}
 			})
+		},
+		addCard: (idList, name) => {
+			var found = false
+			var value = null
+			cache.sources.trello.boards.values.forEach((board) => {
+				if (board.values === undefined) return // handle non-cached boards
+				board.values.forEach((list) => {
+					if (!found && list.id === idList) {
+						list.cards.push({name: name})
+					}
+				})
+			})
 		}
 	},
 	helper: {

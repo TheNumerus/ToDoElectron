@@ -139,19 +139,14 @@ function addCard (data, callback) {
 function trelloApiPostRequest (path) {
 	return new Promise((resolve, reject) => {
 		const request = net.request({ method: 'POST', protocol: 'https:', hostname: 'api.trello.com', path: path })
-		var json
 		request.on('response', (response) => {
 			var completeResponse = ''
 			response.on('data', (chunk) => {
-				handleResponseErrors(chunk, reject)
 				completeResponse += chunk.toString()
 			})
-			// long responses usually take more than one buffer, so we wait for all data to arrive
 			response.on('end', () => {
 				handleResponseErrors(completeResponse, reject)
-				// convert to JSON
-				json = JSON.parse(completeResponse)
-				resolve(json)
+				resolve()
 			})
 		})
 		request.write(JSON.stringify(false))
