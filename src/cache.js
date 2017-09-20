@@ -108,15 +108,33 @@ const calls = {
 		},
 		addCard: (idList, name) => {
 			var found = false
-			var value = null
 			cache.sources.trello.boards.values.forEach((board) => {
 				if (board.values === undefined) return // handle non-cached boards
 				board.values.forEach((list) => {
 					if (!found && list.id === idList) {
+						found = true
 						list.cards.push({name: name})
 					}
 				})
 			})
+		},
+		getCard: (cardId) => {
+			var found = false
+			var value = null
+			cache.sources.trello.boards.values.forEach((board) => {
+				if (found || (!found && board.values === undefined)) { return } // handle non-cached boards
+				board.values.forEach((list) => {
+					if (!found) {
+						list.cards.forEach((card) => {
+							if (card.id === cardId) {
+								found = true
+								value = card
+							}
+						})
+					}
+				})
+			})
+			return value
 		}
 	},
 	helper: {

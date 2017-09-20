@@ -74,6 +74,16 @@ function handleIpcCalls () {
 		TrelloApiNet.addCard({name: 'testCard', idList: idList})
 	})
 
+	ipcMain.on('trelloGetCardData', (event, idCard) => {
+		// TODO add update function
+		var cardData = cacheModule.calls.trello.getCard(idCard)
+		event.sender.send('trelloGetCardData-reply', cardData)
+	})
+
+	ipcMain.on('trelloOpenCard', (event, arg) => {
+		windowManager.openURL(new URL('file://' + __dirname + '/trelloDetails.html?id=' + arg).toString())
+	})
+
 	function getBoardData (boardId, boardData, event) {
 		TrelloApiNet.getBoardData(boardId, (json) => {
 			boardData.values = json.lists

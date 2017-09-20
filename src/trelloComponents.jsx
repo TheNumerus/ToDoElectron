@@ -35,6 +35,14 @@ class ListComponent extends React.Component {
 }
 
 class CardComponent extends React.Component {
+	constructor (props) {
+		super(props)
+		this.openCard = this.openCard.bind(this)
+	}
+
+	openCard () {
+		ipcRenderer.send('trelloOpenCard', this.props.card.id)
+	}
 	render () {
 		var card = this.props.card
 		var hasLabel = card.labels.length > 0
@@ -47,7 +55,7 @@ class CardComponent extends React.Component {
 		}
 		var name = hasLabel ? card.labels[0].name : ''
 		return (
-			<div className='cardComponent' id={card.id} draggable='true'>
+			<div className='cardComponent' onClick={this.openCard} id={card.id} draggable='true'>
 				<div className='cardLabel' style={labelStyle}>{name}</div>
 				<div className='cardTitle'>{card.name}</div>
 			</div>
