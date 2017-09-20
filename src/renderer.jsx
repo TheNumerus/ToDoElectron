@@ -3,39 +3,29 @@ const React = require('react')
 const BoardButton = require('./trelloComponents.js').BoardButton
 const ipcRenderer = require('electron').ipcRenderer
 
-document.querySelector('#authorizeTrello').addEventListener('click', () => {
+function authorize () {
 	ipcRenderer.send('trelloAuthorize')
-})
+}
 
-document.querySelector('#userInfo').addEventListener('click', () => {
+function getUserInfo () {
 	ipcRenderer.send('trelloGetAllUserInfo')
-})
+}
 
-document.querySelector('#getBoards').addEventListener('click', () => {
+function getBoards () {
 	ipcRenderer.send('trelloGetBoards')
-})
+}
 
-document.querySelector('#clearCache').addEventListener('click', () => {
+function clearCache () {
 	ipcRenderer.send('clearCache')
-})
+}
 
 ipcRenderer.on('trelloGetAllUserInfo-reply', (event, value) => {
 	document.querySelector('#data').innerHTML = JSON.stringify(value)
 })
 
-ipcRenderer.on('trelloGetBoards-reply', (event, value) => {
-	// TODO - rewrite this
-	var boardComponents = []
-	value.forEach((board) => {
-		var element = <BoardButton class='boardRedirectButton' name={board.name} id={board.id}/>
-		boardComponents.push(element)
+ipcRenderer.on('trelloGetBoards-reply', (event, boards) => {
+	var boardComponents = boards.map((board) => {
+		return <BoardButton class='boardRedirectButton' name={board.name} id={board.id}/>
 	})
 	ReactDOM.render(<div>{boardComponents}</div>, document.querySelector('#data'))
-	// we need to add listener afterwards, because it will otherwise fire event upon creation
-	var list = document.querySelectorAll('.boardRedirectButton')
-	list.forEach((button) => {
-		button.addEventListener('click', (event) => {
-			ipcRenderer.send('trelloOpenBoard', button.id)
-		})
-	})
 })

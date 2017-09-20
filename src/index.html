@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>To-Do app in Electron</title>
     <link rel="stylesheet" href="css/myMainCss.css">
+    <script src="renderer.js"></script>
   </head>
   
   <body>
@@ -13,15 +14,11 @@
       Chromium <script>document.write(process.versions.chrome)</script>,
       and Electron <script>document.write(process.versions.electron)</script>.
     </div>
-    <button class="button" id="authorizeTrello">Authorize Trello</button>
-    <button class="button" id="userInfo">Get all user info</button>
-    <button class="button" id="getBoards">Get boards</button>
-    <button class="button" id="clearCache">Clear cache</button>
+    <button class="button" onclick="authorize()">Authorize Trello</button>
+    <button class="button" onclick="getUserInfo()">Get all user info</button>
+    <button class="button" onclick="getBoards()">Get boards</button>
+    <button class="button" onclick="clearCache()">Clear cache</button>
     <div id="data">
     </div>
   </body>
-
-  <script>
-    require('./renderer')
-  </script>
 </html>

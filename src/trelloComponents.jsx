@@ -2,8 +2,17 @@ const React = require('react')
 const Sortable = require('sortablejs')
 const ipcRenderer = require('electron').ipcRenderer
 class BoardButton extends React.Component {
+	constructor (props) {
+		super(props)
+		this.openBoard = this.openBoard.bind(this)
+	}
+
+	openBoard () {
+		ipcRenderer.send('trelloOpenBoard', this.props.id)
+	}
+
 	render () {
-		return <button className={`${this.props.class} button`} id={this.props.id}>{this.props.name}</button>
+		return <button onClick={this.openBoard} className={`${this.props.class} button`} id={this.props.id}>{this.props.name}</button>
 	}
 }
 
