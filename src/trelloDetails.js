@@ -10,11 +10,11 @@ ipcRenderer.on('trelloGetCardData-reply', (event, cardData) => {
 	ReactDOM.render(<CardDetail cardData={cardData}/>, document.querySelector('#container'))
 })
 
-/* document.querySelector('.button.back').addEventListener('click', (event) => {
+function goBack () {
 	ipcRenderer.send('goBack')
-})
+}
 
-document.querySelector('#update.button').addEventListener('click', (event) => {
+function update () {
 	document.querySelector('#updateIcon').classList.add('fa-spin')
-	ipcRenderer.send('trelloGetBoardData', cardId, true)
-}) */
+	ipcRenderer.send('trelloGetCardData', cardId, true)
+}

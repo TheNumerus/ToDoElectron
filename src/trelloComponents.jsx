@@ -54,20 +54,54 @@ class CardComponent extends React.Component {
 	}
 	render () {
 		var card = this.props.card
-		var hasLabel = card.labels.length > 0
-		const labelStyle = hasLabel
-		? {
-			backgroundColor: card.labels[0].color
-		}
-		: {
-			display: 'none'
-		}
-		var name = hasLabel ? card.labels[0].name : ''
+		var labels = card.labels.map((label) => {
+			return <Label labelData={label}/>
+		})
 		return (
 			<div className='cardComponent' onClick={this.openCard} id={card.id} draggable='true'>
-				<div className='cardLabel' style={labelStyle}>{name}</div>
+				{labels}
 				<div className='cardTitle'>{card.name}</div>
 			</div>
+		)
+	}
+}
+
+class Label extends React.Component {
+	returnColor (color) {
+		switch (color) {
+		case 'red':
+			return '#eb5a46'
+		case 'yellow':
+			return '#f2d600'
+		case 'purple':
+			return '#c377e0'
+		case 'green':
+			return '#61bd4f'
+		case 'blue':
+			return '#0079bf'
+		case 'sky':
+			return '#00c2e0'
+		case 'orange':
+			return '#ffab4a'
+		case 'pink':
+			return '#ff80ce'
+		case 'lime':
+			return '#51e898'
+		case 'black':
+			return '#4d4d4d'
+		default:
+			return 'rgba(0,0,0,0)'
+		}
+	}
+	render () {
+		var label = this.props.labelData
+		// if the color is set to null, the label will not show on board view
+		if (label.color === null) { return (<div style={{visibility: 'hidden'}}></div>) }
+		const labelStyle = {
+			backgroundColor: this.returnColor(label.color)
+		}
+		return (
+			<div className='cardLabel' style={labelStyle}>{label.name}</div>
 		)
 	}
 }

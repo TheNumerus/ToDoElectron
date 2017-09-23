@@ -9,6 +9,9 @@ class CardDetail extends React.Component {
 			<div>
 				<h3>{cardData.name}</h3>
 				<p>{cardData.desc}</p>
+				<p>{JSON.stringify(cardData.labels)}</p>
+				<p>{cardData.due}</p>
+				<p>{cardData.idChecklist}</p>
 				<p>{JSON.stringify(cardData)}</p>
 			</div>
 		)
