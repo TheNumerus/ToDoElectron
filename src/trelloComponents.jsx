@@ -20,6 +20,7 @@ class ListComponent extends React.Component {
 	constructor (props) {
 		super(props)
 		this.handleAddCard = this.handleAddCard.bind(this)
+		this.addSortable = this.addSortable.bind(this)
 		this.state = {cards: this.props.cards}
 	}
 
@@ -27,16 +28,24 @@ class ListComponent extends React.Component {
 		this.state.cards.push({name: 'new card'})
 		ipcRenderer.send('trelloAddCard', this.props.id)
 	}
+	addSortable (input) {
+		if (input !== null) {
+			Sortable.create(input, {group: 'cards', animation: 150, ghostClass: 'card-ghost'})
+		}
+	}
 
 	render () {
+		// TODO set state only in board, so the board would rerender automaticly without calling the reactDOM. render multiple times
+		// this.setState({cards: this.props.cards})
 		var elements = this.state.cards.map((card) =>
 			<CardComponent card={card}/>
 		)
 		// TODO fix bug with sortable and refreshing
+		// update 25.9 - now refreshing, but it doesn't rerender
 		return (
 			<div className='listComponent'>
 				<h3 className='listTitle'>{this.props.name}</h3>
-				<div className='cardContainer' ref={(input) => { Sortable.create(input, {group: 'cards', animation: 150, ghostClass: 'card-ghost'}) }} id={this.props.id}>{elements}</div>
+				<div className='cardContainer' ref={(input) => {this.addSortable(input)}} id={this.props.id}>{elements}</div>
 				<AddCardButton handleClick={this.handleAddCard} listId={this.props.id}/>
 			</div>
 		)
