@@ -45,7 +45,7 @@ class ListComponent extends React.Component {
 		return (
 			<div className='listComponent'>
 				<h3 className='listTitle'>{this.props.name}</h3>
-				<div className='cardContainer' ref={(input) => {this.addSortable(input)}} id={this.props.id}>{elements}</div>
+				<div className='cardContainer' ref={(input) => { this.addSortable(input) }} id={this.props.id}>{elements}</div>
 				<AddCardButton handleClick={this.handleAddCard} listId={this.props.id}/>
 			</div>
 		)
@@ -66,10 +66,18 @@ class CardComponent extends React.Component {
 		var labels = card.labels.map((label) => {
 			return <Label labelData={label}/>
 		})
+		var checks = <div style={{visibility: 'hidden'}}></div>
+		if (card.badges.checkItems !== 0) {
+			checks = (
+				<div><i className="fa fa-check-square-o"></i>{` ${card.badges.checkItemsChecked}/${card.badges.checkItems}`}</div>
+			)
+		}
+
 		return (
 			<div className='cardComponent' onClick={this.openCard} id={card.id} draggable='true'>
 				{labels}
 				<div className='cardTitle'>{card.name}</div>
+				{checks}
 			</div>
 		)
 	}
