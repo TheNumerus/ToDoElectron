@@ -18,8 +18,8 @@
   },
   "dependencies": {
     "oauth": "0.9.15",
-    "react": "^15.5.4",
-    "react-dom": "^15.5.4",
+    "react": "~16.0.0",
+    "react-dom": "~16.0.0",
     "sortablejs": "^1.6.1",
     "is-online": "~7.0.0"
   }
