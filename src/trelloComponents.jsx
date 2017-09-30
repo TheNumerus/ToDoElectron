@@ -30,7 +30,7 @@ class ListComponent extends React.Component {
 	}
 	addSortable (input) {
 		if (input !== null) {
-			Sortable.create(input, {group: 'cards', animation: 150, ghostClass: 'card-ghost'})
+			Sortable.create(input, {group: 'cards', animation: 150, ghostClass: 'cardGhost'})
 		}
 	}
 
@@ -66,18 +66,27 @@ class CardComponent extends React.Component {
 		var labels = card.labels.map((label) => {
 			return <Label labelData={label}/>
 		})
-		var checks = <div style={{visibility: 'hidden'}}></div>
+		var checks = <div style={{display: 'none'}}></div>
 		if (card.badges.checkItems !== 0) {
 			checks = (
 				<div><i className="fa fa-check-square-o"></i>{` ${card.badges.checkItemsChecked}/${card.badges.checkItems}`}</div>
 			)
 		}
-
+		var desc = <div style={{display: 'none'}}></div>
+		if (card.desc !== '') {
+			desc = <div><i className="fa fa-align-left cardInfoDescIcon"></i></div>
+		}
+		var due = <div style={{display: 'none'}}></div>
+		if (card.due !== null) {
+			var date = new Date(card.due)
+			var dateString = ` ${date.getDate()}.${date.getMonth() + 1}`
+			due = <div><i className="fa fa-calendar-o"></i>{dateString}</div>
+		}
 		return (
 			<div className='cardComponent' onClick={this.openCard} id={card.id} draggable='true'>
 				{labels}
 				<div className='cardTitle'>{card.name}</div>
-				{checks}
+				<div className='cardInfo'>{due}{desc}{checks}</div>
 			</div>
 		)
 	}

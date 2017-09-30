@@ -77,6 +77,16 @@ body{
     min-height: 10px;
 }
 
-.card-ghost{
+.cardGhost{
     opacity: 0.5;
+}
+
+.cardInfo{
+    display: flex;
+    div{
+        margin: 0px 5px;
+        i{
+            font-size: 14px;
+        }
+    }
 }
