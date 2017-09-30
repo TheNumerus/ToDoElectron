@@ -72,14 +72,16 @@ class CardComponent extends React.Component {
 				<div><i className="fa fa-check-square-o"></i>{` ${card.badges.checkItemsChecked}/${card.badges.checkItems}`}</div>
 			)
 		}
+
 		var desc = <div style={{display: 'none'}}></div>
 		if (card.desc !== '') {
 			desc = <div><i className="fa fa-align-left cardInfoDescIcon"></i></div>
 		}
+
 		var due = <div style={{display: 'none'}}></div>
 		if (card.due !== null) {
 			var date = new Date(card.due)
-			var dateString = ` ${date.getDate()}.${date.getMonth() + 1}`
+			var dateString = ` ${date.getDate()}.${date.getMonth() + 1}.`
 			due = <div><i className="fa fa-calendar-o"></i>{dateString}</div>
 		}
 		return (
@@ -155,7 +157,7 @@ class AddCardButton extends React.Component {
 
 	render () {
 		return (
-			<button className='button' onClick={this.handleClick}><i className="fa fa-plus" aria-hidden="true"></i></button>
+			<button className='addCardButton' onClick={this.handleClick}><i className="fa fa-plus" aria-hidden="true"></i></button>
 		)
 	}
 }
