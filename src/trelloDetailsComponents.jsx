@@ -25,7 +25,11 @@ class CardDetail extends React.Component {
 class Checklist extends React.Component {
 	render () {
 		var checklistData = this.props.checklistData
-		var items = checklistData.checkItems.map((item) => {
+		// items store their order in a variable so we must sort them
+		var sorted = checklistData.checkItems.sort((a, b) => {
+			return a.pos - b.pos
+		})
+		var items = sorted.map((item) => {
 			return <ChecklistItem data={item}/>
 		})
 		return (
