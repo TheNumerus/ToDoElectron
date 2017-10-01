@@ -84,15 +84,21 @@ class CardComponent extends React.Component {
 			var dateString = ` ${date.getDate()}.${date.getMonth() + 1}.`
 			due = <div><i className="fa fa-calendar-o"></i>{dateString}</div>
 		}
+
 		var commnents = <div style={{display: 'none'}}></div>
 		if (card.badges.comments > 0) {
 			commnents = <div><i className="fa fa-comment-o"></i>{card.badges.comments}</div>
+		}
+
+		var attachments = <div style={{display: 'none'}}></div>
+		if (card.badges.attachments > 0) {
+			commnents = <div><i className="fa fa-paperclip"></i>{card.badges.attachments}</div>
 		}
 		return (
 			<div className='cardComponent' onClick={this.openCard} id={card.id} draggable='true'>
 				{labels}
 				<div className='cardTitle'>{card.name}</div>
-				<div className='cardInfo'>{due}{desc}{checks}{commnents}</div>
+				<div className='cardInfo'>{due}{desc}{checks}{commnents}{attachments}</div>
 			</div>
 		)
 	}
