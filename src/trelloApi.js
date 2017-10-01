@@ -77,11 +77,28 @@ function handleIpcCalls () {
 	ipcMain.on('trelloGetCardData', (event, idCard) => {
 		// TODO add update function
 		var cardData = cacheModule.calls.trello.getCard(idCard)
-		event.sender.send('trelloGetCardData-reply', cardData)
+		if (cardData.idChecklists.length === 0) {
+			event.sender.send('trelloGetCardData-reply', cardData)
+		}
+		cardData['checklistData'] = []
+		for (var i = 0; i < cardData.idChecklists.length; i++) {
+			TrelloApiNet.getChecklist(cardData.idChecklists[i], (json) => {
+				cardData.checklistData.push(json)
+				if (cardData.checklistData.length === cardData.idChecklists.length) {
+					event.sender.send('trelloGetCardData-reply', cardData)
+				}
+			})
+		}
 	})
 
 	ipcMain.on('trelloOpenCard', (event, arg) => {
 		windowManager.openURL(new URL('file://' + __dirname + '/trelloDetails.html?id=' + arg).toString())
+	})
+
+	ipcMain.on('trelloGetChecklist', (event, arg) => {
+		TrelloApiNet.getChecklist(arg, (json) => {
+			event.sender.send('trelloGetChecklist-reply', json)
+		})
 	})
 
 	function getBoardData (boardId, boardData, event) {

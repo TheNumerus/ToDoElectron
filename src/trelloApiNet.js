@@ -68,6 +68,17 @@ function getBackground (urlToImage, callback) {
 }
 
 /**
+ * 
+ * @param {string} idChecklist 
+ * @param {function} callback 
+ */
+function getChecklist (idChecklist, callback) {
+	trelloApiRequest('/1/checklists/' + idChecklist + '/?&key=' + appKey + '&token=' + token).then((result) => {
+		callback(result)
+	})
+}
+
+/**
  * Sends request to TrelloAPI
  * @param {string} path - path to send request to
  */
@@ -159,5 +170,6 @@ module.exports = {
 	getBoards: getBoards,
 	getBoardData: getBoardData,
 	getBackground: getBackground,
+	getChecklist: getChecklist,
 	addCard: addCard
 }
