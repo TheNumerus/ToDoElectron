@@ -14,7 +14,7 @@ const connectionChecker = require('./connectionChecker')
 let mainWindow
 
 function createWindow () {
-	mainWindow = new BrowserWindow({ width: 1280, height: 720, experimentalFeatures: true })
+	mainWindow = new BrowserWindow({ width: 1600, height: 900, experimentalFeatures: true })
 	windowManager.initialize(mainWindow)
 	windowManager.openURL(url.format({
 		pathname: path.join(__dirname, 'index.html'),
