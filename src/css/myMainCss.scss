@@ -1,12 +1,24 @@
 $font-stack: 'Roboto', 'Arial', sans-serif;
 
 @font-face {
-    font-family: RobotoSlab;
-    src: url(RobotoSlab-Regular.ttf);
+    font-family: Roboto;
+    src: url(Roboto-Regular.ttf);
+}
+
+@font-face {
+    font-family: Montserrat;
+    src: url(Montserrat-Regular.ttf);
+}
+
+@font-face {
+    font-family: Montserrat;
+    src: url(Montserrat-SemiBold.ttf);
+    font-weight: 700;
 }
 
 body{
     font-family: $font-stack;
+    margin: 0px;
 }
 
 .button{

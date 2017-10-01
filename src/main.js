@@ -17,7 +17,7 @@ function createWindow () {
 	mainWindow = new BrowserWindow({ width: 1600, height: 900, experimentalFeatures: true })
 	windowManager.initialize(mainWindow)
 	windowManager.openURL(url.format({
-		pathname: path.join(__dirname, 'index.html'),
+		pathname: path.join(__dirname, 'homepage.html'),
 		protocol: 'file:',
 		slashes: true
 	}))
