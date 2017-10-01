@@ -5,9 +5,12 @@ const ipcRenderer = require('electron').ipcRenderer
 class CardDetail extends React.Component {
 	render () {
 		var cardData = this.props.cardData
-		var checklists = cardData.checklistData.map((data) => {
-			return <Checklist checklistData={data}/>
-		})
+		var checklists = ''
+		if (cardData.checklistData !== undefined) {
+			checklists = cardData.checklistData.map((data) => {
+				return <Checklist checklistData={data}/>
+			})
+		}
 		return (
 			<div>
 				<h3>{cardData.name}</h3>

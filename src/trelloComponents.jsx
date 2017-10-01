@@ -54,9 +54,7 @@ class CardComponent extends React.Component {
 		})
 		var checks = <div style={{display: 'none'}}></div>
 		if (card.badges.checkItems !== 0) {
-			checks = (
-				<div><i className="fa fa-check-square-o"></i>{` ${card.badges.checkItemsChecked}/${card.badges.checkItems}`}</div>
-			)
+			checks = <div><i className="fa fa-check-square-o"></i>{` ${card.badges.checkItemsChecked}/${card.badges.checkItems}`}</div>
 		}
 
 		var desc = <div style={{display: 'none'}}></div>
