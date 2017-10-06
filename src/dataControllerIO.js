@@ -10,13 +10,18 @@ function initialize () {
 			cacheModule.loadCache().then(() => {
 				resolve()
 			}).catch((error) => {
-				if (error.code === 'Empty file') {
+				if (error === 'Empty file') {
 					cacheModule.saveCache()
+					resolve()
 				}
 			})
 		}).catch((error) => {
-			if (error.code === 'ENOENT') {
-				createFolder()
+			if (error === 'ENOENT') {
+				createFolder().then(() => {
+					cacheModule.saveCache().then(() => {
+						resolve()
+					})
+				})
 			}
 		})
 	})
