@@ -95,9 +95,9 @@ function handleIpcCalls () {
 		windowManager.openURL(new URL('file://' + __dirname + '/trelloDetails.html?id=' + arg).toString())
 	})
 
-	ipcMain.on('trelloGetChecklist', (event, arg) => {
-		TrelloApiNet.getChecklist(arg, (json) => {
-			event.sender.send('trelloGetChecklist-reply', json)
+	ipcMain.on('trelloGetActions', (event, arg) => {
+		TrelloApiNet.getActions(arg, (json) => {
+			event.sender.send('trelloGetActions-reply', json)
 		})
 	})
 

@@ -45,6 +45,17 @@ function getBoardData (idBoard, callback) {
 }
 
 /**
+ * Get card actions
+ * @param {string} idCard
+ * @param {function} callback
+ */
+function getActions (idCard, callback) {
+	trelloApiRequest('/1/cards/' + idBoard + '/actions/?&key=' + appKey + '&token=' + token).then((result) => {
+		callback(result)
+	})
+}
+
+/**
  * 	Get background, save it and return its path
  * @param {string} urlToImage - url to download image from
  * @param {function} callback
@@ -167,6 +178,7 @@ function trelloApiPostRequest (path) {
 module.exports = {
 	initialize: initialize,
 	getAllUserInfo: getAllUserInfo,
+	getActions: getActions,
 	getBoards: getBoards,
 	getBoardData: getBoardData,
 	getBackground: getBackground,
