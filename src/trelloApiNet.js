@@ -56,6 +56,17 @@ function getAttachments (idCard, callback) {
 }
 
 /**
+ * Get card actions
+ * @param {string} idCard
+ * @param {function} callback
+ */
+function getActions (idCard, callback) {
+	trelloApiRequest('/1/cards/' + idCard + '/actions/?&key=' + appKey + '&token=' + token).then((result) => {
+		callback(result)
+	})
+}
+
+/**
  * 	Get background, save it and return its path
  * @param {string} urlToImage - url to download image from
  * @param {function} callback
@@ -179,6 +190,7 @@ module.exports = {
 	initialize: initialize,
 	getAllUserInfo: getAllUserInfo,
 	getAttachments: getAttachments,
+	getActions: getActions,
 	getBoards: getBoards,
 	getBoardData: getBoardData,
 	getBackground: getBackground,
