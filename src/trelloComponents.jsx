@@ -3,6 +3,7 @@ const Sortable = require('sortablejs')
 const ipcRenderer = require('electron').ipcRenderer
 const URL = require('url').URL
 const boardId = new URL(window.location.href).searchParams.get('id')
+const connCheck = require('./connectionChecker')
 
 class ListComponent extends React.Component {
 	constructor (props) {
@@ -152,6 +153,17 @@ class Board extends React.Component {
 				document.querySelector('body').style.backgroundColor = imagePath
 			} else {
 				document.querySelector('body').background = imagePath
+			}
+		})
+	}
+
+	/**
+	 * force update when opening board, if connection is available
+	 */
+	componentDidMount () {
+		connCheck.checkConnection().then((result) => {
+			if (result === true) {
+				ipcRenderer.send('trelloGetBoardData', boardId, true)
 			}
 		})
 	}
