@@ -11,7 +11,9 @@ class ListComponent extends React.Component {
 	}
 
 	handleAddCard () {
-		this.state.cards.push({name: 'new card'})
+		this.setState((prevState) => ({
+			cards: prevState.cards.concat([{name: 'new card', placeholder: true}])
+		}))
 		ipcRenderer.send('trelloAddCard', this.props.id)
 	}
 	addSortable (input) {
@@ -21,13 +23,9 @@ class ListComponent extends React.Component {
 	}
 
 	render () {
-		// TODO set state only in board, so the board would rerender automaticly without calling the reactDOM. render multiple times
-		// this.setState({cards: this.props.cards})
 		var elements = this.state.cards.map((card) =>
 			<CardComponent card={card}/>
 		)
-		// TODO fix bug with sortable and refreshing
-		// update 25.9 - now refreshing, but it doesn't rerender
 		return (
 			<div className='listComponent'>
 				<h3 className='listTitle'>{this.props.name}</h3>
@@ -49,34 +47,39 @@ class CardComponent extends React.Component {
 	}
 	render () {
 		var card = this.props.card
-		var labels = card.labels.map((label) => {
-			return <Label labelData={label}/>
-		})
-		var checks = <div style={{display: 'none'}}></div>
-		if (card.badges.checkItems !== 0) {
-			checks = <div><i className="fa fa-check-square-o"></i>{` ${card.badges.checkItemsChecked}/${card.badges.checkItems}`}</div>
-		}
+		// setting these variables to null, so React won't create any DOM element
+		var labels = null
+		var checks = null
+		var desc = null
+		var due = null
+		var comments = null
+		var attachments = null
+		if (card.placeholder === undefined) {
+			labels = card.labels.map((label) => {
+				return <Label labelData={label}/>
+			})
 
-		var desc = <div style={{display: 'none'}}></div>
-		if (card.desc !== '') {
-			desc = <div><i className="fa fa-align-left cardInfoDescIcon"></i></div>
-		}
+			if (card.badges.checkItems !== 0) {
+				checks = <div><i className="fa fa-check-square-o"></i>{` ${card.badges.checkItemsChecked}/${card.badges.checkItems}`}</div>
+			}
 
-		var due = <div style={{display: 'none'}}></div>
-		if (card.due !== null) {
-			var date = new Date(card.due)
-			var dateString = ` ${date.getDate()}.${date.getMonth() + 1}.`
-			due = <div><i className="fa fa-calendar-o"></i>{dateString}</div>
-		}
+			if (card.desc !== '') {
+				desc = <div><i className="fa fa-align-left cardInfoDescIcon"></i></div>
+			}
 
-		var comments = <div style={{display: 'none'}}></div>
-		if (card.badges.comments > 0) {
-			comments = <div><i className="fa fa-comment-o"></i>{card.badges.comments}</div>
-		}
+			if (card.due !== null) {
+				var date = new Date(card.due)
+				var dateString = ` ${date.getDate()}.${date.getMonth() + 1}.`
+				due = <div><i className="fa fa-calendar-o"></i>{dateString}</div>
+			}
 
-		var attachments = <div style={{display: 'none'}}></div>
-		if (card.badges.attachments > 0) {
-			attachments = <div><i className="fa fa-paperclip"></i>{card.badges.attachments}</div>
+			if (card.badges.comments > 0) {
+				comments = <div><i className="fa fa-comment-o"></i>{card.badges.comments}</div>
+			}
+
+			if (card.badges.attachments > 0) {
+				attachments = <div><i className="fa fa-paperclip"></i>{card.badges.attachments}</div>
+			}
 		}
 		return (
 			<div className='cardComponent' onClick={this.openCard} id={card.id} draggable='true'>
@@ -118,7 +121,7 @@ class Label extends React.Component {
 	render () {
 		var label = this.props.labelData
 		// if the color is set to null, the label will not show on board view
-		if (label.color === null) { return (<div style={{visibility: 'hidden'}}></div>) }
+		if (label.color === null) { return null }
 		const labelStyle = {
 			backgroundColor: this.returnColor(label.color)
 		}
