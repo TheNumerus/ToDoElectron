@@ -15,10 +15,6 @@ $blur: if($useblur, blur(30px), none);
     backdrop-filter: $blur;
 }
 
-#lists{
-    padding-top: 58px;
-}
-
 .cardComponent{
     background: rgba(255,255,255,0.5);
     margin-bottom: 5px;
@@ -43,6 +39,7 @@ $blur: if($useblur, blur(30px), none);
     flex-wrap: nowrap;
     flex-direction: row;
     align-items: flex-start;
+    padding-top: 58px;
 }
 
 #headerBoard{

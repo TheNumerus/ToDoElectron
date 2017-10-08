@@ -133,7 +133,9 @@ class Label extends React.Component {
 class Board extends React.Component {
 	constructor (props) {
 		super(props)
-		this.AddCardToList = this.AddCardToList.bind(this)
+		this.addCardToList = this.addCardToList.bind(this)
+		this.update = this.update.bind(this)
+		this.goBack = this.goBack.bind(this)
 		this.handleIpc()
 		this.state = { boardData: { values: [] } }
 		ipcRenderer.send('trelloGetBoardData', boardId, false)
@@ -163,12 +165,12 @@ class Board extends React.Component {
 	componentDidMount () {
 		connCheck.checkConnection().then((result) => {
 			if (result === true) {
-				ipcRenderer.send('trelloGetBoardData', boardId, true)
+				this.update()
 			}
 		})
 	}
 
-	AddCardToList (id) {
+	addCardToList (id) {
 		this.setState((prevState) => {
 			for (var i = 0; i < prevState.boardData.values.length; i++) {
 				if (prevState.boardData.values[i].id === id) {
@@ -182,12 +184,28 @@ class Board extends React.Component {
 		ipcRenderer.send('trelloAddCard', id)
 	}
 
+	update () {
+		document.querySelector('#updateIcon').classList.add('fa-spin')
+		ipcRenderer.send('trelloGetBoardData', boardId, true)
+	}
+
+	goBack () {
+		ipcRenderer.send('goBack')
+	}
+
 	render () {
 		var components = this.state.boardData.values.map((list) => {
 			return <ListComponent onAddCard={this.AddCardToList} cards={list.cards} name={list.name} id={list.id} key={list.id}/>
 		})
 		return (
-			<div className='boardRoot'>{components}</div>
+			<div>
+				<div id="headerBoard">
+					<button onClick={this.goBack} className='button back header'><i className='fa fa-arrow-left fa-2x'></i></button>
+					<h1 id='boardName' style={{marginLeft: '10px'}}>{this.state.boardData.name}</h1>
+					<button onClick={this.update} className='button header' style={{marginLeft: 'auto'}}><i id='updateIcon' className='fa fa-refresh fa-2x'></i></button>
+				</div>
+				<div className='boardRoot'>{components}</div>
+			</div>
 		)
 	}
 }

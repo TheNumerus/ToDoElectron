@@ -79,20 +79,19 @@ function handleIpcCalls () {
 		for (var i = 0; i < cardData.idChecklists.length; i++) {
 			var json = await TrelloApiNet.getChecklist(cardData.idChecklists[i])
 			cardData.checklistData.push(json)
-			if (cardData.checklistData.length === cardData.idChecklists.length) {
-				event.sender.send('trelloGetCardData-reply', cardData)
-			}
 		}
+		if (cardData.badges.comments > 0) {
+			cardData['comments'] = []
+			var actions = await TrelloApiNet.getActions(idCard)
+			actions.forEach(action => {
+				if (action.type === 'commentCard') { cardData.comments.push(action) }
+			})
+		}
+		event.sender.send('trelloGetCardData-reply', cardData)
 	})
 
 	ipcMain.on('trelloOpenCard', (event, arg) => {
 		windowManager.openURL(new URL('file://' + __dirname + '/trelloDetails.html?id=' + arg).toString())
-	})
-
-	ipcMain.on('trelloGetActions', (event, arg) => {
-		TrelloApiNet.getActions(arg, (json) => {
-			event.sender.send('trelloGetActions-reply', json)
-		})
 	})
 
 	async function getBoardData (boardId, boardData, event) {

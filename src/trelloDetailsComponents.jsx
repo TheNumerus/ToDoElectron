@@ -5,10 +5,16 @@ const ipcRenderer = require('electron').ipcRenderer
 class CardDetail extends React.Component {
 	render () {
 		var cardData = this.props.cardData
-		var checklists = ''
+		var checklists = null
 		if (cardData.checklistData !== undefined) {
 			checklists = cardData.checklistData.map((data) => {
 				return <Checklist checklistData={data}/>
+			})
+		}
+		var comments = null
+		if (cardData.comments !== undefined) {
+			comments = cardData.comments.map(data => {
+				return <Comment commentData={data}/>
 			})
 		}
 		return (
@@ -20,6 +26,7 @@ class CardDetail extends React.Component {
 				<p>{cardData.idChecklist}</p>
 				<p>{JSON.stringify(cardData)}</p>
 				{checklists}
+				{comments}
 			</div>
 		)
 	}
@@ -52,6 +59,17 @@ class ChecklistItem extends React.Component {
 		return (
 			<div>
 				{icon}<span>{this.props.data.name}</span>
+			</div>
+		)
+	}
+}
+class Comment extends React.Component {
+	render () {
+		var commentData = this.props.commentData
+		return (
+			<div>
+				<span style={{fontSize: '150%'}}>{commentData.memberCreator.fullName}</span>
+				<span>{commentData.data.text}</span>
 			</div>
 		)
 	}
