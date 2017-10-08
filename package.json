@@ -1,6 +1,6 @@
 {
   "name": "to-do-electron",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Electron test",
   "main": "main.js",
   "scripts": {
