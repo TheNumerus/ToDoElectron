@@ -120,6 +120,7 @@ class HelperModule extends React.Component {
 
 class Homepage extends React.Component {
 	render () {
+		ipcRenderer.send('readyToShow')
 		return (
 			<div>
 				<h1 className="title">ToDoElectron</h1>

@@ -27,6 +27,9 @@ ipcMain.on('goBack', (event) => {
 	}
 })
 
+ipcMain.on('readyToShow', (event) => {
+	window.show()
+})
 module.exports = {
 	initialize: initialize,
 	openURL: openURL
