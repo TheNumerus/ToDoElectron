@@ -122,7 +122,7 @@ class Homepage extends React.Component {
 	render () {
 		return (
 			<div>
-				<h1 class="title">ToDoElectron</h1>
+				<h1 className="title">ToDoElectron</h1>
 				<TrelloModule/>
 				<GoogleModule/>
 				<OfflineModule/>

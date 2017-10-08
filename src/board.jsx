@@ -5,22 +5,7 @@ const ipcRenderer = require('electron').ipcRenderer
 const URL = require('url').URL
 const boardId = new URL(window.location.href).searchParams.get('id')
 
-ipcRenderer.send('trelloGetBoardData', boardId, false)
-ipcRenderer.on('trelloGetBoardData-reply', (event, boardData, imagePath) => {
-	document.querySelector('#boardName').innerHTML = boardData.name
-	ReactDOM.render(<Board boardData={boardData}/>, document.querySelector('#lists'))
-	// stop spinning refresh icon
-	document.querySelector('#updateIcon').classList.remove('fa-spin')
-})
-
-ipcRenderer.on('trelloSetBackground', (event, imagePath) => {
-	// handle solid color background
-	if (imagePath[0] === '#') {
-		document.querySelector('body').style.backgroundColor = imagePath
-	} else {
-		document.querySelector('body').background = imagePath
-	}
-})
+ReactDOM.render(<Board/>, document.querySelector('#lists'))
 
 function goBack () {
 	ipcRenderer.send('goBack')

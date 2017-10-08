@@ -1,20 +1,18 @@
 const React = require('react')
 const Sortable = require('sortablejs')
 const ipcRenderer = require('electron').ipcRenderer
+const URL = require('url').URL
+const boardId = new URL(window.location.href).searchParams.get('id')
 
 class ListComponent extends React.Component {
 	constructor (props) {
 		super(props)
 		this.handleAddCard = this.handleAddCard.bind(this)
 		this.addSortable = this.addSortable.bind(this)
-		this.state = {cards: this.props.cards}
 	}
 
 	handleAddCard () {
-		this.setState((prevState) => ({
-			cards: prevState.cards.concat([{name: 'new card', placeholder: true}])
-		}))
-		ipcRenderer.send('trelloAddCard', this.props.id)
+		this.props.onAddCard(this.props.id)
 	}
 	addSortable (input) {
 		if (input !== null) {
@@ -23,8 +21,8 @@ class ListComponent extends React.Component {
 	}
 
 	render () {
-		var elements = this.state.cards.map((card) =>
-			<CardComponent card={card}/>
+		var elements = this.props.cards.map((card) =>
+			<CardComponent key={card.id} card={card}/>
 		)
 		return (
 			<div className='listComponent'>
@@ -56,7 +54,7 @@ class CardComponent extends React.Component {
 		var attachments = null
 		if (card.placeholder === undefined) {
 			labels = card.labels.map((label) => {
-				return <Label labelData={label}/>
+				return <Label key={label.id} labelData={label}/>
 			})
 
 			if (card.badges.checkItems !== 0) {
@@ -132,9 +130,49 @@ class Label extends React.Component {
 }
 
 class Board extends React.Component {
+	constructor (props) {
+		super(props)
+		this.AddCardToList = this.AddCardToList.bind(this)
+		this.handleIpc()
+		this.state = { boardData: { values: [] } }
+		ipcRenderer.send('trelloGetBoardData', boardId, false)
+	}
+
+	handleIpc () {
+		ipcRenderer.on('trelloGetBoardData-reply', (event, boardData, imagePath) => {
+			document.querySelector('#boardName').innerHTML = boardData.name
+			this.setState({boardData: boardData})
+			// stop spinning refresh icon
+			document.querySelector('#updateIcon').classList.remove('fa-spin')
+		})
+
+		ipcRenderer.on('trelloSetBackground', (event, imagePath) => {
+		// handle solid color background
+			if (imagePath[0] === '#') {
+				document.querySelector('body').style.backgroundColor = imagePath
+			} else {
+				document.querySelector('body').background = imagePath
+			}
+		})
+	}
+
+	AddCardToList (id) {
+		this.setState((prevState) => {
+			for (var i = 0; i < prevState.boardData.values.length; i++) {
+				if (prevState.boardData.values[i].id === id) {
+					prevState.boardData.values[i].cards.push({name: 'new card', placeholder: true})
+				}
+			}
+			return {
+				cards: prevState
+			}
+		})
+		ipcRenderer.send('trelloAddCard', id)
+	}
+
 	render () {
-		var components = this.props.boardData.values.map((list) => {
-			return <ListComponent cards={list.cards} name={list.name} id={list.id} key={list.id}/>
+		var components = this.state.boardData.values.map((list) => {
+			return <ListComponent onAddCard={this.AddCardToList} cards={list.cards} name={list.name} id={list.id} key={list.id}/>
 		})
 		return (
 			<div className='boardRoot'>{components}</div>
