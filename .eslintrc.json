@@ -2,7 +2,8 @@
     "extends": "standard",
     "plugins": [
         "standard",
-        "promise"
+        "promise",
+        "react"
     ],
     "env": {
         "node": true
@@ -14,6 +15,9 @@
         "no-path-concat":"off"
     },
     "parserOptions": {
-        "ecmaVersion": 8
+        "ecmaVersion": 2017,
+        "ecmaFeatures": {
+            "jsx": true
+        }
     }
 }

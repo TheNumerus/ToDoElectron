@@ -24,27 +24,24 @@ function handleIpcCalls () {
 		authorize()
 	})
 
-	ipcMain.on('trelloGetAllUserInfo', (event) => {
-		TrelloApiNet.getAllUserInfo((json) => {
-			event.sender.send('trelloGetAllUserInfo-reply', json)
-		})
+	ipcMain.on('trelloGetAllUserInfo', async (event) => {
+		event.sender.send('trelloGetAllUserInfo-reply', await TrelloApiNet.getAllUserInfo())
 	})
 
-	ipcMain.on('trelloGetBoards', (event) => {
+	ipcMain.on('trelloGetBoards', async (event) => {
 		var boards = cacheModule.calls.trello.getBoards()
 		// handle empty cache and old cache
 		if (cacheModule.calls.helper.checkInvalidity(boards)) {
-			TrelloApiNet.getBoards((json) => {
-				// format data for internal use
-				boards.values = []
-				json.forEach((element) => {
-					boards.values.push({id: element.id, name: element.name})
-				})
-				boards.date = Date.now()
-				cacheModule.calls.trello.setBoards(boards)
-				cacheModule.saveCache()
-				event.sender.send('trelloGetBoards-reply', json)
+			var json = await TrelloApiNet.getBoards()
+			// format data for internal use
+			boards.values = []
+			json.forEach((element) => {
+				boards.values.push({id: element.id, name: element.name})
 			})
+			boards.date = Date.now()
+			cacheModule.calls.trello.setBoards(boards)
+			cacheModule.saveCache()
+			event.sender.send('trelloGetBoards-reply', json)
 		} else {
 			event.sender.send('trelloGetBoards-reply', boards.values)
 		}
@@ -54,9 +51,7 @@ function handleIpcCalls () {
 		var boardData = cacheModule.calls.trello.getBoardData(boardId)
 		if (forceUpdate === true) {
 			getBoardData(boardId, boardData, event)
-			return
-		}
-		if (cacheModule.calls.helper.checkInvalidity(boardData)) {
+		} else if (cacheModule.calls.helper.checkInvalidity(boardData)) {
 			getBoardData(boardId, boardData, event)
 		} else {
 			getBackground(boardData.prefs, event)
@@ -74,7 +69,7 @@ function handleIpcCalls () {
 		TrelloApiNet.addCard({name: 'testCard', idList: idList})
 	})
 
-	ipcMain.on('trelloGetCardData', (event, idCard) => {
+	ipcMain.on('trelloGetCardData', async (event, idCard) => {
 		// TODO add update function
 		var cardData = cacheModule.calls.trello.getCard(idCard)
 		if (cardData.idChecklists.length === 0) {
@@ -82,12 +77,11 @@ function handleIpcCalls () {
 		}
 		cardData['checklistData'] = []
 		for (var i = 0; i < cardData.idChecklists.length; i++) {
-			TrelloApiNet.getChecklist(cardData.idChecklists[i], (json) => {
-				cardData.checklistData.push(json)
-				if (cardData.checklistData.length === cardData.idChecklists.length) {
-					event.sender.send('trelloGetCardData-reply', cardData)
-				}
-			})
+			var json = await TrelloApiNet.getChecklist(cardData.idChecklists[i])
+			cardData.checklistData.push(json)
+			if (cardData.checklistData.length === cardData.idChecklists.length) {
+				event.sender.send('trelloGetCardData-reply', cardData)
+			}
 		}
 	})
 
@@ -101,33 +95,30 @@ function handleIpcCalls () {
 		})
 	})
 
-	function getBoardData (boardId, boardData, event) {
-		TrelloApiNet.getBoardData(boardId, (json) => {
-			boardData.values = json.lists
-			boardData.prefs = json.prefs
-			// sort cards
-			for (var i = 0; i < boardData.values.length; i++) {
-				boardData.values[i].cards = []
-				json.cards.forEach((card) => {
-					if (card.idList === boardData.values[i].id) {
-						boardData.values[i].cards.push(card)
-					}
-				})
-			}
-			getBackground(boardData.prefs, event)
-			boardData.date = Date.now()
-			cacheModule.calls.trello.setBoardData(boardId, boardData)
-			cacheModule.saveCache()
-			event.sender.send('trelloGetBoardData-reply', boardData, boardId)
-		})
+	async function getBoardData (boardId, boardData, event) {
+		var json = await TrelloApiNet.getBoardData(boardId)
+		boardData.values = json.lists
+		boardData.prefs = json.prefs
+		// sort cards
+		for (var i = 0; i < boardData.values.length; i++) {
+			boardData.values[i].cards = []
+			json.cards.forEach((card) => {
+				if (card.idList === boardData.values[i].id) {
+					boardData.values[i].cards.push(card)
+				}
+			})
+		}
+		await getBackground(boardData.prefs, event)
+		boardData.date = Date.now()
+		cacheModule.calls.trello.setBoardData(boardId, boardData)
+		cacheModule.saveCache()
+		event.sender.send('trelloGetBoardData-reply', boardData, boardId)
 	}
 
-	function getBackground (prefs, event) {
+	async function getBackground (prefs, event) {
 		// download background if necessary
 		if (prefs.backgroundImage !== null) {
-			TrelloApiNet.getBackground(prefs.backgroundImage, (path) => {
-				event.sender.send('trelloSetBackground', path)
-			})
+			event.sender.send('trelloSetBackground', await TrelloApiNet.getBackground(prefs.backgroundImage))
 		} else if (prefs.backgroundColor !== null) {
 			event.sender.send('trelloSetBackground', prefs.backgroundColor)
 		}

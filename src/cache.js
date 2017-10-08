@@ -23,8 +23,11 @@ var cache = {
 }
 
 function saveCache () {
-	fs.writeFile(globalProperties.path + 'cache', JSON.stringify(cache), (error) => {
-		if (error) throw error
+	return new Promise(function (resolve, reject) {
+		fs.writeFile(globalProperties.path + 'cache', JSON.stringify(cache), (error) => {
+			if (error) reject(error)
+			resolve()
+		})
 	})
 }
 

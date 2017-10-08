@@ -15,55 +15,40 @@ function initialize () {
 
 /**
  * Get all user info
- * @param {function} callback
  */
-function getAllUserInfo (callback) {
-	trelloApiRequest('/1/member/me?&key=' + appKey + '&token=' + token, callback).then((result) => {
-		callback(result)
-	})
+async function getAllUserInfo () {
+	return trelloApiRequest('/1/member/me?&key=' + appKey + '&token=' + token)
 }
 
 /**
  * Get all boards
- * @param {function} callback
  */
-function getBoards (callback) {
-	trelloApiRequest('/1/member/me/boards?&key=' + appKey + '&token=' + token + '&fields=name,id,background&filter=open', callback).then((result) => {
-		callback(result)
-	})
+async function getBoards (callback) {
+	return trelloApiRequest('/1/member/me/boards?&key=' + appKey + '&token=' + token + '&fields=name,id,background&filter=open')
 }
 
 /**
  * Get board data
  * @param {string} idBoard
- * @param {function} callback
  */
-function getBoardData (idBoard, callback) {
-	trelloApiRequest('/1/boards/' + idBoard + '/?&key=' + appKey + '&token=' + token + '&fields=id,name,prefs&lists=open&list_fields=id,name&cards=open').then((result) => {
-		callback(result)
-	})
+async function getBoardData (idBoard) {
+	return trelloApiRequest('/1/boards/' + idBoard + '/?&key=' + appKey + '&token=' + token + '&fields=id,name,prefs&lists=open&list_fields=id,name&cards=open')
 }
 
 /**
  * Get attachments
  * @param {string} idCard
- * @param {function} callback
  */
-function getAttachments (idCard, callback) {
-	trelloApiRequest('/1/cards/' + idCard + '/atatchments/?&key=' + appKey + '&token=' + token + '&fields=all&filter=none').then((result) => {
-		callback(result)
-	})
+async function getAttachments (idCard) {
+	return trelloApiRequest('/1/cards/' + idCard + '/atatchments/?&key=' + appKey + '&token=' + token + '&fields=all&filter=none')
 }
 
 /**
  * Get card actions
  * @param {string} idCard
- * @param {function} callback
  */
-function getActions (idCard, callback) {
-	trelloApiRequest('/1/cards/' + idCard + '/actions/?&key=' + appKey + '&token=' + token).then((result) => {
-		callback(result)
-	})
+async function getActions (idCard) {
+	return trelloApiRequest('/1/cards/' + idCard + '/actions/?&key=' + appKey + '&token=' + token)
 }
 
 /**
@@ -71,22 +56,18 @@ function getActions (idCard, callback) {
  * @param {string} urlToImage - url to download image from
  * @param {function} callback
  */
-function getBackground (urlToImage, callback) {
+async function getBackground (urlToImage) {
 	// seperate path into chunks and select last part
 	var pathnames = new URL(urlToImage).pathname.split('/')
 	var name = pathnames[pathnames.length - 1] + '.png'
-	// check for existing file
-	trelloIO.checkExistence(name).then((resolve) => {
-		callback(resolve)
-	}).catch((error) => {
-		if (error !== 'ENOENT') throw error
+	try {
+		return trelloIO.checkExistence(name)
+	} catch (e) {
+		if (e !== 'ENOENT') { throw e }
 		// download if needed
-		downloadBackgroundImage(urlToImage).then((imageData) => {
-			trelloIO.saveImage(name, imageData).then((value) => {
-				callback(value)
-			})
-		})
-	})
+		var imageData = await downloadBackgroundImage(urlToImage)
+		return trelloIO.saveImage(name, imageData)
+	}
 }
 
 /**
@@ -94,15 +75,14 @@ function getBackground (urlToImage, callback) {
  * @param {string} idChecklist 
  * @param {function} callback 
  */
-function getChecklist (idChecklist, callback) {
-	trelloApiRequest('/1/checklists/' + idChecklist + '/?&key=' + appKey + '&token=' + token).then((result) => {
-		callback(result)
-	})
+async function getChecklist (idChecklist, callback) {
+	return trelloApiRequest('/1/checklists/' + idChecklist + '/?&key=' + appKey + '&token=' + token)
 }
 
 /**
  * Sends request to TrelloAPI
  * @param {string} path - path to send request to
+ * @returns {Promise<String>} - data from request
  */
 function trelloApiRequest (path) {
 	return new Promise((resolve, reject) => {

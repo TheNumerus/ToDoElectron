@@ -3,28 +3,20 @@ const globalProperties = require('./globalProperties')
 const cacheModule = require('./cache')
 var path
 
-function initialize () {
-	return new Promise((resolve, reject) => {
-		createPathString()
-		checkForFolder().then(() => {
-			cacheModule.loadCache().then(() => {
-				resolve()
-			}).catch((error) => {
-				if (error === 'Empty file') {
-					cacheModule.saveCache()
-					resolve()
-				}
-			})
-		}).catch((error) => {
-			if (error === 'ENOENT') {
-				createFolder().then(() => {
-					cacheModule.saveCache().then(() => {
-						resolve()
-					})
-				})
-			}
-		})
-	})
+async function initialize () {
+	createPathString()
+	try {
+		await checkForFolder()
+	} catch (e) {
+		await createFolder()
+		await cacheModule.saveCache()
+		return
+	}
+	try {
+		await cacheModule.loadCache()
+	} catch (e) {
+		await cacheModule.saveCache()
+	}
 }
 
 /**
@@ -57,11 +49,8 @@ function createPathString () {
 function checkForFolder () {
 	return new Promise((resolve, reject) => {
 		fs.access(path, fs.constants.F_OK, (error) => {
-			if (error !== null) {
-				reject(error.code)
-			} else {
-				resolve()
-			}
+			if (error) { reject(error) }
+			resolve(true)
 		})
 	})
 }
@@ -72,8 +61,8 @@ function checkForFolder () {
 function createFolder () {
 	return new Promise((resolve, reject) => {
 		fs.mkdir(path, (error) => {
-			if (error) throw error
-			resolve()
+			if (error) { reject(error) }
+			resolve(true)
 		})
 	})
 }

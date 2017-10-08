@@ -3,11 +3,10 @@ const {ipcMain} = require('electron')
 const cacheModule = require('./cache')
 const trelloApi = require('./trelloApi')
 
-function initialize () {
-	dataControllerIO.initialize().then(() => {
-		trelloApi.initialize()
-		handleIpcCalls()
-	})
+async function initialize () {
+	await dataControllerIO.initialize()
+	trelloApi.initialize()
+	handleIpcCalls()
 }
 
 function handleIpcCalls () {
