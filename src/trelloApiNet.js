@@ -60,7 +60,7 @@ async function getBackground (urlToImage) {
 	var pathnames = new URL(urlToImage).pathname.split('/')
 	var name = pathnames[pathnames.length - 1] + '.png'
 	try {
-		return trelloIO.checkExistence(name)
+		return await trelloIO.checkExistence(name)
 	} catch (e) {
 		if (e !== 'ENOENT') { throw e }
 		// download if needed

@@ -143,7 +143,6 @@ class Board extends React.Component {
 
 	handleIpc () {
 		ipcRenderer.on('trelloGetBoardData-reply', (event, boardData, imagePath) => {
-			document.querySelector('#boardName').innerHTML = boardData.name
 			this.setState({boardData: boardData})
 			// stop spinning refresh icon
 			document.querySelector('#updateIcon').classList.remove('fa-spin')
@@ -195,7 +194,7 @@ class Board extends React.Component {
 
 	render () {
 		var components = this.state.boardData.values.map((list) => {
-			return <ListComponent onAddCard={this.AddCardToList} cards={list.cards} name={list.name} id={list.id} key={list.id}/>
+			return <ListComponent onAddCard={this.addCardToList} cards={list.cards} name={list.name} id={list.id} key={list.id}/>
 		})
 		return (
 			<div>
