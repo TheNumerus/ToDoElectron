@@ -13,6 +13,7 @@ const accessURL = 'https://trello.com/1/OAuthGetAccessToken'
 const authorizeURL = 'https://trello.com/1/OAuthAuthorizeToken'
 const oauth = new OAuth(requestURL, accessURL, GlobalProperties.trelloAppKey, GlobalProperties.trelloSecretKey, '1.0A', 'todoapp://trelloauth', 'HMAC-SHA1')
 var verificationToken = ''
+var homepageTrelloAuthEvent = null
 // store authentification window variable here, so we can close it from another function
 var authorizeWindow
 
@@ -22,6 +23,19 @@ var authorizeWindow
 function handleIpcCalls () {
 	ipcMain.on('trelloAuthorize', () => {
 		authorize()
+	})
+
+	/**
+	 * Ok, so I'm writing a little bullshit. Since I don't know any other way to to do it,
+	 * I'm just gonna write something terrible. Homepage should check on construction if trello
+	 * is authenticated, so we store the event which came for later use. Then, when the authorize
+	 * window closes, we send the reply to the same event, but this time with a true value.
+	 * The thing is, we need to store the event as a module global variable, so we can access
+	 * it from anothen function. I'm sorry if someone sees this code.  - TheNumerus 2017-10-14
+	 */
+	ipcMain.on('trelloIsAuthorized', (event) => {
+		homepageTrelloAuthEvent = event
+		event.sender.send('trelloIsAuthorized-reply', cacheModule.calls.trello.getUsed())
 	})
 
 	ipcMain.on('trelloGetAllUserInfo', async (event) => {
@@ -151,18 +165,19 @@ function authorizeCallback (url) {
 		// regenerate trello api access with new access tokens
 		cacheModule.calls.trello.setToken(accessToken)
 		cacheModule.calls.trello.setUsed(true)
+		callHomepageTrelloModule()
 		TrelloApiNet.initialize()
 		cacheModule.saveCache()
 	})
 }
 
+function callHomepageTrelloModule () {
+	homepageTrelloAuthEvent.sender.send('trelloIsAuthorized-reply', cacheModule.calls.trello.getUsed())
+}
+
 function initialize () {
-	return new Promise((resolve, reject) => {
-		handleIpcCalls()
-		TrelloApiNet.initialize()
-		TrelloApiIO.initialize()
-		resolve()
-	})
+	handleIpcCalls()
+	TrelloApiIO.initialize()
 }
 module.exports = {
 	authorize: authorize,

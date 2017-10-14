@@ -18,7 +18,8 @@ class TrelloModule extends React.Component {
 		this.authorize = this.authorize.bind(this)
 		this.getUserInfo = this.getUserInfo.bind(this)
 		this.getBoards = this.getBoards.bind(this)
-		this.state = {data: ''}
+		this.state = {data: '', showAuthBtns: false}
+		this.getAuthorization()
 	}
 
 	authorize () {
@@ -29,6 +30,13 @@ class TrelloModule extends React.Component {
 		ipcRenderer.send('trelloGetAllUserInfo')
 		ipcRenderer.on('trelloGetAllUserInfo-reply', (event, value) => {
 			this.setState({data: JSON.stringify(value)})
+		})
+	}
+
+	getAuthorization () {
+		ipcRenderer.send('trelloIsAuthorized')
+		ipcRenderer.on('trelloIsAuthorized-reply', (event, data) => {
+			this.setState({showAuthBtns: data})
 		})
 	}
 
@@ -43,14 +51,21 @@ class TrelloModule extends React.Component {
 	}
 
 	render () {
+		var showAuthBtns = this.state.showAuthBtns
+		var authorizedEelements = showAuthBtns ? [<button className='button' onClick={this.getUserInfo}>Get all user info</button>,
+			<button className='button' onClick={this.getBoards}>Get boards</button>]
+			: null
+		var authorizeButton = showAuthBtns ? null
+			: <button className='button' onClick={this.authorize}>Authorize Trello</button>
+		var authorized = showAuthBtns ? <span style={{fontSize: '50%'}}>- authorized</span>
+			: null
 		return (
 			<div className='homeModule'>
 				<div className='moduleTitle'>
-					<i className='fa fa-trello'></i> Trello
+					<i className='fa fa-trello'></i> Trello {authorized}
 				</div>
-				<button className='button' onClick={this.authorize}>Authorize Trello</button>
-				<button className='button' onClick={this.getUserInfo}>Get all user info</button>
-				<button className='button' onClick={this.getBoards}>Get boards</button>
+				{authorizeButton}
+				{authorizedEelements}
 				<div>{this.state.data}</div>
 			</div>
 		)

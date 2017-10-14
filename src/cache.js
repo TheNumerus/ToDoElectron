@@ -4,7 +4,7 @@ const globalProperties = require('./globalProperties')
 var cache = {
 	sources: {
 		trello: {
-			used: null,
+			used: false,
 			token: null,
 			boards: {
 				date: null,
@@ -12,7 +12,7 @@ var cache = {
 			}
 		},
 		googlecal: {
-			used: null,
+			used: false,
 			values: {}
 		},
 		nologin: {

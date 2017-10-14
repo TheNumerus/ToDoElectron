@@ -14,7 +14,7 @@ const connectionChecker = require('./connectionChecker')
 let mainWindow
 
 function createWindow () {
-	mainWindow = new BrowserWindow({ width: 1600, height: 900, experimentalFeatures: true, show: false })
+	mainWindow = new BrowserWindow({ width: 1600, height: 900, experimentalFeatures: true /* show: false */ })
 	windowManager.initialize(mainWindow)
 	windowManager.openURL(url.format({
 		pathname: path.join(__dirname, 'homepage.html'),
@@ -28,9 +28,9 @@ function createWindow () {
 /**
  * call methods after app has loaded
  */
-app.on('ready', function () {
+app.on('ready', async function () {
+	await dataController.initialize()
 	createWindow()
-	dataController.initialize()
 	protocols.registerToDoProtocol()
 	connectionChecker.startCheck()
 })
