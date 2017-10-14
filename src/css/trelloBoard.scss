@@ -75,6 +75,8 @@ body{
 
 .cardContainer{
     min-height: 10px;
+    overflow-y: auto;
+    max-height: calc(100vh - 165px);
 }
 
 .cardGhost{

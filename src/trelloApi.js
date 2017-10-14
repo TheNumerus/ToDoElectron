@@ -178,6 +178,7 @@ function callHomepageTrelloModule () {
 function initialize () {
 	handleIpcCalls()
 	TrelloApiIO.initialize()
+	TrelloApiNet.initialize()
 }
 module.exports = {
 	authorize: authorize,
