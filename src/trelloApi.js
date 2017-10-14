@@ -21,6 +21,7 @@ var authorizeWindow
  * Handler for ipc calls from renderer process
  */
 function handleIpcCalls () {
+	// #region ipc
 	ipcMain.on('trelloAuthorize', () => {
 		authorize()
 	})
@@ -107,7 +108,7 @@ function handleIpcCalls () {
 	ipcMain.on('trelloOpenCard', (event, arg) => {
 		windowManager.openURL(new URL('file://' + __dirname + '/trelloDetails.html?id=' + arg).toString())
 	})
-
+	// #endregion ipc
 	async function getBoardData (boardId, boardData, event) {
 		var json = await TrelloApiNet.getBoardData(boardId)
 		boardData.values = json.lists

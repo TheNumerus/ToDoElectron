@@ -39,6 +39,22 @@ class CardComponent extends React.Component {
 	constructor (props) {
 		super(props)
 		this.openCard = this.openCard.bind(this)
+		this.addHoverAnim = this.addHoverAnim.bind(this)
+		this.delHoverAnim = this.delHoverAnim.bind(this)
+	}
+
+	addHoverAnim (card) {
+		if (card.target.classList.contains('cardComponent')) {
+			card.target.classList.remove('animCardOut')
+			card.target.classList.add('animCardIn')
+		}
+	}
+
+	delHoverAnim (card) {
+		if (card.target.classList.contains('cardComponent')) {
+			card.target.classList.remove('animCardIn')
+			card.target.classList.add('animCardOut')
+			
 	}
 
 	openCard () {
@@ -81,7 +97,7 @@ class CardComponent extends React.Component {
 			}
 		}
 		return (
-			<div className='cardComponent' onClick={this.openCard} id={card.id} draggable='true'>
+			<div className='cardComponent' onClick={this.openCard} onMouseEnter={(e) => this.addHoverAnim(e)} onMouseLeave={(e) => this.delHoverAnim(e)} id={card.id} draggable='true'>
 				{labels}
 				<div className='cardTitle'>{card.name}</div>
 				<div className='cardInfo'>{due}{desc}{checks}{comments}{attachments}</div>
