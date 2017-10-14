@@ -18,8 +18,7 @@ class TrelloModule extends React.Component {
 		this.authorize = this.authorize.bind(this)
 		this.getUserInfo = this.getUserInfo.bind(this)
 		this.getBoards = this.getBoards.bind(this)
-		this.state = {data: '', showAuthBtns: false}
-		this.getAuthorization()
+		this.state = {data: ''}
 	}
 
 	authorize () {
@@ -30,13 +29,6 @@ class TrelloModule extends React.Component {
 		ipcRenderer.send('trelloGetAllUserInfo')
 		ipcRenderer.on('trelloGetAllUserInfo-reply', (event, value) => {
 			this.setState({data: JSON.stringify(value)})
-		})
-	}
-
-	getAuthorization () {
-		ipcRenderer.send('trelloIsAuthorized')
-		ipcRenderer.on('trelloIsAuthorized-reply', (event, data) => {
-			this.setState({showAuthBtns: data})
 		})
 	}
 
@@ -51,7 +43,7 @@ class TrelloModule extends React.Component {
 	}
 
 	render () {
-		var showAuthBtns = this.state.showAuthBtns
+		var showAuthBtns = this.props.authorized
 		var authorizedEelements = showAuthBtns ? [<button className='button' onClick={this.getUserInfo}>Get all user info</button>,
 			<button className='button' onClick={this.getBoards}>Get boards</button>]
 			: null
@@ -118,7 +110,7 @@ class HelperModule extends React.Component {
 	}
 
 	clearCache () {
-		ipcRenderer.send('clearCache')
+		this.props.clearCache()
 	}
 
 	render () {
@@ -134,15 +126,34 @@ class HelperModule extends React.Component {
 }
 
 class Homepage extends React.Component {
-	render () {
+	constructor (props) {
+		super(props)
+		this.clearCache = this.clearCache.bind(this)
+		this.state = {trelloAuthorized: false}
+		this.getAuthorization()
 		ipcRenderer.send('readyToShow')
+	}
+
+	getAuthorization () {
+		ipcRenderer.send('trelloIsAuthorized')
+		ipcRenderer.on('trelloIsAuthorized-reply', (event, data) => {
+			this.setState({trelloAuthorized: data})
+		})
+	}
+
+	clearCache () {
+		ipcRenderer.send('clearCache')
+		this.getAuthorization()
+	}
+
+	render () {
 		return (
 			<div>
 				<h1 className="title">ToDoElectron</h1>
-				<TrelloModule/>
+				<TrelloModule authorized={this.state.trelloAuthorized}/>
 				<GoogleModule/>
 				<OfflineModule/>
-				<HelperModule/>
+				<HelperModule clearCache={this.clearCache}/>
 				<AppInfoBar/>
 			</div>
 		)
