@@ -54,7 +54,7 @@ class CardComponent extends React.Component {
 		if (card.target.classList.contains('cardComponent')) {
 			card.target.classList.remove('animCardIn')
 			card.target.classList.add('animCardOut')
-			
+		}
 	}
 
 	openCard () {
