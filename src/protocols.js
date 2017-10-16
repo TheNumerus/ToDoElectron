@@ -2,7 +2,7 @@ const {protocol} = require('electron')
 const trelloApi = require('./trelloApi')
 
 /**
- * Resisters todoapp:// protocol used for callbacks
+ * Registers todoapp:// protocol used for callbacks
  */
 function registerToDoProtocol () {
 	protocol.registerStringProtocol('todoapp', (request, callback) => {

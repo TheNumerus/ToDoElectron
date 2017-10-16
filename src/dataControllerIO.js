@@ -1,6 +1,7 @@
 const fs = require('fs')
 const globalProperties = require('./globalProperties')
 const cacheModule = require('./cache')
+const settings = require('./settings')
 var path
 
 async function initialize () {
@@ -16,6 +17,11 @@ async function initialize () {
 		await cacheModule.loadCache()
 	} catch (e) {
 		await cacheModule.saveCache()
+	}
+	try {
+		await settings.initialize()
+	} catch (e) {
+		await settings.save()
 	}
 }
 
