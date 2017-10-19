@@ -40,7 +40,7 @@ async function getBoardData (idBoard) {
  * @param {string} idCard
  */
 async function getAttachments (idCard) {
-	return trelloApiRequest('/1/cards/' + idCard + '/atatchments/?&key=' + appKey + '&token=' + token + '&fields=all&filter=none')
+	return trelloApiRequest('/1/cards/' + idCard + '/attachments/?&key=' + appKey + '&token=' + token + '&fields=all&filter=false')
 }
 
 /**
@@ -52,10 +52,10 @@ async function getActions (idCard) {
 }
 
 /**
- * 	Get background, save it and return its path
+ * 	Get iamge, save it and return its path
  * @param {string} urlToImage - url to download image from
  */
-async function getBackground (urlToImage) {
+async function getImage (urlToImage) {
 	// seperate path into chunks and select last part
 	var pathnames = new URL(urlToImage).pathname.split('/')
 	var name = pathnames[pathnames.length - 1] + '.png'
@@ -64,7 +64,7 @@ async function getBackground (urlToImage) {
 	} catch (e) {
 		if (e !== 'ENOENT') { throw e }
 		// download if needed
-		var imageData = await downloadBackgroundImage(urlToImage)
+		var imageData = await downloadImage(urlToImage)
 		return trelloIO.saveImage(name, imageData)
 	}
 }
@@ -115,15 +115,15 @@ function trelloApiRequest (path) {
  *  Downloads image from provided url and returns buffer
  * @param {string} path - url to download image from
  */
-function downloadBackgroundImage (path) {
+function downloadImage (path) {
 	return new Promise((resolve, reject) => {
 		var url = new URL(path)
-		const request = net.request({method: 'GET', hostname: url.hostname, path: url.pathname})
+		const request = net.request({protocol: 'https:', method: 'GET', hostname: url.hostname, path: url.pathname})
 		// create empty buffer for later use
 		var data = Buffer.alloc(0)
 		request.on('response', (response) => {
 			response.on('data', (chunk) => {
-				var error = handleResponseErrors(data)
+				var error = handleResponseErrors(chunk)
 				if (error) {
 					reject(error)
 					return
@@ -180,7 +180,7 @@ module.exports = {
 	getActions: getActions,
 	getBoards: getBoards,
 	getBoardData: getBoardData,
-	getBackground: getBackground,
+	getImage: getImage,
 	getChecklist: getChecklist,
 	addCard: addCard
 }

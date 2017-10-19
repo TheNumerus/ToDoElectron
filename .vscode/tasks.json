@@ -2,29 +2,13 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "command": "${workspaceRoot}/node_modules/.bin/babel",
-            "args": [
-                "src",
-                "--out-dir",
-                "bin",
-                "--source-maps",
-                "--copy-files"
-            ],
+            "command": "${workspaceRoot}/node_modules/.bin/babel src --out-dir bin --source-maps --copy-files",
             "taskName": "compile",
-            "suppressTaskName": true,
-            "isBackground": false,
             "type": "shell"
         },
         {
-            "command": "${workspaceRoot}/node_modules/.bin/node-sass",
-            "args": [
-                "src/",
-                "-o",
-                "bin/"
-            ],
+            "command": "${workspaceRoot}/node_modules/.bin/node-sass src/ -o bin/",
             "taskName": "css",
-            "suppressTaskName": true,
-            "isBackground": false,
             "type": "shell"
         },
         {

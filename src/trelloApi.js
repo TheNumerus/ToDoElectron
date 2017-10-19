@@ -114,7 +114,7 @@ function handleIpcCalls () {
 		boardData.values = json.lists
 		boardData.prefs = json.prefs
 		// sort cards
-		for (var i = 0; i < boardData.values.length; i++) {
+		for (let i = 0; i < boardData.values.length; i++) {
 			boardData.values[i].cards = []
 			json.cards.forEach((card) => {
 				if (card.idList === boardData.values[i].id) {
@@ -123,6 +123,15 @@ function handleIpcCalls () {
 			})
 		}
 		await getBackground(boardData.prefs, event)
+		for (let i = 0; i < boardData.values.length; i++) {
+			for (let c = 0; c < boardData.values[i].cards.length; c++) {
+				if (boardData.values[i].cards[c].badges.attachments > 0) {
+					var attData = await TrelloApiNet.getAttachments(boardData.values[i].cards[c].id)
+					downloadAttachment(attData)
+					boardData.values[i].cards[c]['attachemnts'] = attData
+				}
+			}
+		}
 		boardData.date = Date.now()
 		cacheModule.calls.trello.setBoardData(boardId, boardData)
 		cacheModule.saveCache()
@@ -132,10 +141,18 @@ function handleIpcCalls () {
 	async function getBackground (prefs, event) {
 		// download background if necessary
 		if (prefs.backgroundImage !== null) {
-			event.sender.send('trelloSetBackground', await TrelloApiNet.getBackground(prefs.backgroundImage))
+			event.sender.send('trelloSetBackground', await TrelloApiNet.getImage(prefs.backgroundImage))
 		} else if (prefs.backgroundColor !== null) {
 			event.sender.send('trelloSetBackground', prefs.backgroundColor)
 		}
+	}
+
+	async function downloadAttachment (attachmentData) {
+		attachmentData.forEach(async (attachment) => {
+			if (attachment.isUpload) {
+				await TrelloApiNet.getImage(attachment.url)
+			}
+		})
 	}
 }
 
