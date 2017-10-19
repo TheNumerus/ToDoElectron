@@ -20,6 +20,9 @@ function openURL (url) {
 function createWindow () {
 	var size = settings.windowSize.get()
 	mainWindow = new BrowserWindow({ width: size.x, height: size.y, experimentalFeatures: true, show: false })
+	if (size.maximized) {
+		mainWindow.maximize()
+	}
 	openURL(url.format({
 		pathname: path.join(__dirname, 'homepage.html'),
 		protocol: 'file:',
@@ -35,7 +38,8 @@ function createWindow () {
 
 function save () {
 	var size = mainWindow.getSize()
-	settings.windowSize.set({ x: size[0], y: size[1] })
+	var maximized = mainWindow.isMaximized()
+	settings.windowSize.set({ x: size[0], y: size[1], maximized: maximized })
 	settings.save()
 }
 
