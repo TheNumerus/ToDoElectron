@@ -122,21 +122,13 @@ function handleIpcCalls () {
 				}
 			})
 		}
-		// *SCREAMING INTERNALLY*
 		await getBackground(boardData.prefs, event)
 		boardData.values.forEach((list) => {
 			list.cards.forEach(async (card, index, cards) => {
 				if (cards[index].badges.attachments > 0) {
 					var attData = await TrelloApiNet.getAttachments(cards[index].id)
-					var attachmentPaths = await downloadAttachments(attData)
+					downloadAttachments(attData)
 					cards[index]['attachments'] = attData
-					cards[index].attachments.forEach((attachment, index, attachments) => {
-						attachmentPaths.forEach((path) => {
-							if (attachments[index].id === path.id) {
-								attachments[index]['path'] = path.path
-							}
-						})
-					})
 				}
 			})
 		})
@@ -156,13 +148,11 @@ function handleIpcCalls () {
 	}
 
 	async function downloadAttachments (attachmentData) {
-		var paths = []
-		for (let i = 0; i < attachmentData.length; i++) {
-			if (attachmentData[i].isUpload) {
-				paths.push({id: attachmentData[i].id, path: await TrelloApiNet.getImage(attachmentData[i].url)})
+		attachmentData.forEach((attachment) => {
+			if (attachment.isUpload) {
+				TrelloApiNet.getImage(attachment.url)
 			}
-		}
-		return paths
+		})
 	}
 }
 

@@ -1,6 +1,6 @@
 const ReactDOM = require('react-dom')
 const React = require('react')
-const globalProperties = require('./globalProperties')
+const globalProperties = require('electron').remote.require('./globalProperties')
 const ipcRenderer = require('electron').ipcRenderer
 
 class CardDetail extends React.Component {
@@ -85,7 +85,7 @@ class Comment extends React.Component {
 class ImageAttachment extends React.Component {
 	render () {
 		return (
-			<img src={this.props.imageData.path}/>
+			<img src={globalProperties.path.get() + encodeURIComponent(this.props.imageData.name)}/>
 		)
 	}
 }

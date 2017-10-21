@@ -59,7 +59,13 @@ async function getActions (idCard) {
 async function getImage (urlToImage) {
 	// seperate path into chunks and select last part
 	var pathnames = new URL(urlToImage).pathname.split('/')
-	var name = pathnames[pathnames.length - 1] + '.png'
+	var name
+	if (urlToImage.match(/\/\w+([.].+)$/)) {
+		// url does have file extension
+		name = pathnames[pathnames.length - 1]
+	} else {
+		name = pathnames[pathnames.length - 1] + '.png'
+	}
 	try {
 		return await trelloIO.checkExistence(name)
 	} catch (e) {
