@@ -6,7 +6,7 @@ class AppInfoBar extends React.Component {
 	render () {
 		return (
 			<div className='bottomInfo'>
-				Version {globalProperties.appVersion} | Node.js {process.versions.node} | Chromium {process.versions.chrome} | Electron {process.versions.electron}
+				Version {globalProperties.getAppVersion()} | Node.js {process.versions.node} | Chromium {process.versions.chrome} | Electron {process.versions.electron}
 			</div>
 		)
 	}

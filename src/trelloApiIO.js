@@ -36,7 +36,7 @@ function saveImage (filename, data) {
 	})
 }
 function initialize () {
-	pathToFolder = globalProperties.path
+	pathToFolder = globalProperties.path.get()
 }
 module.exports = {
 	saveImage: saveImage,

@@ -1,5 +1,6 @@
 const ReactDOM = require('react-dom')
 const React = require('react')
+const globalProperties = require('./globalProperties')
 const ipcRenderer = require('electron').ipcRenderer
 
 class CardDetail extends React.Component {
@@ -17,6 +18,12 @@ class CardDetail extends React.Component {
 				return <Comment commentData={data}/>
 			})
 		}
+		var attachments = null
+		if (cardData.attachments !== undefined) {
+			attachments = cardData.attachments.map(data => {
+				return <ImageAttachment imageData={data}/>
+			})
+		}
 		return (
 			<div>
 				<h3>{cardData.name}</h3>
@@ -26,6 +33,7 @@ class CardDetail extends React.Component {
 				<p>{cardData.idChecklist}</p>
 				<p>{JSON.stringify(cardData)}</p>
 				{checklists}
+				{attachments}
 				{comments}
 			</div>
 		)
@@ -54,8 +62,8 @@ class Checklist extends React.Component {
 class ChecklistItem extends React.Component {
 	render () {
 		var icon = this.props.data.state === 'complete'
-			? <i class="fa fa-check-square" aria-hidden="true"></i>
-			: <i class="fa fa-square" aria-hidden="true"></i>
+			? <i className="fa fa-check-square"></i>
+			: <i className="fa fa-square"></i>
 		return (
 			<div>
 				{icon}<span>{this.props.data.name}</span>
@@ -71,6 +79,13 @@ class Comment extends React.Component {
 				<span style={{fontSize: '150%'}}>{commentData.memberCreator.fullName}</span>
 				<span>{commentData.data.text}</span>
 			</div>
+		)
+	}
+}
+class ImageAttachment extends React.Component {
+	render () {
+		return (
+			<img src={this.props.imageData.path}/>
 		)
 	}
 }

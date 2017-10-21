@@ -11,7 +11,7 @@ const cacheModule = require('./cache')
 const requestURL = 'https://trello.com/1/OAuthGetRequestToken'
 const accessURL = 'https://trello.com/1/OAuthGetAccessToken'
 const authorizeURL = 'https://trello.com/1/OAuthAuthorizeToken'
-const oauth = new OAuth(requestURL, accessURL, GlobalProperties.trelloAppKey, GlobalProperties.trelloSecretKey, '1.0A', 'todoapp://trelloauth', 'HMAC-SHA1')
+const oauth = new OAuth(requestURL, accessURL, GlobalProperties.getTrelloAppKey(), GlobalProperties.getTrelloSecretKey(), '1.0A', 'todoapp://trelloauth', 'HMAC-SHA1')
 var verificationToken = ''
 var homepageTrelloAuthEvent = null
 // store authentification window variable here, so we can close it from another function
@@ -122,16 +122,24 @@ function handleIpcCalls () {
 				}
 			})
 		}
+		// *SCREAMING INTERNALLY*
 		await getBackground(boardData.prefs, event)
-		for (let i = 0; i < boardData.values.length; i++) {
-			for (let c = 0; c < boardData.values[i].cards.length; c++) {
-				if (boardData.values[i].cards[c].badges.attachments > 0) {
-					var attData = await TrelloApiNet.getAttachments(boardData.values[i].cards[c].id)
-					downloadAttachment(attData)
-					boardData.values[i].cards[c]['attachemnts'] = attData
+		boardData.values.forEach((list) => {
+			list.cards.forEach(async (card, index, cards) => {
+				if (cards[index].badges.attachments > 0) {
+					var attData = await TrelloApiNet.getAttachments(cards[index].id)
+					var attachmentPaths = await downloadAttachments(attData)
+					cards[index]['attachments'] = attData
+					cards[index].attachments.forEach((attachment, index, attachments) => {
+						attachmentPaths.forEach((path) => {
+							if (attachments[index].id === path.id) {
+								attachments[index]['path'] = path.path
+							}
+						})
+					})
 				}
-			}
-		}
+			})
+		})
 		boardData.date = Date.now()
 		cacheModule.calls.trello.setBoardData(boardId, boardData)
 		cacheModule.saveCache()
@@ -147,12 +155,14 @@ function handleIpcCalls () {
 		}
 	}
 
-	async function downloadAttachment (attachmentData) {
-		attachmentData.forEach(async (attachment) => {
-			if (attachment.isUpload) {
-				await TrelloApiNet.getImage(attachment.url)
+	async function downloadAttachments (attachmentData) {
+		var paths = []
+		for (let i = 0; i < attachmentData.length; i++) {
+			if (attachmentData[i].isUpload) {
+				paths.push({id: attachmentData[i].id, path: await TrelloApiNet.getImage(attachmentData[i].url)})
 			}
-		})
+		}
+		return paths
 	}
 }
 
@@ -164,7 +174,7 @@ function authorize () {
 		if (error) throw error
 		verificationToken = tokenSecret
 		authorizeWindow = new BrowserWindow({ width: 800, height: 600, webPreferences: { nodeIntegration: false, webSecurity: false, allowRunningInsecureContent: true } })
-		authorizeWindow.loadURL(`${authorizeURL}?oauth_token=${token}&name=${GlobalProperties.appName}&expires=never&scope=read,write,account`)
+		authorizeWindow.loadURL(`${authorizeURL}?oauth_token=${token}&name=${GlobalProperties.getAppName()}&expires=never&scope=read,write,account`)
 	})
 }
 /**

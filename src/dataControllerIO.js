@@ -44,7 +44,7 @@ function createPathString () {
 	}
 	}
 	// save it, so we can use it anywhere
-	globalProperties.path = path
+	globalProperties.path.set(path)
 }
 
 /**

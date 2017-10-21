@@ -1,7 +1,8 @@
 const {net} = require('electron')
 const trelloIO = require('./trelloApiIO')
 const URL = require('url').URL
-const appKey = require('./globalProperties').trelloAppKey
+const globalProperties = require('./globalProperties')
+const appKey = globalProperties.getTrelloAppKey()
 const cacheModule = require('./cache')
 var token
 
@@ -64,8 +65,8 @@ async function getImage (urlToImage) {
 	} catch (e) {
 		if (e !== 'ENOENT') { throw e }
 		// download if needed
-		var imageData = await downloadImage(urlToImage)
-		return trelloIO.saveImage(name, imageData)
+		trelloIO.saveImage(name, await downloadImage(urlToImage))
+		return globalProperties.path.get() + name
 	}
 }
 
