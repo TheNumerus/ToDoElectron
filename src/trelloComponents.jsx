@@ -3,6 +3,7 @@ const Sortable = require('sortablejs')
 const ipcRenderer = require('electron').ipcRenderer
 const URL = require('url').URL
 const boardId = new URL(window.location.href).searchParams.get('id')
+const globalProperties = require('electron').remote.require('./globalProperties')
 const connCheck = require('./connectionChecker')
 
 class ListComponent extends React.Component {
@@ -69,6 +70,7 @@ class CardComponent extends React.Component {
 		var due = null
 		var comments = null
 		var attachments = null
+		var imageCover = null
 		if (card.placeholder === undefined) {
 			labels = card.labels.map((label) => {
 				return <Label key={label.id} labelData={label}/>
@@ -95,12 +97,35 @@ class CardComponent extends React.Component {
 			if (card.badges.attachments > 0) {
 				attachments = <div><i className="fa fa-paperclip"></i>{card.badges.attachments}</div>
 			}
+
+			if (card.idAttachmentCover) {
+				var attachment
+				card.attachments.forEach((element) => {
+					if (element.id === card.idAttachmentCover) {
+						attachment = element
+					}
+				})
+				imageCover = <ImageCover attData={attachment}/>
+			}
 		}
 		return (
 			<div className='cardComponent' onClick={this.openCard} onMouseEnter={(e) => this.addHoverAnim(e)} onMouseLeave={(e) => this.delHoverAnim(e)} id={card.id} draggable='true'>
+				{imageCover}
 				{labels}
 				<div className='cardTitle'>{card.name}</div>
 				<div className='cardInfo'>{due}{desc}{checks}{comments}{attachments}</div>
+			</div>
+		)
+	}
+}
+
+class ImageCover extends React.Component {
+	render () {
+		var filename = this.props.attData.url.match(/\/([\S][^/]+[.][\w]+)$/)[1]
+		var pathToImage = globalProperties.path.get() + filename
+		return (
+			<div>
+				<img width='310' src={pathToImage}/>
 			</div>
 		)
 	}

@@ -60,11 +60,12 @@ async function getImage (urlToImage) {
 	// seperate path into chunks and select last part
 	var pathnames = new URL(urlToImage).pathname.split('/')
 	var name
-	if (urlToImage.match(/\/\w+([.].+)$/)) {
+	var result = urlToImage.match(/\/\w+([.].+)$/)
+	if (urlToImage.match(/\/\S+([.]\w+)$/)) {
 		// url does have file extension
-		name = pathnames[pathnames.length - 1]
+		name = decodeURIComponent(pathnames[pathnames.length - 1])
 	} else {
-		name = pathnames[pathnames.length - 1] + '.png'
+		name = decodeURIComponent(pathnames[pathnames.length - 1] + '.png')
 	}
 	try {
 		return await trelloIO.checkExistence(name)

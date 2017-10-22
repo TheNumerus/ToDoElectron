@@ -123,15 +123,15 @@ function handleIpcCalls () {
 			})
 		}
 		await getBackground(boardData.prefs, event)
-		boardData.values.forEach((list) => {
-			list.cards.forEach(async (card, index, cards) => {
-				if (cards[index].badges.attachments > 0) {
-					var attData = await TrelloApiNet.getAttachments(cards[index].id)
+		for (var listIndex in boardData.values) {
+			for (var cardIndex in boardData.values[listIndex].cards) {
+				if (boardData.values[listIndex].cards[cardIndex].badges.attachments > 0) {
+					var attData = await TrelloApiNet.getAttachments(boardData.values[listIndex].cards[cardIndex].id)
 					downloadAttachments(attData)
-					cards[index]['attachments'] = attData
+					boardData.values[listIndex].cards[cardIndex]['attachments'] = attData
 				}
-			})
-		})
+			}
+		}
 		boardData.date = Date.now()
 		cacheModule.calls.trello.setBoardData(boardId, boardData)
 		cacheModule.saveCache()
