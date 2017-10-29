@@ -45,7 +45,11 @@ function loadCache () {
 				if (data.length === 0) {
 					reject(Error('Empty file'))
 				}
-				cache = JSON.parse(data.toString())
+				try {
+					cache = JSON.parse(data.toString())
+				} catch (e) {
+					reject(e)
+				}
 				resolve()
 			}
 		})

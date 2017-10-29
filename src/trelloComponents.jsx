@@ -99,7 +99,7 @@ class CardComponent extends React.Component {
 				attachments = <div><i className="fa fa-paperclip"></i>{card.badges.attachments}</div>
 			}
 
-			if (card.idAttachmentCover) {
+			if (card.idAttachmentCover && card.attachments) {
 				var attachment
 				card.attachments.forEach((element) => {
 					if (element.id === card.idAttachmentCover) {
