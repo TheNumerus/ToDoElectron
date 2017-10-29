@@ -22,7 +22,7 @@ export default class HelperUI {
 		case 'black':
 			return '#4d4d4d'
 		default:
-			return 'rgba(0,0,0,0)'
+			return 'rgba(128,128,128,0)'
 		}
 	}
 }

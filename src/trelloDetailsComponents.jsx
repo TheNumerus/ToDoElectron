@@ -1,8 +1,8 @@
+import HelperUI from './HelperUI'
 const ReactDOM = require('react-dom')
 const React = require('react')
 const globalProperties = require('electron').remote.require('./globalProperties')
-const ipcRenderer = require('electron').ipcRenderer
-
+const {shell, ipcRenderer} = require('electron')
 class CardDetail extends React.Component {
 	render () {
 		var cardData = this.props.cardData
@@ -18,23 +18,29 @@ class CardDetail extends React.Component {
 				return <Comment commentData={data}/>
 			})
 		}
-		var attachments = null
-		if (cardData.attachments !== undefined) {
-			attachments = cardData.attachments.map(data => {
-				return <ImageAttachment imageData={data}/>
+		var labels = null
+		if (cardData.labels !== undefined) {
+			labels = cardData.labels.map(data => {
+				return <Label labelData={data}/>
 			})
 		}
 		return (
-			<div>
-				<h3>{cardData.name}</h3>
-				<p>{cardData.desc}</p>
-				<p>{JSON.stringify(cardData.labels)}</p>
-				<p>{cardData.due}</p>
-				<p>{cardData.idChecklist}</p>
-				<p>{JSON.stringify(cardData)}</p>
-				{checklists}
-				{attachments}
-				{comments}
+			<div className='detailsContainer'>
+				<div id='headerBoard'>
+					<button onClick={this.goBack}><i className='fa fa-arrow-left fa-2x'></i></button>
+					<button onClick={this.update} style={{marginLeft: 'auto'}}><i id='updateIcon' className='fa fa-refresh fa-2x'></i></button>
+				</div>
+				<div className='data'>
+					<div className='mainColumn'>
+						<Name name={cardData.name}/>
+						<Description desc={cardData.desc}/>
+						<div>{labels}</div>
+						<p>{cardData.due}</p>
+						{checklists}
+						{comments}
+					</div>
+					<Attachments attData={cardData.attachments}/>
+				</div>
 			</div>
 		)
 	}
@@ -83,9 +89,62 @@ class Comment extends React.Component {
 	}
 }
 class ImageAttachment extends React.Component {
+	openImage (path) {
+		shell.openExternal(path)
+	}
+	render () {
+		var filename = this.props.imageData.url.match(/\/([\S][^/]+[.][\w]+)$/)[1]
+		var path = globalProperties.path.get() + filename
+		return (
+			<div className='att'>
+				<div>{this.props.imageData.name}</div>
+				<img onClick={(e) => this.openImage(path)} className='attThumb' src={path}/>
+			</div>
+		)
+	}
+}
+
+class Attachments extends React.Component {
+	render () {
+		var attachments = null
+		if (this.props.attData !== undefined) {
+			attachments = this.props.attData.map(data => {
+				return <ImageAttachment imageData={data}/>
+			})
+		}
+		return (
+			<div className='attContainer'>
+				<h3>Attachments</h3>
+				{attachments}
+			</div>
+		)
+	}
+}
+
+class Label extends React.Component {
+	render () {
+		var label = this.props.labelData
+		const labelStyle = {
+			backgroundColor: HelperUI.returnColor(label.color)
+		}
+		return (
+			<div className='cardLabel' style={labelStyle}>{label.name}</div>
+		)
+	}
+}
+
+class Description extends React.Component {
 	render () {
 		return (
-			<img src={globalProperties.path.get() + encodeURIComponent(this.props.imageData.name)}/>
+			<div>{this.props.desc}</div>
+		)
+	}
+}
+
+class Name extends React.Component {
+	render () {
+		return (
+			<h1>{this.props.name}</h1>
 		)
 	}
 }
