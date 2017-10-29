@@ -212,6 +212,7 @@ class Board extends React.Component {
 		var components = this.state.boardData.values.map((list) => {
 			return <ListComponent onAddCard={this.addCardToList} cards={list.cards} name={list.name} id={list.id} key={list.id}/>
 		})
+		document.title = `${this.state.boardData.name} | To-Do app in Electron`
 		return (
 			<div id='lists'>
 				<div id='headerBoard'>

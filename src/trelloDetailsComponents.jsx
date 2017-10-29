@@ -6,6 +6,7 @@ const {shell, ipcRenderer} = require('electron')
 class CardDetail extends React.Component {
 	render () {
 		var cardData = this.props.cardData
+		document.title = `${cardData.name} | To-Do app in Electron`
 		var checklists = null
 		if (cardData.checklistData !== undefined) {
 			checklists = cardData.checklistData.map((data) => {
