@@ -55,11 +55,12 @@ $blur: if($useblur, blur(30px), none);
 }
 
 .boardRoot{
-    display: flex;
+    display: inline-flex;
     flex-wrap: nowrap;
     flex-direction: row;
     align-items: flex-start;
     padding-top: 58px;
+    height: calc(100vh - 80px);
 }
 
 #headerBoard{

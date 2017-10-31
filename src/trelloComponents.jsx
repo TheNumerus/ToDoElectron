@@ -183,6 +183,18 @@ class Board extends React.Component {
 				this.update()
 			}
 		})
+		this.handleBackgroundScroll()
+	}
+
+	handleBackgroundScroll () {
+		var target = document.querySelector('.boardRoot')
+		target.addEventListener('wheel', (e) => {
+			console.log(e)
+			if (target === e.target) {
+				e.preventDefault()
+				window.scrollBy({behavior: 'smooth', left: e.deltaY * 5, top: 0})
+			}
+		})
 	}
 
 	addCardToList (id) {
