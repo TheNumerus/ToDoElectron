@@ -3,20 +3,57 @@ const ReactDOM = require('react-dom')
 const React = require('react')
 const globalProperties = require('electron').remote.require('./globalProperties')
 const {shell, ipcRenderer} = require('electron')
+const URL = require('url').URL
+const cardId = new URL(window.location.href).searchParams.get('id')
+const connCheck = require('./connectionChecker')
 class CardDetail extends React.Component {
+	constructor (props) {
+		super(props)
+		this.update = this.update.bind(this)
+		this.goBack = this.goBack.bind(this)
+		this.state = {cardData: {name: ''}}
+	}
+
+	componentDidMount () {
+		this.handleIpc()
+		ipcRenderer.send('trelloGetCardData', cardId, false)
+		if (connCheck.state) {
+			/* I have to comment this shit because fucking JS somehow managed to merge two seperate function calls into one,
+			 which returned comments and checklists twice. 
+			this.update() */
+		}
+	}
+
+	handleIpc () {
+		ipcRenderer.on('trelloGetCardData-reply', (event, cardData) => {
+			this.setState({cardData: cardData})
+			// stop spinning refresh icon
+			document.querySelector('#updateIcon').classList.remove('fa-spin')
+		})
+	}
+
+	goBack () {
+		ipcRenderer.send('goBack')
+	}
+
+	update () {
+		document.querySelector('#updateIcon').classList.add('fa-spin')
+		ipcRenderer.send('trelloGetCardData', cardId, true)
+	}
+
 	render () {
-		var cardData = this.props.cardData
+		var cardData = this.state.cardData
 		document.title = `${cardData.name} | To-Do app in Electron`
 		var checklists = null
 		if (cardData.checklistData !== undefined) {
 			checklists = cardData.checklistData.map((data) => {
-				return <Checklist checklistData={data}/>
+				return <Checklist checklistData={data} key={data.id}/>
 			})
 		}
 		var comments = null
 		if (cardData.comments !== undefined) {
 			comments = cardData.comments.map(data => {
-				return <Comment commentData={data}/>
+				return <Comment commentData={data} key={data.id}/>
 			})
 		}
 		var labels = null
