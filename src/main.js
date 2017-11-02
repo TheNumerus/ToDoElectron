@@ -1,8 +1,8 @@
+import * as protocols from './protocols'
 const electron = require('electron')
 const app = electron.app
 // enable backdrop blur in css
 app.commandLine.appendSwitch('--enable-experimental-web-platform-features')
-const protocols = require('./protocols')
 const windowManager = require('./windowManager')
 const dataController = require('./dataController')
 const connectionChecker = require('./connectionChecker')

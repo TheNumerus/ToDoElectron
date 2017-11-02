@@ -57,5 +57,6 @@ ipcMain.on('readyToShow', (event) => {
 module.exports = {
 	openURL: openURL,
 	save: save,
-	createWindow: createWindow
+	createWindow: createWindow,
+	getMainWindow: () => { return mainWindow }
 }

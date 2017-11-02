@@ -163,7 +163,17 @@ function authorize () {
 	oauth.getOAuthRequestToken(function (error, token, tokenSecret, results) {
 		if (error) throw error
 		verificationToken = tokenSecret
-		authorizeWindow = new BrowserWindow({ width: 800, height: 600, webPreferences: { nodeIntegration: false, webSecurity: false, allowRunningInsecureContent: true } })
+		authorizeWindow = new BrowserWindow({
+			parent: windowManager.getMainWindow(),
+			modal: true,
+			width: 640,
+			height: 768,
+			webPreferences: {
+				nodeIntegration: false,
+				webSecurity: false,
+				allowRunningInsecureContent: true
+			}})
+		authorizeWindow.setMenuBarVisibility(false)
 		authorizeWindow.loadURL(`${authorizeURL}?oauth_token=${token}&name=${GlobalProperties.getAppName()}&expires=never&scope=read,write,account`)
 	})
 }
