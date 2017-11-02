@@ -86,9 +86,10 @@ class CardComponent extends React.Component {
 			}
 
 			if (card.due !== null) {
+				var today = new Date()
 				var date = new Date(card.due)
 				var dateString = ` ${date.getDate()}.${date.getMonth() + 1}.`
-				due = <div><i className="fa fa-calendar-o"></i>{dateString}</div>
+				due = <div className={today > date ? 'dueLabel' : ''}><i className='fa fa-calendar-o'></i>{dateString}</div>
 			}
 
 			if (card.badges.comments > 0) {

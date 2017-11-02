@@ -36,7 +36,7 @@ class CardDetail extends React.Component {
 						<Name name={cardData.name}/>
 						<Description desc={cardData.desc}/>
 						<div>{labels}</div>
-						<p>{cardData.due}</p>
+						<DueDate due={cardData.due}/>
 						{checklists}
 						{comments}
 					</div>
@@ -146,6 +146,17 @@ class Name extends React.Component {
 	render () {
 		return (
 			<h1>{this.props.name}</h1>
+		)
+	}
+}
+
+class DueDate extends React.Component {
+	render () {
+		var today = new Date()
+		var date = new Date(this.props.due)
+		var dateString = ` ${date.getDate()}.${date.getMonth() + 1}.`
+		return (
+			<div className={today > date ? 'dueLabel' : ''}><i className='fa fa-calendar-o'></i>{dateString}</div>
 		)
 	}
 }
