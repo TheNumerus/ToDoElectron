@@ -153,9 +153,8 @@ class Board extends React.Component {
 		this.addCardToList = this.addCardToList.bind(this)
 		this.update = this.update.bind(this)
 		this.goBack = this.goBack.bind(this)
-		this.handleIpc()
-		this.state = { boardData: { values: [] } }
-		ipcRenderer.send('trelloGetBoardData', boardId, false)
+		// add empty list to speed up the process later
+		this.state = { boardData: { values: [{cards: [], name: '', id: ''}] } }
 	}
 
 	handleIpc () {
@@ -175,16 +174,13 @@ class Board extends React.Component {
 		})
 	}
 
-	/**
-	 * force update when opening board, if connection is available
-	 */
-	componentDidMount () {
-		connCheck.checkConnection().then((result) => {
-			if (result === true) {
-				this.update()
-			}
-		})
+	async componentDidMount () {
 		this.handleBackgroundScroll()
+		this.handleIpc()
+		ipcRenderer.send('trelloGetBoardData', boardId, false)
+		if (connCheck.state) {
+			this.update()
+		}
 	}
 
 	handleBackgroundScroll () {

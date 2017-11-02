@@ -25,7 +25,7 @@ async function getAllUserInfo () {
  * Get all boards
  */
 async function getBoards () {
-	return trelloApiRequest('/1/member/me/boards?&key=' + appKey + '&token=' + token + '&fields=name,id,background&filter=open')
+	return trelloApiRequest('/1/member/me/boards?&key=' + appKey + '&token=' + token + '&fields=name,id,prefs&filter=open')
 }
 
 /**

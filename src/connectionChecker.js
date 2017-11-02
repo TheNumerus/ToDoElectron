@@ -1,13 +1,8 @@
-const isOnline = require('is-online')
-const {ipcMain} = require('electron')
+import isOnline from 'is-online'
 var currentState = true
 
-function checkConnection () {
-	return new Promise((resolve, reject) => {
-		isOnline().then((online) => {
-			resolve(online)
-		})
-	})
+async function checkConnection () {
+	currentState = await isOnline()
 }
 
 function startCheck () {
@@ -18,6 +13,6 @@ function startCheck () {
 
 module.exports = {
 	startCheck: startCheck,
-	checkConnection: checkConnection,
-	currentState: currentState
+	check: checkConnection,
+	state: () => { return currentState }
 }
