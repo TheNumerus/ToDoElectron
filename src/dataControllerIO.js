@@ -1,3 +1,4 @@
+import os from 'os'
 const fs = require('fs')
 const globalProperties = require('./globalProperties')
 const cacheModule = require('./cache')
@@ -31,17 +32,14 @@ async function initialize () {
  */
 function createPathString () {
 	switch (process.platform) {
-	case 'win32': {
-		path = 'C:\\Users\\' + require('os').userInfo().username + '\\AppData\\Roaming\\ToDoElectron\\'
+	case 'win32':
+		path = 'C:\\Users\\' + os.userInfo().username + '\\AppData\\Roaming\\ToDoElectron\\'
 		break
-	}
-	case 'darwin': {
+	case 'darwin':
 		break
-	}
-	case 'linux': {
-		path = '/home/' + require('os').userInfo().username + '/.todoelectron/'
+	case 'linux':
+		path = '/home/' + os.userInfo().username + '/.todoelectron/'
 		break
-	}
 	}
 	// save it, so we can use it anywhere
 	globalProperties.path.set(path)
