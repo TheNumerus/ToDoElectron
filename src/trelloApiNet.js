@@ -54,31 +54,43 @@ async function getActions (idCard) {
 
 /**
  * 	Get iamge, save it and return its path
- * @param {string} urlToImage - url to download image from
+ * @param {object} urlToImage - url to download image from
+ * @param {}
  */
-async function getImage (urlToImage) {
-	// seperate path into chunks and select last part
-	var pathnames = new URL(urlToImage).pathname.split('/')
+async function getImage (imageData, options) {
 	var name
-	var result = urlToImage.match(/\/\w+([.].+)$/)
-	if (urlToImage.match(/\/\S+([.]\w+)$/)) {
-		// url does have file extension
-		name = decodeURIComponent(pathnames[pathnames.length - 1])
-	} else {
-		name = decodeURIComponent(pathnames[pathnames.length - 1] + '.png')
+	var urlToDownload
+	switch (options.type) {
+	case 'background':
+	// seperate path into chunks and select last part
+		var pathnames = new URL(imageData).pathname.split('/')
+		var result = imageData.match(/\/\w+([.].+)$/)
+		if (imageData.match(/\/\S+([.]\w+)$/)) {
+			// url does have file extension
+			name = decodeURIComponent(pathnames[pathnames.length - 1])
+		} else {
+			name = decodeURIComponent(pathnames[pathnames.length - 1] + '.jpg')
+		}
+		urlToDownload = imageData
+		break
+	case 'attachment':
+		var extension = imageData.url.match(/.+([.].+)/)
+		name = `${imageData.id}${extension[1]}`
+		urlToDownload = imageData.url
+		break
 	}
 	try {
 		return await trelloIO.checkExistence(name)
 	} catch (e) {
 		if (e !== 'ENOENT') { throw e }
 		// download if needed
-		trelloIO.saveImage(name, await downloadImage(urlToImage))
+		trelloIO.saveImage(name, await downloadImage(urlToDownload))
 		return globalProperties.path.get() + name
 	}
 }
 
 /**
- * 
+ * Gets checklists
  * @param {string} idChecklist
  */
 async function getChecklist (idChecklist) {

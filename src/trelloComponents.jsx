@@ -123,7 +123,8 @@ class CardComponent extends React.Component {
 
 class ImageCover extends React.Component {
 	render () {
-		var filename = this.props.attData.url.match(/\/([\S][^/]+[.][\w]+)$/)[1]
+		var extension = this.props.attData.url.match(/.+([.].+)/)
+		var filename = `${this.props.attData.id}${extension[1]}`
 		var pathToImage = globalProperties.path.get() + filename
 		return (
 			<div>

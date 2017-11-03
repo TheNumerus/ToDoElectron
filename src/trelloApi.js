@@ -141,7 +141,7 @@ function handleIpcCalls () {
 	async function getBackground (prefs, event) {
 		// download background if necessary
 		if (prefs.backgroundImage !== null) {
-			event.sender.send('trelloSetBackground', await TrelloApiNet.getImage(prefs.backgroundImage))
+			event.sender.send('trelloSetBackground', await TrelloApiNet.getImage(prefs.backgroundImage, {type: 'background'}))
 		} else if (prefs.backgroundColor !== null) {
 			event.sender.send('trelloSetBackground', prefs.backgroundColor)
 		}
@@ -150,7 +150,7 @@ function handleIpcCalls () {
 	async function downloadAttachments (attachmentData) {
 		attachmentData.forEach((attachment) => {
 			if (attachment.isUpload) {
-				TrelloApiNet.getImage(attachment.url)
+				TrelloApiNet.getImage(attachment, {type: 'attachment'})
 			}
 		})
 	}

@@ -131,11 +131,12 @@ class ImageAttachment extends React.Component {
 		shell.openExternal(path)
 	}
 	render () {
-		var filename = this.props.imageData.url.match(/\/([\S][^/]+[.][\w]+)$/)[1]
+		var extension = this.props.attData.url.match(/.+([.].+)/)
+		var filename = `${this.props.attData.id}${extension[1]}`
 		var path = globalProperties.path.get() + filename
 		return (
 			<div className='att'>
-				<div>{this.props.imageData.name}</div>
+				<div>{this.props.attData.name}</div>
 				<img onClick={(e) => this.openImage(path)} className='attThumb' src={path}/>
 			</div>
 		)
@@ -147,7 +148,7 @@ class Attachments extends React.Component {
 		var attachments = null
 		if (this.props.attData !== undefined) {
 			attachments = this.props.attData.map(data => {
-				return <ImageAttachment imageData={data}/>
+				return <ImageAttachment attData={data}/>
 			})
 		}
 		return (
