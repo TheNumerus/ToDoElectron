@@ -30,8 +30,10 @@ class ListComponent extends React.Component {
 		return (
 			<div className='listComponent'>
 				<h3 className='listTitle'>{this.props.name}</h3>
-				<div className='cardContainer' ref={(input) => { this.addSortable(input) }} id={this.props.id}>{elements}</div>
-				<AddCardButton handleClick={this.handleAddCard} listId={this.props.id}/>
+				<div className='cardContainer' ref={(input) => { this.addSortable(input) }} id={this.props.id}>
+					{elements}
+					<AddCardButton handleClick={this.handleAddCard} listId={this.props.id}/>
+				</div>
 			</div>
 		)
 	}
@@ -127,8 +129,8 @@ class ImageCover extends React.Component {
 		var filename = `${this.props.attData.id}${extension[1]}`
 		var pathToImage = globalProperties.path.get() + filename
 		return (
-			<div>
-				<img width='310' src={pathToImage}/>
+			<div className='imgCoverBgr' style={{backgroundColor: this.props.attData.edgeColor}}>
+				<img className='imgCover' src={pathToImage}/>
 			</div>
 		)
 	}
