@@ -13,7 +13,7 @@ var token
 function initialize () {
 	token = cacheModule.calls.trello.getToken()
 }
-
+// #region GETTERS
 /**
  * Get all user info
  */
@@ -64,7 +64,6 @@ async function getImage (imageData, options) {
 	case 'background':
 	// seperate path into chunks and select last part
 		var pathnames = new URL(imageData).pathname.split('/')
-		var result = imageData.match(/\/\w+([.].+)$/)
 		if (imageData.match(/\/\S+([.]\w+)$/)) {
 			// url does have file extension
 			name = decodeURIComponent(pathnames[pathnames.length - 1])
@@ -96,7 +95,20 @@ async function getImage (imageData, options) {
 async function getChecklist (idChecklist) {
 	return trelloApiRequest('/1/checklists/' + idChecklist + '/?&key=' + appKey + '&token=' + token)
 }
-
+// #endregion
+/**
+ * Updates card
+ * @param {string} idCard 
+ * @param {Array<Array<string>>} options 
+ */
+async function updateCard (idCard, options) {
+	var path = `/1/cards/${idCard}?`
+	options.forEach((option) => {
+		path += `${option[0]}=${option[1]}&`
+	})
+	path += `key=${appKey}&token=${token}`
+	return trelloApiPutRequest(path)
+}
 /**
  * Sends request to TrelloAPI
  * @param {string} path - path to send request to
@@ -176,6 +188,10 @@ async function addCard (data) {
 	return trelloApiPostRequest('/1/cards?name=' + data.name + '&idList=' + data.idList + '&key=' + appKey + '&token=' + token)
 }
 
+/**
+ * Sends POST request to Trello API
+ * @param {string} path 
+ */
 function trelloApiPostRequest (path) {
 	return new Promise((resolve, reject) => {
 		const request = net.request({ method: 'POST', protocol: 'https:', hostname: 'api.trello.com', path: path })
@@ -193,6 +209,29 @@ function trelloApiPostRequest (path) {
 		request.end()
 	})
 }
+
+/**
+ * Sends PUT request to Trello API
+ * @param {string} path 
+ */
+function trelloApiPutRequest (path) {
+	return new Promise((resolve, reject) => {
+		const request = net.request({ method: 'PUT', protocol: 'https:', hostname: 'api.trello.com', path: path })
+		request.on('response', (response) => {
+			var completeResponse = ''
+			response.on('data', (chunk) => {
+				completeResponse += chunk.toString()
+			})
+			response.on('end', () => {
+				handleResponseErrors(completeResponse, reject)
+				resolve()
+			})
+		})
+		request.write(JSON.stringify(false))
+		request.end()
+	})
+}
+
 module.exports = {
 	initialize: initialize,
 	getAllUserInfo: getAllUserInfo,
@@ -202,5 +241,6 @@ module.exports = {
 	getBoardData: getBoardData,
 	getImage: getImage,
 	getChecklist: getChecklist,
-	addCard: addCard
+	addCard: addCard,
+	updateCard: updateCard
 }

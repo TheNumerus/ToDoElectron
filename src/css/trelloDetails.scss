@@ -60,8 +60,11 @@ h1{
     width: 100%;
     .att{
         display: flex;
-        div{
-            width: auto;
+        .attControl{
+            .attDate{
+                color: #999;
+                font-size: 80%;
+            }
         }
         img{
             max-width: 120px;
@@ -81,4 +84,8 @@ h1{
     color: white;
     padding: 0px 4px;
     border-radius: 1px;
+}
+
+.attButtonBar{
+    display: flex;
 }

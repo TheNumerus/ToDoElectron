@@ -9,8 +9,6 @@ const connCheck = require('./connectionChecker')
 class CardDetail extends React.Component {
 	constructor (props) {
 		super(props)
-		this.update = this.update.bind(this)
-		this.goBack = this.goBack.bind(this)
 		this.state = {cardData: {name: ''}}
 	}
 
@@ -30,15 +28,6 @@ class CardDetail extends React.Component {
 			// stop spinning refresh icon
 			document.querySelector('#updateIcon').classList.remove('fa-spin')
 		})
-	}
-
-	goBack () {
-		ipcRenderer.send('goBack')
-	}
-
-	update () {
-		document.querySelector('#updateIcon').classList.add('fa-spin')
-		ipcRenderer.send('trelloGetCardData', cardId, true)
 	}
 
 	render () {
@@ -64,10 +53,7 @@ class CardDetail extends React.Component {
 		}
 		return (
 			<div className='detailsContainer'>
-				<div id='headerBoard'>
-					<button onClick={this.goBack}><i className='fa fa-arrow-left fa-2x'></i></button>
-					<button onClick={this.update} style={{marginLeft: 'auto'}}><i id='updateIcon' className='fa fa-refresh fa-2x'></i></button>
-				</div>
+				<Header/>
 				<div className='data'>
 					<div className='mainColumn'>
 						<Name name={cardData.name}/>
@@ -77,13 +63,38 @@ class CardDetail extends React.Component {
 						{checklists}
 						{comments}
 					</div>
-					<Attachments attData={cardData.attachments}/>
+					<Attachments cardData={cardData}/>
 				</div>
 			</div>
 		)
 	}
 }
 
+class Header extends React.Component {
+	constructor (props) {
+		super(props)
+		this.update = this.update.bind(this)
+		this.goBack = this.goBack.bind(this)
+	}
+
+	goBack () {
+		ipcRenderer.send('goBack')
+	}
+
+	update () {
+		document.querySelector('#updateIcon').classList.add('fa-spin')
+		ipcRenderer.send('trelloGetCardData', cardId, true)
+	}
+
+	render () {
+		return (
+			<div id='headerBoard'>
+				<button onClick={this.goBack}><i className='fa fa-arrow-left fa-2x'></i></button>
+				<button onClick={this.update} style={{marginLeft: 'auto'}}><i id='updateIcon' className='fa fa-refresh fa-2x'></i></button>
+			</div>
+		)
+	}
+}
 class Checklist extends React.Component {
 	render () {
 		var checklistData = this.props.checklistData
@@ -127,16 +138,36 @@ class Comment extends React.Component {
 	}
 }
 class ImageAttachment extends React.Component {
+	constructor (props) {
+		super(props)
+		this.changeCover = this.changeCover.bind(this)
+	}
+
 	openImage (path) {
 		shell.openExternal(path)
 	}
+
+	changeCover (idCover) {
+		this.props.changeCover(idCover)
+	}
+
 	render () {
 		var extension = this.props.attData.url.match(/.+([.].+)/)
 		var filename = `${this.props.attData.id}${extension[1]}`
 		var path = globalProperties.path.get() + filename
+		var date = new Date(this.props.attData.date)
+		var dateString = `${date.getUTCDate()}.${date.getUTCMonth() + 1}.${date.getUTCFullYear()} - ${date.getUTCHours()}:${date.getUTCMinutes()}`
 		return (
 			<div className='att'>
-				<div>{this.props.attData.name}</div>
+				<div className='attControl'>
+					<div className='attName'>{this.props.attData.name}</div>
+					<div className='attDate'>{dateString}</div>
+					<div className='attButtonBar'>
+						<button>Comment</button>
+						<button>Remove</button>
+						<button onClick={(e) => this.changeCover(this.props.attData.id)}>{this.props.isCover ? 'Remove cover' : 'Set as cover'}</button>
+					</div>
+				</div>
 				<img onClick={(e) => this.openImage(path)} className='attThumb' src={path}/>
 			</div>
 		)
@@ -144,12 +175,40 @@ class ImageAttachment extends React.Component {
 }
 
 class Attachments extends React.Component {
+	constructor (props) {
+		super(props)
+		this.changeCover = this.changeCover.bind(this)
+		this.state = {currentCover: this.props.cardData.idAttachmentCover}
+	}
+
+	changeCover (idCover) {
+		var changedCover
+		if (idCover === this.state.currentCover) {
+			changedCover = ''
+		} else {
+			changedCover = idCover
+		}
+		this.setState({currentCover: changedCover})
+		ipcRenderer.send('trelloUpdateCard', this.props.cardData.id, [
+			['idAttachmentCover', changedCover]
+		])
+	}
+
+	componentWillReceiveProps (nextProps) {
+		if (nextProps.cardData.idAttachmentCover !== this.state.currentCover) {
+			this.setState({currentCover: nextProps.cardData.idAttachmentCover})
+		}
+	}
+
 	render () {
 		var attachments = null
-		if (this.props.attData !== undefined) {
-			attachments = this.props.attData.map(data => {
-				return <ImageAttachment attData={data}/>
+		if (this.props.cardData.attachments !== undefined) {
+			attachments = this.props.cardData.attachments.map(data => {
+				var isCover = data.id === this.state.currentCover
+				return <ImageAttachment attData={data} key={data.id} isCover={isCover} changeCover={this.changeCover}/>
 			})
+		} else {
+			return null
 		}
 		return (
 			<div className='attContainer'>
@@ -190,6 +249,7 @@ class Name extends React.Component {
 
 class DueDate extends React.Component {
 	render () {
+		if (this.props.due === null) { return null }
 		var today = new Date()
 		var date = new Date(this.props.due)
 		var dateString = ` ${date.getDate()}.${date.getMonth() + 1}.`

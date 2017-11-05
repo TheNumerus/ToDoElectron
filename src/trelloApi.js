@@ -105,6 +105,10 @@ function handleIpcCalls () {
 		event.sender.send('trelloGetCardData-reply', cardData)
 	})
 
+	ipcMain.on('trelloUpdateCard', async (event, idCard, options) => {
+		TrelloApiNet.updateCard(idCard, options)
+	})
+
 	ipcMain.on('trelloOpenCard', (event, arg) => {
 		windowManager.openURL(new URL('file://' + __dirname + '/trelloDetails.html?id=' + arg).toString())
 	})
