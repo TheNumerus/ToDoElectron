@@ -1,5 +1,4 @@
 import HelperUI from './HelperUI'
-const ReactDOM = require('react-dom')
 const React = require('react')
 const globalProperties = require('electron').remote.require('./globalProperties')
 const {shell, ipcRenderer} = require('electron')
@@ -56,7 +55,7 @@ class CardDetail extends React.Component {
 				<Header/>
 				<div className='data'>
 					<div className='mainColumn'>
-						<Name name={cardData.name}/>
+						<Name cardData={cardData}/>
 						<Description desc={cardData.desc}/>
 						<div>{labels}</div>
 						<DueDate due={cardData.due}/>
@@ -240,10 +239,45 @@ class Description extends React.Component {
 }
 
 class Name extends React.Component {
+	constructor (props) {
+		super(props)
+		this.startEdit = this.startEdit.bind(this)
+		this.finishEdit = this.finishEdit.bind(this)
+		this.handleChange = this.handleChange.bind(this)
+		this.state = {editing: false, name: this.props.cardData.name}
+	}
+
+	startEdit () {
+		this.setState({editing: true})
+	}
+
+	finishEdit (event) {
+		this.setState({editing: false, name: event.target.value})
+		ipcRenderer.send('trelloUpdateCard', this.props.cardData.id, [
+			['name', this.state.name]
+		])
+	}
+
+	componentDidUpdate () {
+		if (this.state.editing) {
+			this.nameInput.focus()
+		}
+	}
+
+	handleChange (event) {
+		this.setState({name: event.target.value})
+	}
+
+	componentWillReceiveProps () {
+		this.setState({name: this.props.cardData.name})
+	}
+
 	render () {
-		return (
-			<h1>{this.props.name}</h1>
-		)
+		if (this.state.editing) {
+			return <input className='cardNameInput' type='text' value={this.state.name} onBlur={(e) => this.finishEdit(e)} ref={(input) => { this.nameInput = input }} onChange={(e) => this.handleChange(e)}/>
+		} else {
+			return <div className='cardName' onClick={(e) => this.startEdit()}>{this.state.name}</div>
+		}
 	}
 }
 

@@ -104,7 +104,7 @@ async function getChecklist (idChecklist) {
 async function updateCard (idCard, options) {
 	var path = `/1/cards/${idCard}?`
 	options.forEach((option) => {
-		path += `${option[0]}=${option[1]}&`
+		path += `${option[0]}=${encodeURIComponent(option[1])}&`
 	})
 	path += `key=${appKey}&token=${token}`
 	return trelloApiPutRequest(path)
