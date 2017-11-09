@@ -32,6 +32,18 @@ $blur: if($useblur, blur(30px), none);
         min-width: 20px;
         min-height: 5px;
     }
+    .cardTitle{
+        overflow-wrap: break-word;
+    }
+    .cardInfo{
+        display: flex;
+        div{
+            margin: 0px 5px;
+            i{
+                font-size: 14px;
+            }
+        }
+    }
 }
 
 @keyframes example {
@@ -69,6 +81,7 @@ $blur: if($useblur, blur(30px), none);
     display: flex;
     position: fixed;
     width: 100%;
+    backdrop-filter: $blur;
     h1{
         margin: 10px;
     }
@@ -102,16 +115,6 @@ body{
 
 .cardGhost{
     opacity: 0.5;
-}
-
-.cardInfo{
-    display: flex;
-    div{
-        margin: 0px 5px;
-        i{
-            font-size: 14px;
-        }
-    }
 }
 
 .listTitle{

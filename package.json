@@ -28,6 +28,7 @@
     "react": "~16.0.0",
     "react-dom": "~16.0.0",
     "sortablejs": "^1.6.1",
-    "is-online": "~7.0.0"
+    "is-online": "~7.0.0",
+    "autosize" : "^4.0.0"
   }
 }

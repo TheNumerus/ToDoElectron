@@ -89,10 +89,17 @@ h1{
 .attButtonBar{
     display: flex;
 }
-.cardName, .cardNameInput{
+.cardName{
     font-family: 'Montserrat';
     font-weight: bold;
-    font-size: 32px; 
+    font-size: 32px;
+    overflow-wrap: break-word;
+    resize: none;
+    overflow: hidden;
+    width: 100%;
+    border: none;
+    outline: none;
+    border-bottom: 2px solid gray;
 }
 .cardNameInput{
     border: none;

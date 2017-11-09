@@ -113,7 +113,8 @@ class CardComponent extends React.Component {
 			}
 		}
 		return (
-			<div className='cardComponent' onClick={this.openCard} onMouseEnter={(e) => this.addHoverAnim(e)} onMouseLeave={(e) => this.delHoverAnim(e)} id={card.id} draggable='true'>
+			<div className='cardComponent'
+				onClick={this.openCard} onMouseEnter={this.addHoverAnim} onMouseLeave={this.delHoverAnim} id={card.id} draggable='true'>
 				{imageCover}
 				{labels}
 				<div className='cardTitle'>{card.name}</div>

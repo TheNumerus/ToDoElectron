@@ -1,4 +1,5 @@
 import HelperUI from './HelperUI'
+const autosize = require('autosize')
 const React = require('react')
 const globalProperties = require('electron').remote.require('./globalProperties')
 const {shell, ipcRenderer} = require('electron')
@@ -31,7 +32,11 @@ class CardDetail extends React.Component {
 
 	render () {
 		var cardData = this.state.cardData
-		document.title = `${cardData.name} | To-Do app in Electron`
+		if (cardData.name.length > 20) {
+			document.title = `${cardData.name.substring(0, 20)}... | To-Do app in Electron`
+		} else {
+			document.title = `${cardData.name} | To-Do app in Electron`
+		}
 		var checklists = null
 		if (cardData.checklistData !== undefined) {
 			checklists = cardData.checklistData.map((data) => {
@@ -241,27 +246,20 @@ class Description extends React.Component {
 class Name extends React.Component {
 	constructor (props) {
 		super(props)
-		this.startEdit = this.startEdit.bind(this)
 		this.finishEdit = this.finishEdit.bind(this)
 		this.handleChange = this.handleChange.bind(this)
-		this.state = {editing: false, name: this.props.cardData.name}
-	}
-
-	startEdit () {
-		this.setState({editing: true})
+		this.state = {name: this.props.cardData.name}
 	}
 
 	finishEdit (event) {
-		this.setState({editing: false, name: event.target.value})
+		this.setState({name: event.target.value})
 		ipcRenderer.send('trelloUpdateCard', this.props.cardData.id, [
 			['name', this.state.name]
 		])
 	}
 
 	componentDidUpdate () {
-		if (this.state.editing) {
-			this.nameInput.focus()
-		}
+		autosize.update(this.nameInput)
 	}
 
 	handleChange (event) {
@@ -273,11 +271,15 @@ class Name extends React.Component {
 	}
 
 	render () {
-		if (this.state.editing) {
-			return <input className='cardNameInput' type='text' value={this.state.name} onBlur={(e) => this.finishEdit(e)} ref={(input) => { this.nameInput = input }} onChange={(e) => this.handleChange(e)}/>
-		} else {
-			return <div className='cardName' onClick={(e) => this.startEdit()}>{this.state.name}</div>
-		}
+		return <textarea className='cardName'
+			rows='1'
+			onChange={this.handleChange}
+			value={this.state.name}
+			onBlur={this.finishEdit}
+			ref={(input) => {
+				this.nameInput = input
+				autosize(input)
+			}}/>
 	}
 }
 
