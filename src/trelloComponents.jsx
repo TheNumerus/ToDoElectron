@@ -230,7 +230,7 @@ class Board extends React.Component {
 			<div id='lists'>
 				<div id='headerBoard'>
 					<button onClick={this.goBack} className='button back header'><i className='fa fa-arrow-left fa-2x'></i></button>
-					<h1 id='boardName' style={{marginLeft: '10px'}}>{this.state.boardData.name}</h1>
+					<h1 id='boardName'>{this.state.boardData.name}</h1>
 					<button onClick={this.update} className='button header' style={{marginLeft: 'auto'}}><i id='updateIcon' className='fa fa-refresh fa-2x'></i></button>
 				</div>
 				<div className='boardRoot'>{components}</div>

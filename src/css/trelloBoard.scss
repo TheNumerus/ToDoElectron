@@ -82,8 +82,13 @@ $blur: if($useblur, blur(30px), none);
     position: fixed;
     width: 100%;
     backdrop-filter: $blur;
-    h1{
+    #boardName{
         margin: 10px;
+        color: white;
+        font-family: 'Montserrat';
+        overflow: hidden;
+        text-overflow: ellipsis;
+        margin-right: 20px;
     }
 }
 button.button.header{
@@ -102,10 +107,6 @@ body{
     margin: 0;
 }
 
-#boardName{
-    color: white;
-    font-family: 'Montserrat';
-}
 
 .cardContainer{
     min-height: 10px;
