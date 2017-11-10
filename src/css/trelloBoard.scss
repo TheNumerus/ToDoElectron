@@ -3,60 +3,6 @@ $useblur: false; //so far broken as fuck
 $shadow: 0px 5px 10px rgba(0,0,0,0.125);
 $blur: if($useblur, blur(30px), none);
 
-.listComponent{
-    margin: 5px;
-    background: rgba(180,180,180,0.5);
-    box-shadow: $shadow;
-    border-radius: 3px;
-    width: 320px;
-    flex: none;
-    vertical-align: top;
-    padding: 5px;
-    backdrop-filter: $blur;
-    .listTitle{
-        resize: none;
-        margin: 10px 2px;
-        width: 100%;
-        background: none;
-        border: none;
-        outline: none;
-        font-size: 18px;
-        font-weight: bold;
-        font-family: 'Roboto';
-    }
-}
-
-.cardComponent{
-    background: rgba(255,255,255,0.5);
-    margin-bottom: 5px;
-    box-shadow: $shadow;
-    padding: 5px;
-    .cardLabel{
-        margin: 0px 1px 5px;
-        color: white;
-        font-size: 66%;
-        text-shadow: 0px 0px 5px rgba(0,0,0,0.5);
-        font-weight: bold;
-        border-radius: 2px;
-        padding: 1.5px 4px;
-        display: inline-block;
-        min-width: 20px;
-        min-height: 5px;
-    }
-    .cardTitle{
-        overflow-wrap: break-word;
-    }
-    .cardInfo{
-        display: flex;
-        div{
-            margin: 0px 5px;
-            i{
-                font-size: 14px;
-            }
-        }
-    }
-}
-
 @keyframes example {
     from {background-color: rgba(255,255,255,0.5);}
     to {background-color: rgba(255,255,255,0.75);}
@@ -70,9 +16,9 @@ $blur: if($useblur, blur(30px), none);
     animation-name: example;
     animation-duration: 0.1s;
     background-color: rgba(255,255,255,0.75);
-  }
-.animCardOut{
-    animation-name: example2;
+}
+  .animCardOut{
+      animation-name: example2;
     animation-duration: 0.1s;
     background-color: rgba(255,255,255,0.5);
 }
@@ -84,6 +30,79 @@ $blur: if($useblur, blur(30px), none);
     align-items: flex-start;
     padding-top: 58px;
     height: calc(100vh - 80px);
+    .listComponent{
+        margin: 5px;
+        background: rgba(180,180,180,0.5);
+        box-shadow: $shadow;
+        border-radius: 3px;
+        width: 320px;
+        flex: none;
+        vertical-align: top;
+        padding: 5px;
+        backdrop-filter: $blur;
+        .listTitle{
+            resize: none;
+            margin: 10px 2px;
+            width: 100%;
+            background: none;
+            border: none;
+            outline: none;
+            font-size: 18px;
+            font-weight: bold;
+            font-family: 'Roboto';
+        }
+        .cardContainer{
+            min-height: 10px;
+            overflow-y: auto;
+            max-height: calc(100vh - 165px);
+            .cardComponent{
+                background: rgba(255,255,255,0.5);
+                margin-bottom: 5px;
+                box-shadow: $shadow;
+                padding: 5px;
+                .imgCover{
+                    max-width: 100%;
+                    max-height: 200px;
+                    margin: 0 auto;
+                    display: inherit;
+                }
+                .cardLabel{
+                    margin: 0px 1px 5px;
+                    color: white;
+                    font-size: 66%;
+                    text-shadow: 0px 0px 5px rgba(0,0,0,0.5);
+                    font-weight: bold;
+                    border-radius: 2px;
+                    padding: 1.5px 4px;
+                    display: inline-block;
+                    min-width: 20px;
+                    min-height: 5px;
+                }
+                .cardTitle{
+                    overflow-wrap: break-word;
+                }
+                .cardInfo{
+                    display: flex;
+                    div{
+                        margin: 0px 5px;
+                        i{
+                            font-size: 14px;
+                        }
+                    }
+                }
+            }
+            .addCardButton{
+                padding: 5px;
+                background: rgba(255,255,255,0.5);
+                border: 0;
+                margin: 0 auto;
+                width: 100%;
+            }
+        }
+        .cardContainer::-webkit-scrollbar {
+            display: none;
+        }
+    }
 }
 
 #headerBoard{
@@ -124,24 +143,8 @@ body{
     margin: 0;
 }
 
-
-.cardContainer{
-    min-height: 10px;
-    overflow-y: auto;
-    max-height: calc(100vh - 165px);
-}
-
 .cardGhost{
     opacity: 0.5;
-}
-
-
-.addCardButton{
-    padding: 5px;
-    background: rgba(255,255,255,0.5);
-    border: 0;
-    margin: 0 auto;
-    width: 100%;
 }
 
 .dueLabel{
@@ -149,14 +152,4 @@ body{
     color: white;
     padding: 0px 4px;
     border-radius: 1px;
-}
-.cardContainer::-webkit-scrollbar {
-    display: none;
-}
-
-.imgCover{
-    max-width: 100%;
-    max-height: 200px;
-    margin: 0 auto;
-    display: inherit;
 }
