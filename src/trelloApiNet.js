@@ -110,7 +110,20 @@ async function updateCard (idCard, options) {
 	return trelloApiPutRequest(path)
 }
 /**
- * Updates card
+ * Updates list
+ * @param {string} idList 
+ * @param {Array<Array<string>>} options 
+ */
+async function updateList (idList, options) {
+	var path = `/1/lists/${idList}?`
+	options.forEach((option) => {
+		path += `${option[0]}=${encodeURIComponent(option[1])}&`
+	})
+	path += `key=${appKey}&token=${token}`
+	return trelloApiPutRequest(path)
+}
+/**
+ * Updates board
  * @param {string} idBoard
  * @param {Array<Array<string>>} options
  */
@@ -256,5 +269,6 @@ module.exports = {
 	getChecklist: getChecklist,
 	addCard: addCard,
 	updateCard: updateCard,
-	updateBoard: updateBoard
+	updateBoard: updateBoard,
+	updateList: updateList
 }

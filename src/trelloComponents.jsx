@@ -1,4 +1,5 @@
 import HelperUI from './HelperUI'
+import autosize from 'autosize'
 const React = require('react')
 const Sortable = require('sortablejs')
 const ipcRenderer = require('electron').ipcRenderer
@@ -15,7 +16,7 @@ class ListComponent extends React.Component {
 	}
 
 	handleAddCard () {
-		this.props.onAddCard(this.props.id)
+		this.props.onAddCard(this.props.listData.id)
 	}
 	addSortable (input) {
 		if (input !== null) {
@@ -24,18 +25,58 @@ class ListComponent extends React.Component {
 	}
 
 	render () {
-		var elements = this.props.cards.map((card) =>
+		var elements = this.props.listData.cards.map((card) =>
 			<CardComponent key={card.id} card={card}/>
 		)
 		return (
 			<div className='listComponent'>
-				<h3 className='listTitle'>{this.props.name}</h3>
-				<div className='cardContainer' ref={(input) => { this.addSortable(input) }} id={this.props.id}>
+				<ListName listData={this.props.listData}/>
+				<div className='cardContainer' ref={(input) => { this.addSortable(input) }} id={this.props.listData.id}>
 					{elements}
-					<AddCardButton handleClick={this.handleAddCard} listId={this.props.id}/>
+					<AddCardButton handleClick={this.handleAddCard} listId={this.props.listData.id}/>
 				</div>
 			</div>
 		)
+	}
+}
+
+class ListName extends React.Component {
+	constructor (props) {
+		super(props)
+		this.finishEdit = this.finishEdit.bind(this)
+		this.handleChange = this.handleChange.bind(this)
+		this.state = {name: this.props.listData.name}
+	}
+
+	finishEdit (event) {
+		this.setState({name: event.target.value})
+		ipcRenderer.send('trelloUpdateList', this.props.listData.id, [
+			['name', this.state.name]
+		])
+	}
+
+	componentDidUpdate () {
+		autosize.update(this.nameInput)
+	}
+
+	handleChange (event) {
+		this.setState({name: event.target.value})
+	}
+
+	componentWillReceiveProps () {
+		this.setState({name: this.props.listData.name})
+	}
+
+	render () {
+		return <textarea className='listTitle'
+			rows='1'
+			onChange={this.handleChange}
+			value={this.state.name}
+			onBlur={this.finishEdit}
+			ref={(input) => {
+				this.nameInput = input
+				autosize(input)
+			}}/>
 	}
 }
 
@@ -223,7 +264,7 @@ class Board extends React.Component {
 
 	render () {
 		var components = this.state.boardData.values.map((list) => {
-			return <ListComponent onAddCard={this.addCardToList} cards={list.cards} name={list.name} id={list.id} key={list.id}/>
+			return <ListComponent onAddCard={this.addCardToList} listData={list} key={list.id}/>
 		})
 		document.title = `${this.state.boardData.name} | To-Do app in Electron`
 		return (

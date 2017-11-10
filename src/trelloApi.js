@@ -113,6 +113,10 @@ function handleIpcCalls () {
 		TrelloApiNet.updateBoard(idBoard, options)
 	})
 
+	ipcMain.on('trelloUpdateList', async (event, idList, options) => {
+		TrelloApiNet.updateList(idList, options)
+	})
+
 	ipcMain.on('trelloOpenCard', (event, arg) => {
 		windowManager.openURL(new URL('file://' + __dirname + '/trelloDetails.html?id=' + arg).toString())
 	})

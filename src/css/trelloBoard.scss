@@ -13,6 +13,17 @@ $blur: if($useblur, blur(30px), none);
     vertical-align: top;
     padding: 5px;
     backdrop-filter: $blur;
+    .listTitle{
+        resize: none;
+        margin: 10px 2px;
+        width: 100%;
+        background: none;
+        border: none;
+        outline: none;
+        font-size: 18px;
+        font-weight: bold;
+        font-family: 'Roboto';
+    }
 }
 
 .cardComponent{
@@ -124,9 +135,6 @@ body{
     opacity: 0.5;
 }
 
-.listTitle{
-    margin: 10px 2px;
-}
 
 .addCardButton{
     padding: 5px;
