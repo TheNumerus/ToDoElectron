@@ -158,7 +158,7 @@ class Board extends React.Component {
 		this.update = this.update.bind(this)
 		this.goBack = this.goBack.bind(this)
 		// add empty list to speed up the process later
-		this.state = { boardData: { values: [{cards: [], name: '', id: ''}] } }
+		this.state = { boardData: { name: '', values: [{cards: [], name: '', id: ''}] } }
 	}
 
 	handleIpc () {
@@ -230,12 +230,46 @@ class Board extends React.Component {
 			<div id='lists'>
 				<div id='headerBoard'>
 					<button onClick={this.goBack} className='button back header'><i className='fa fa-arrow-left fa-2x'></i></button>
-					<h1 id='boardName'>{this.state.boardData.name}</h1>
+					<BoardName boardData={this.state.boardData}/>
 					<button onClick={this.update} className='button header' style={{marginLeft: 'auto'}}><i id='updateIcon' className='fa fa-refresh fa-2x'></i></button>
 				</div>
 				<div className='boardRoot'>{components}</div>
 			</div>
 		)
+	}
+}
+
+class BoardName extends React.Component {
+	constructor (props) {
+		super(props)
+		this.finishEdit = this.finishEdit.bind(this)
+		this.handleChange = this.handleChange.bind(this)
+		this.state = {name: ''}
+	}
+
+	finishEdit (event) {
+		this.setState({name: event.target.value})
+		ipcRenderer.send('trelloUpdateBoard', this.props.boardData.id, [
+			['name', this.state.name]
+		])
+	}
+
+	handleChange (event) {
+		this.setState({name: event.target.value})
+	}
+
+	componentWillReceiveProps (nextProps) {
+		if (nextProps.boardData) {
+			this.setState({name: nextProps.boardData.name})
+		}
+	}
+
+	render () {
+		return <input id='boardName'
+			type='text'
+			onChange={this.handleChange}
+			value={this.state.name}
+			onBlur={this.finishEdit}/>
 	}
 }
 

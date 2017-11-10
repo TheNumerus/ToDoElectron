@@ -109,6 +109,10 @@ function handleIpcCalls () {
 		TrelloApiNet.updateCard(idCard, options)
 	})
 
+	ipcMain.on('trelloUpdateBoard', async (event, idBoard, options) => {
+		TrelloApiNet.updateBoard(idBoard, options)
+	})
+
 	ipcMain.on('trelloOpenCard', (event, arg) => {
 		windowManager.openURL(new URL('file://' + __dirname + '/trelloDetails.html?id=' + arg).toString())
 	})
@@ -116,6 +120,7 @@ function handleIpcCalls () {
 	async function getBoardData (boardId, boardData, event) {
 		var json = await TrelloApiNet.getBoardData(boardId)
 		boardData.values = json.lists
+		boardData.name = json.name
 		boardData.prefs = json.prefs
 		// sort cards
 		for (let i = 0; i < boardData.values.length; i++) {

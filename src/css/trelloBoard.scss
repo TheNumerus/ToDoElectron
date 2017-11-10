@@ -89,6 +89,12 @@ $blur: if($useblur, blur(30px), none);
         overflow: hidden;
         text-overflow: ellipsis;
         margin-right: 20px;
+        background: none;
+        border: none;
+        font-weight: bold;
+        font-size: 30px;
+        outline: none;
+        width: 100%;
     }
 }
 button.button.header{
