@@ -10,21 +10,21 @@ var token
  * Initializes variables required for connection to Trello API
  * @param {token for acces} tokenNew
  */
-function initialize () {
+export function initialize () {
 	token = cacheModule.calls.trello.getToken()
 }
 // #region GETTERS
 /**
  * Get all user info
  */
-async function getAllUserInfo () {
+export async function getAllUserInfo () {
 	return trelloApiRequest('/1/member/me?&key=' + appKey + '&token=' + token)
 }
 
 /**
  * Get all boards
  */
-async function getBoards () {
+export async function getBoards () {
 	return trelloApiRequest('/1/member/me/boards?&key=' + appKey + '&token=' + token + '&fields=name,id,prefs&filter=open')
 }
 
@@ -32,7 +32,7 @@ async function getBoards () {
  * Get board data
  * @param {string} idBoard
  */
-async function getBoardData (idBoard) {
+export async function getBoardData (idBoard) {
 	return trelloApiRequest('/1/boards/' + idBoard + '/?&key=' + appKey + '&token=' + token + '&fields=id,name,prefs&lists=open&list_fields=id,name&cards=open')
 }
 
@@ -40,7 +40,7 @@ async function getBoardData (idBoard) {
  * Get attachments
  * @param {string} idCard
  */
-async function getAttachments (idCard) {
+export async function getAttachments (idCard) {
 	return trelloApiRequest('/1/cards/' + idCard + '/attachments/?&key=' + appKey + '&token=' + token + '&fields=all&filter=false')
 }
 
@@ -48,7 +48,7 @@ async function getAttachments (idCard) {
  * Get card actions
  * @param {string} idCard
  */
-async function getActions (idCard) {
+export async function getActions (idCard) {
 	return trelloApiRequest('/1/cards/' + idCard + '/actions/?&key=' + appKey + '&token=' + token)
 }
 
@@ -57,7 +57,7 @@ async function getActions (idCard) {
  * @param {object} urlToImage - url to download image from
  * @param {}
  */
-async function getImage (imageData, options) {
+export async function getImage (imageData, options) {
 	var name
 	var urlToDownload
 	switch (options.type) {
@@ -92,16 +92,17 @@ async function getImage (imageData, options) {
  * Gets checklists
  * @param {string} idChecklist
  */
-async function getChecklist (idChecklist) {
+export async function getChecklist (idChecklist) {
 	return trelloApiRequest('/1/checklists/' + idChecklist + '/?&key=' + appKey + '&token=' + token)
 }
 // #endregion
+// #region UPDATERS
 /**
  * Updates card
  * @param {string} idCard 
  * @param {Array<Array<string>>} options 
  */
-async function updateCard (idCard, options) {
+export async function updateCard (idCard, options) {
 	var path = `/1/cards/${idCard}?`
 	options.forEach((option) => {
 		path += `${option[0]}=${encodeURIComponent(option[1])}&`
@@ -114,7 +115,7 @@ async function updateCard (idCard, options) {
  * @param {string} idList 
  * @param {Array<Array<string>>} options 
  */
-async function updateList (idList, options) {
+export async function updateList (idList, options) {
 	var path = `/1/lists/${idList}?`
 	options.forEach((option) => {
 		path += `${option[0]}=${encodeURIComponent(option[1])}&`
@@ -127,7 +128,7 @@ async function updateList (idList, options) {
  * @param {string} idBoard
  * @param {Array<Array<string>>} options
  */
-async function updateBoard (idBoard, options) {
+export async function updateBoard (idBoard, options) {
 	var path = `/1/boards/${idBoard}?`
 	options.forEach((option) => {
 		path += `${option[0]}=${encodeURIComponent(option[1])}&`
@@ -135,6 +136,19 @@ async function updateBoard (idBoard, options) {
 	path += `key=${appKey}&token=${token}`
 	return trelloApiPutRequest(path)
 }
+// #endregion
+// #region ADDERS
+/**
+ * Adds card
+ * @param {Object} data 
+ * @param {string} data.name
+ * @param {string} data.idList
+ */
+export async function addCard (data) {
+	return trelloApiPostRequest('/1/cards?name=' + data.name + '&idList=' + data.idList + '&key=' + appKey + '&token=' + token)
+}
+// #endregion
+// #region REQUESTS
 /**
  * Sends request to TrelloAPI
  * @param {string} path - path to send request to
@@ -210,10 +224,6 @@ function handleResponseErrors (chunk) {
 	}
 }
 
-async function addCard (data) {
-	return trelloApiPostRequest('/1/cards?name=' + data.name + '&idList=' + data.idList + '&key=' + appKey + '&token=' + token)
-}
-
 /**
  * Sends POST request to Trello API
  * @param {string} path 
@@ -257,18 +267,4 @@ function trelloApiPutRequest (path) {
 		request.end()
 	})
 }
-
-module.exports = {
-	initialize: initialize,
-	getAllUserInfo: getAllUserInfo,
-	getAttachments: getAttachments,
-	getActions: getActions,
-	getBoards: getBoards,
-	getBoardData: getBoardData,
-	getImage: getImage,
-	getChecklist: getChecklist,
-	addCard: addCard,
-	updateCard: updateCard,
-	updateBoard: updateBoard,
-	updateList: updateList
-}
+// #endregion
