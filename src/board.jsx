@@ -1,5 +1,5 @@
-const ReactDOM = require('react-dom')
-const React = require('react')
-const Board = require('./trelloComponents').Board
+import React from 'react'
+import ReactDOM from 'react-dom'
+import Board from './trelloComponents'
 
 ReactDOM.render(<Board/>, document.querySelector('#container'))

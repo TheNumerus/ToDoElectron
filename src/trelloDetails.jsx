@@ -1,4 +1,5 @@
-const ReactDOM = require('react-dom')
-const React = require('react')
-const CardDetail = require('./trelloDetailsComponents')
+import React from 'react'
+import ReactDOM from 'react-dom'
+import CardDetail from './trelloDetailsComponents'
+
 ReactDOM.render(<CardDetail/>, document.querySelector('#container'))

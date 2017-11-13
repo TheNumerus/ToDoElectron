@@ -6,7 +6,8 @@ const {shell, ipcRenderer} = require('electron')
 const URL = require('url').URL
 const cardId = new URL(window.location.href).searchParams.get('id')
 const connCheck = require('./connectionChecker')
-class CardDetail extends React.Component {
+
+export default class CardDetail extends React.Component {
 	constructor (props) {
 		super(props)
 		this.state = {cardData: {name: ''}}
@@ -32,6 +33,8 @@ class CardDetail extends React.Component {
 
 	render () {
 		var cardData = this.state.cardData
+		// solve empty data
+		if (cardData.url === undefined) { return null }
 		if (cardData.name.length > 20) {
 			document.title = `${cardData.name.substring(0, 20)}... | To-Do app in Electron`
 		} else {
@@ -61,7 +64,7 @@ class CardDetail extends React.Component {
 				<div className='data'>
 					<div className='mainColumn'>
 						<Name cardData={cardData}/>
-						<Description desc={cardData.desc}/>
+						<Description cardData={cardData}/>
 						<div>{labels}</div>
 						<DueDate due={cardData.due}/>
 						{checklists}
@@ -236,10 +239,43 @@ class Label extends React.Component {
 }
 
 class Description extends React.Component {
+	constructor (props) {
+		super(props)
+		this.finishEdit = this.finishEdit.bind(this)
+		this.handleChange = this.handleChange.bind(this)
+		this.state = {desc: this.props.cardData.desc}
+	}
+
+	finishEdit (event) {
+		this.setState({desc: event.target.value})
+		ipcRenderer.send('trelloUpdateCard', this.props.cardData.id, [
+			['desc', this.state.desc]
+		])
+	}
+
+	componentDidUpdate () {
+		autosize.update(this.nameInput)
+	}
+
+	handleChange (event) {
+		this.setState({desc: event.target.value})
+	}
+
+	componentWillReceiveProps () {
+		this.setState({desc: this.props.cardData.desc})
+	}
+
 	render () {
-		return (
-			<div>{this.props.desc}</div>
-		)
+		return <textarea className='desc'
+			rows='1'
+			placeholder='Add description'
+			onChange={this.handleChange}
+			value={this.state.desc}
+			onBlur={this.finishEdit}
+			ref={(input) => {
+				this.nameInput = input
+				autosize(input)
+			}}/>
 	}
 }
 
@@ -253,9 +289,11 @@ class Name extends React.Component {
 
 	finishEdit (event) {
 		this.setState({name: event.target.value})
-		ipcRenderer.send('trelloUpdateCard', this.props.cardData.id, [
-			['name', this.state.name]
-		])
+		if (this.state.name.length > 1) {
+			ipcRenderer.send('trelloUpdateCard', this.props.cardData.id, [
+				['name', this.state.name]
+			])
+		}
 	}
 
 	componentDidUpdate () {
@@ -294,5 +332,3 @@ class DueDate extends React.Component {
 		)
 	}
 }
-
-module.exports = CardDetail
