@@ -1,12 +1,11 @@
-import os from 'os'
+import globalProperties from './globalProperties'
 const fs = require('fs')
-const globalProperties = require('./globalProperties')
 const cacheModule = require('./cache')
 const settings = require('./settings')
 var path
 
 async function initialize () {
-	createPathString()
+	path = globalProperties.getPath()
 	try {
 		await checkForFolder()
 	} catch (e) {
@@ -24,25 +23,6 @@ async function initialize () {
 	} catch (e) {
 		await settings.save()
 	}
-}
-
-/**
- * creates string with path to folder, depending on OS
- * @todo add other OSs
- */
-function createPathString () {
-	switch (process.platform) {
-	case 'win32':
-		path = 'C:\\Users\\' + os.userInfo().username + '\\AppData\\Roaming\\ToDoElectron\\'
-		break
-	case 'darwin':
-		break
-	case 'linux':
-		path = '/home/' + os.userInfo().username + '/.todoelectron/'
-		break
-	}
-	// save it, so we can use it anywhere
-	globalProperties.path.set(path)
 }
 
 /**

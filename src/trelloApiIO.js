@@ -1,5 +1,5 @@
+import globalProperties from './globalProperties'
 const fs = require('fs')
-const globalProperties = require('./globalProperties')
 var pathToFolder
 
 /**
@@ -36,7 +36,7 @@ function saveImage (filename, data) {
 	})
 }
 function initialize () {
-	pathToFolder = globalProperties.path.get()
+	pathToFolder = globalProperties.getPath()
 }
 module.exports = {
 	saveImage: saveImage,

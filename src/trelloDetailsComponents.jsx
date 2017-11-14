@@ -1,7 +1,7 @@
 import HelperUI from './HelperUI'
 const autosize = require('autosize')
 const React = require('react')
-const globalProperties = require('electron').remote.require('./globalProperties')
+const globalProperties = require('electron').remote.require('./globalProperties').default
 const {shell, ipcRenderer} = require('electron')
 const URL = require('url').URL
 const cardId = new URL(window.location.href).searchParams.get('id')
@@ -161,7 +161,7 @@ class ImageAttachment extends React.Component {
 	render () {
 		var extension = this.props.attData.url.match(/.+([.].+)/)
 		var filename = `${this.props.attData.id}${extension[1]}`
-		var path = globalProperties.path.get() + filename
+		var path = globalProperties.getPath() + filename
 		var date = new Date(this.props.attData.date)
 		var dateString = `${date.getUTCDate()}.${date.getUTCMonth() + 1}.${date.getUTCFullYear()} - ${date.getUTCHours()}:${date.getUTCMinutes()}`
 		return (

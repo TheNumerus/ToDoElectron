@@ -1,8 +1,9 @@
 {
   "name": "to-do-electron",
+  "productName": "ToDoElectron",
   "version": "0.0.2",
-  "description": "Electron test",
-  "main": "main.js",
+  "description": "To Do app written in Electron",
+  "main": "bin/main.js",
   "scripts": {
     "build": "babel src -d lib",
     "start": "electron ."

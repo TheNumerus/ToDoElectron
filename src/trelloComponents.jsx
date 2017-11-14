@@ -5,7 +5,7 @@ const Sortable = require('sortablejs')
 const ipcRenderer = require('electron').ipcRenderer
 const URL = require('url').URL
 const boardId = new URL(window.location.href).searchParams.get('id')
-const globalProperties = require('electron').remote.require('./globalProperties')
+const globalProperties = require('electron').remote.require('./globalProperties').default
 const connCheck = require('./connectionChecker')
 
 class ListComponent extends React.Component {
@@ -35,6 +35,51 @@ class ListComponent extends React.Component {
 					{elements}
 					<AddCardButton handleClick={this.handleAddCard} listId={this.props.listData.id}/>
 				</div>
+			</div>
+		)
+	}
+}
+
+class AddableList extends React.Component {
+	constructor (props) {
+		super(props)
+		this.state = {clicked: false, name: ''}
+		this.clicked = this.clicked.bind(this)
+		this.finishEdit = this.finishEdit.bind(this)
+		this.handleChange = this.handleChange.bind(this)
+	}
+
+	clicked () {
+		this.setState({clicked: true})
+	}
+
+	finishEdit (event) {
+		this.setState({name: event.target.value})
+		ipcRenderer.send('trelloAddList', {name: event.target.value, idBoard: boardId})
+	}
+
+	componentDidUpdate () {
+		autosize.update(this.nameInput)
+	}
+
+	handleChange (event) {
+		this.setState({name: event.target.value})
+	}
+
+	render () {
+		var element = this.state.clicked
+			? <textarea rows='1'
+				onChange={this.handleChange}
+				value={this.state.name}
+				onBlur={this.finishEdit}
+				ref={(input) => {
+					this.nameInput = input
+					autosize(input)
+				}}/>
+			: <button onClick={this.clicked}>Click to add card</button>
+		return (
+			<div className='listComponent'>
+				{element}
 			</div>
 		)
 	}
@@ -152,7 +197,7 @@ class ImageCover extends React.Component {
 	render () {
 		var extension = this.props.attData.url.match(/.+([.].+)/)
 		var filename = `${this.props.attData.id}${extension[1]}`
-		var pathToImage = globalProperties.path.get() + filename
+		var pathToImage = globalProperties.getPath() + filename
 		return (
 			<div style={{backgroundColor: this.props.attData.edgeColor}}>
 				<img className='imgCover' src={pathToImage}/>
@@ -257,7 +302,10 @@ export default class Board extends React.Component {
 					<BoardName boardData={this.state.boardData}/>
 					<button onClick={this.update} className='button header' style={{marginLeft: 'auto'}}><i id='updateIcon' className='fa fa-refresh fa-2x'></i></button>
 				</div>
-				<div className='boardRoot'>{components}</div>
+				<div className='boardRoot'>
+					{components}
+					<AddableList/>
+				</div>
 			</div>
 		)
 	}

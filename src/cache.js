@@ -1,5 +1,6 @@
+import globalProperties from './globalProperties'
 const fs = require('fs')
-const globalProperties = require('./globalProperties')
+const filename = 'userCache'
 
 var cache = {
 	sources: {
@@ -24,7 +25,7 @@ var cache = {
 
 function saveCache () {
 	return new Promise(function (resolve, reject) {
-		fs.writeFile(globalProperties.path.get() + 'cache', JSON.stringify(cache), (error) => {
+		fs.writeFile(globalProperties.getPath() + filename, JSON.stringify(cache), (error) => {
 			if (error) reject(error)
 			resolve()
 		})
@@ -33,7 +34,7 @@ function saveCache () {
 
 function loadCache () {
 	return new Promise(function (resolve, reject) {
-		fs.readFile(globalProperties.path.get() + 'cache', (error, data) => {
+		fs.readFile(globalProperties.getPath() + filename, (error, data) => {
 			if (error) {
 				// handle non-existing file
 				if (error.code === 'ENOENT') {

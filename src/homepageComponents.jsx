@@ -1,6 +1,6 @@
 const React = require('react')
 const ipcRenderer = require('electron').ipcRenderer
-const globalProperties = require('./globalProperties')
+const globalProperties = require('electron').remote.require('./globalProperties').default
 
 class AppInfoBar extends React.Component {
 	render () {

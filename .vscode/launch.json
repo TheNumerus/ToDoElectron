@@ -13,7 +13,7 @@
         "<node_internals>/**/*.js"
       ],
       "runtimeExecutable": "${workspaceRoot}/node_modules/.bin/electron",
-      "program": "${workspaceRoot}/bin/main.js",
+      "args" : ["."],
       "protocol": "inspector"
     }
   ]

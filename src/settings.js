@@ -1,5 +1,6 @@
+import globalProperties from './globalProperties'
 const fs = require('fs')
-const globalProperties = require('./globalProperties')
+
 var settings = {
 	windowSize: {
 		x: 1600,
@@ -11,7 +12,7 @@ var settings = {
 
 function load () {
 	return new Promise(function (resolve, reject) {
-		fs.readFile(globalProperties.path.get() + 'settings', (error, data) => {
+		fs.readFile(globalProperties.getPath() + 'settings', (error, data) => {
 			if (error) {
 				reject(error)
 			} else {
@@ -27,7 +28,7 @@ function load () {
 
 function save () {
 	return new Promise(function (resolve, reject) {
-		fs.writeFile(globalProperties.path.get() + 'settings', JSON.stringify(settings), (error) => {
+		fs.writeFile(globalProperties.getPath() + 'settings', JSON.stringify(settings), (error) => {
 			if (error) reject(error)
 			resolve()
 		})

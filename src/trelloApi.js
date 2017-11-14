@@ -1,9 +1,9 @@
+import GlobalProperties from './globalProperties'
 const {BrowserWindow, ipcMain} = require('electron')
 const URL = require('url').URL
 const OAuth = require('oauth').OAuth
 const TrelloApiNet = require('./trelloApiNet')
 const TrelloApiIO = require('./trelloApiIO')
-const GlobalProperties = require('./globalProperties')
 const windowManager = require('./windowManager')
 const cacheModule = require('./cache')
 
@@ -82,6 +82,12 @@ function handleIpcCalls () {
 		cacheModule.calls.trello.addCard(idList, name)
 		// TODO add offline card adding
 		TrelloApiNet.addCard({name: 'testCard', idList: idList})
+	})
+
+	ipcMain.on('trelloAddList', (event, data) => {
+		if (data.name !== '') {
+			TrelloApiNet.addList(data)
+		}
 	})
 
 	ipcMain.on('trelloGetCardData', async (event, idCard) => {

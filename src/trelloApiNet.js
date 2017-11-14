@@ -1,14 +1,13 @@
+import globalProperties from './globalProperties'
 const {net} = require('electron')
 const trelloIO = require('./trelloApiIO')
 const URL = require('url').URL
-const globalProperties = require('./globalProperties')
 const appKey = globalProperties.getTrelloAppKey()
 const cacheModule = require('./cache')
 var token
 
 /**
  * Initializes variables required for connection to Trello API
- * @param {token for acces} tokenNew
  */
 export function initialize () {
 	token = cacheModule.calls.trello.getToken()
@@ -84,7 +83,7 @@ export async function getImage (imageData, options) {
 		if (e !== 'ENOENT') { throw e }
 		// download if needed
 		trelloIO.saveImage(name, await downloadImage(urlToDownload))
-		return globalProperties.path.get() + name
+		return globalProperties.getPath() + name
 	}
 }
 
@@ -145,7 +144,17 @@ export async function updateBoard (idBoard, options) {
  * @param {string} data.idList
  */
 export async function addCard (data) {
-	return trelloApiPostRequest('/1/cards?name=' + data.name + '&idList=' + data.idList + '&key=' + appKey + '&token=' + token)
+	return trelloApiPostRequest('/1/cards?name=' + encodeURIComponent(data.name) + '&idList=' + data.idList + '&key=' + appKey + '&token=' + token)
+}
+
+/**
+ * Adds list
+ * @param {Object} data 
+ * @param {string} data.name
+ * @param {string} data.idBoard
+ */
+export async function addList (data) {
+	return trelloApiPostRequest('/1/lists?name=' + encodeURIComponent(data.name) + '&idBoard=' + data.idBoard + '&pos=bottom&key=' + appKey + '&token=' + token)
 }
 // #endregion
 // #region REQUESTS
