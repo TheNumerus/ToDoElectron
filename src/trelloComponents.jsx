@@ -157,13 +157,6 @@ class CardComponent extends React.Component {
 				desc = <div><i className="fa fa-align-left cardInfoDescIcon"></i></div>
 			}
 
-			if (card.due !== null) {
-				var today = new Date()
-				var date = new Date(card.due)
-				var dateString = ` ${date.getDate()}.${date.getMonth() + 1}.`
-				due = <div className={today > date ? 'dueLabel' : ''}><i className='fa fa-calendar-o'></i>{dateString}</div>
-			}
-
 			if (card.badges.comments > 0) {
 				comments = <div><i className="fa fa-comment-o"></i>{card.badges.comments}</div>
 			}
@@ -187,8 +180,60 @@ class CardComponent extends React.Component {
 				{imageCover}
 				{labels}
 				<div className='cardTitle'>{card.name}</div>
-				<div className='cardInfo'>{due}{desc}{checks}{comments}{attachments}</div>
+				<div className='cardInfo'>{due}
+					<DueDate cardData={card}/>
+					{desc}{checks}{comments}{attachments}
+				</div>
 			</div>
+		)
+	}
+}
+class DueDate extends React.Component {
+	/** 
+	 * checks if due date is tommorow or before that
+	 * @param {number} time 
+	 * @returns {boolean}
+	 */
+	isTommorowOrNear (time) {
+		var twoDaysLater = new Date(Date.now() + 172800000)
+		var endOfTommorow = new Date(twoDaysLater.getFullYear(), twoDaysLater.getMonth(), twoDaysLater.getDate())
+		return endOfTommorow.getTime() > time
+	}
+	/**
+	 * checks if due date was today
+	 * @param {number} time 
+	 * @returns {boolean}
+	 */
+	wasDueToday (time) {
+		var today = new Date()
+		var todayMidnight = new Date(today.getFullYear(), today.getMonth(), today.getDate())
+		return todayMidnight.getTime() < time && time < Date.now()
+	}
+
+	render () {
+		var classes = ['dueLabel']
+		var due = this.props.cardData.due
+		// handle non set due date
+		if (due === null) { return null }
+		var date = new Date(due)
+		var today = new Date()
+		var dateString = ` ${date.getDate()}. ${date.getMonth() + 1}. ${today.getFullYear() === date.getFullYear() ? '' : date.getFullYear()}`
+		const clock = ` - ${date.getHours()}:${date.getMinutes() > 9 ? date.getMinutes() : '0' + date.getMinutes()}`
+		if (this.props.cardData.dueComplete) {
+			classes.push('dueComplete')
+		} else if (this.wasDueToday(date.getTime())) {
+			classes.push('dueOverdueNear')
+			dateString += clock
+		} else if (date.getTime() < today.getTime()) {
+			classes.push('dueOverdue')
+		} else if (this.isTommorowOrNear(date.getTime())) {
+			classes.push('dueNear')
+			dateString += clock
+		} else if (this.wasDueToday(date.getTime())) {
+			classes.push('dueOverdueNear')
+		}
+		return (
+			<div className={classes.join(' ')}><i className='fa fa-calendar-o'></i>{dateString}</div>
 		)
 	}
 }
