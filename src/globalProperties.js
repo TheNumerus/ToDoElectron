@@ -27,10 +27,10 @@ export default class Properties {
 	}
 
 	static getTrelloAppKey () {
-		return '01ad9ee9ec7a92b20ddd261ff55820f4'
+		return '45e02d045ec187c603a9ad8841085845'
 	}
 
 	static getTrelloSecretKey () {
-		return '7b455f5b12ca3b432bb34c381e00b594b53adca7fc5789449a1569f59ab2449c'
+		return '492347774f15f7bcb2038172ad343eaa84213de13e8c0e29e23163d6f97f84bc'
 	}
 }
