@@ -189,27 +189,6 @@ class CardComponent extends React.Component {
 	}
 }
 class DueDate extends React.Component {
-	/** 
-	 * checks if due date is tommorow or before that
-	 * @param {number} time 
-	 * @returns {boolean}
-	 */
-	isTommorowOrNear (time) {
-		var twoDaysLater = new Date(Date.now() + 172800000)
-		var endOfTommorow = new Date(twoDaysLater.getFullYear(), twoDaysLater.getMonth(), twoDaysLater.getDate())
-		return endOfTommorow.getTime() > time
-	}
-	/**
-	 * checks if due date was today
-	 * @param {number} time 
-	 * @returns {boolean}
-	 */
-	wasDueToday (time) {
-		var today = new Date()
-		var todayMidnight = new Date(today.getFullYear(), today.getMonth(), today.getDate())
-		return todayMidnight.getTime() < time && time < Date.now()
-	}
-
 	render () {
 		var classes = ['dueLabel']
 		var due = this.props.cardData.due
@@ -221,16 +200,24 @@ class DueDate extends React.Component {
 		const clock = ` - ${date.getHours()}:${date.getMinutes() > 9 ? date.getMinutes() : '0' + date.getMinutes()}`
 		if (this.props.cardData.dueComplete) {
 			classes.push('dueComplete')
-		} else if (this.wasDueToday(date.getTime())) {
-			classes.push('dueOverdueNear')
-			dateString += clock
-		} else if (date.getTime() < today.getTime()) {
-			classes.push('dueOverdue')
-		} else if (this.isTommorowOrNear(date.getTime())) {
-			classes.push('dueNear')
-			dateString += clock
-		} else if (this.wasDueToday(date.getTime())) {
-			classes.push('dueOverdueNear')
+		} else {
+			switch (HelperUI.returnDueState(date.getTime())) {
+			case HelperUI.dueStates.overdueNear:
+				classes.push('dueOverdueNear')
+				dateString += clock
+				break
+			case HelperUI.dueStates.overdue:
+				classes.push('dueOverdue')
+				break
+			case HelperUI.dueStates.near:
+				classes.push('dueNear')
+				dateString += clock
+				break
+			case HelperUI.dueStates.later:
+				break
+			default:
+				throw new Error(`Wrong date on card with id ${this.props.cardData.id}`)
+			}
 		}
 		return (
 			<div className={classes.join(' ')}><i className='fa fa-calendar-o'></i>{dateString}</div>
