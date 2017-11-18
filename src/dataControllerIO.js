@@ -1,15 +1,17 @@
 import globalProperties from './globalProperties'
+import * as path from 'path'
 const fs = require('fs')
 const cacheModule = require('./cache')
 const settings = require('./settings')
-var path
+const paths = ['', 'background/', 'background/thumbs/', 'attachments/']
+var pathToFolder
 
 async function initialize () {
-	path = globalProperties.getPath()
+	pathToFolder = globalProperties.getPath()
 	try {
-		await checkForFolder()
+		await checkForFolders()
 	} catch (e) {
-		await createFolder()
+		await createFolders()
 		await cacheModule.saveCache()
 		return
 	}
@@ -25,27 +27,45 @@ async function initialize () {
 	}
 }
 
+async function checkForFolders () {
+	var checks = paths.map((folder) => {
+		return checkForFolder(path.join(pathToFolder, folder))
+	})
+	return Promise.all(checks)
+}
+
+async function createFolders () {
+	var checks = paths.map((folder) => {
+		return createFolder(path.join(pathToFolder, folder))
+	})
+	return Promise.all(checks)
+}
 /**
- * asynchronusly checks for existence of  main folder
- * @param {path} path to check
+ * asynchronusly checks for existence of folder
+ * @param {string} pathToCheck - to check
  * @return {Promise} Promise
  */
-function checkForFolder () {
+function checkForFolder (pathToCheck = '') {
 	return new Promise((resolve, reject) => {
-		fs.access(path, fs.constants.F_OK, (error) => {
-			if (error) { reject(error) }
+		fs.access(pathToCheck, fs.constants.F_OK, (error) => {
+			if (error && error.code !== 'EEXIST') {
+				reject(error)
+			}
 			resolve(true)
 		})
 	})
 }
 
 /**
- * Creates folder for data
+ * Creates folder
+ * @param {string} pathToCheck - to check
  */
-function createFolder () {
+function createFolder (pathToCheck = '') {
 	return new Promise((resolve, reject) => {
-		fs.mkdir(path, (error) => {
-			if (error) { reject(error) }
+		fs.mkdir(pathToCheck, (error) => {
+			if (error && error.code !== 'EEXIST') {
+				reject(error)
+			}
 			resolve(true)
 		})
 	})

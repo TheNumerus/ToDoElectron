@@ -7,11 +7,11 @@ var pathToFolder
  * @param {path} path to check
  * @return {Promise} Promise
  */
-function checkExistence (path = '') {
+export function checkExistence (path = '') {
 	return new Promise(function (resolve, reject) {
 		fs.access(pathToFolder + path, fs.constants.F_OK, (error) => {
 			if (error) {
-				reject(error.code)
+				reject(error)
 			} else {
 				resolve(pathToFolder + path)
 			}
@@ -24,22 +24,17 @@ function checkExistence (path = '') {
  * @param {string} filename - saves to this path
  * @param {Buffer} data - data to save
  */
-function saveImage (filename, data) {
+export function saveImage (filename, data) {
 	return new Promise(function (resolve, reject) {
 		fs.writeFile(pathToFolder + filename, data, (error) => {
 			if (error) {
-				reject(error.code)
+				reject(error)
 			} else {
 				resolve(pathToFolder + filename)
 			}
 		})
 	})
 }
-function initialize () {
+export function initialize () {
 	pathToFolder = globalProperties.getPath()
-}
-module.exports = {
-	saveImage: saveImage,
-	initialize: initialize,
-	checkExistence: checkExistence
 }

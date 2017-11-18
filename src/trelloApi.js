@@ -49,15 +49,25 @@ function handleIpcCalls () {
 		if (cacheModule.calls.helper.checkInvalidity(boards)) {
 			var json = await TrelloApiNet.getBoards()
 			// format data for internal use
-			boards.values = []
-			json.forEach((element) => {
-				boards.values.push({id: element.id, name: element.name})
+			boards.values = json.map((board) => {
+				return {id: board.id, name: board.name, prefs: board.prefs}
 			})
 			boards.date = Date.now()
 			cacheModule.calls.trello.setBoards(boards)
 			cacheModule.saveCache()
 			event.sender.send('trelloGetBoards-reply', json)
+			// now download images in background
+			boards.values.forEach(board => {
+				if (board.prefs.backgroundImageScaled !== null) {
+					TrelloApiNet.getImage(board.prefs.backgroundImageScaled[0].url, {type: TrelloApiNet.imageTypes.backgroundThumb})
+				}
+			})
 		} else {
+			boards.values.forEach(board => {
+				if (board.prefs.backgroundImageScaled !== null) {
+					TrelloApiNet.getImage(board.prefs.backgroundImageScaled[0].url, {type: TrelloApiNet.imageTypes.backgroundThumb})
+				}
+			})
 			event.sender.send('trelloGetBoards-reply', boards.values)
 		}
 	})
@@ -160,7 +170,7 @@ function handleIpcCalls () {
 	async function getBackground (prefs, event) {
 		// download background if necessary
 		if (prefs.backgroundImage !== null) {
-			event.sender.send('trelloSetBackground', await TrelloApiNet.getImage(prefs.backgroundImage, {type: 'background'}))
+			event.sender.send('trelloSetBackground', await TrelloApiNet.getImage(prefs.backgroundImage, {type: TrelloApiNet.imageTypes.background}))
 		} else if (prefs.backgroundColor !== null) {
 			event.sender.send('trelloSetBackground', prefs.backgroundColor)
 		}
@@ -169,7 +179,7 @@ function handleIpcCalls () {
 	async function downloadAttachments (attachmentData) {
 		attachmentData.forEach((attachment) => {
 			if (attachment.isUpload) {
-				TrelloApiNet.getImage(attachment, {type: 'attachment'})
+				TrelloApiNet.getImage(attachment, {type: TrelloApiNet.imageTypes.attachment})
 			}
 		})
 	}

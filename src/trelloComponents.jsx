@@ -229,7 +229,7 @@ class ImageCover extends React.Component {
 	render () {
 		var extension = this.props.attData.url.match(/.+([.].+)/)
 		var filename = `${this.props.attData.id}${extension[1]}`
-		var pathToImage = globalProperties.getPath() + filename
+		var pathToImage = `${globalProperties.getPath()}attachments/${filename}`
 		return (
 			<div style={{backgroundColor: this.props.attData.edgeColor}}>
 				<img className='imgCover' src={pathToImage}/>

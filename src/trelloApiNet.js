@@ -1,4 +1,5 @@
 import globalProperties from './globalProperties'
+import * as path from 'path'
 const {net} = require('electron')
 const trelloIO = require('./trelloApiIO')
 const URL = require('url').URL
@@ -52,37 +53,55 @@ export async function getActions (idCard) {
 }
 
 /**
- * 	Get iamge, save it and return its path
- * @param {object} urlToImage - url to download image from
- * @param {}
+ * 	Get image, save it and return its path
+ * @param {string} imageData - url to download image from
+ * @param {object} options
+ * @param {number} options.type
  */
 export async function getImage (imageData, options) {
-	var name
-	var urlToDownload
+	var name, urlToDownload, pathnames, decodedName
 	switch (options.type) {
-	case 'background':
-	// seperate path into chunks and select last part
-		var pathnames = new URL(imageData).pathname.split('/')
+	case imageTypes.background:
+		// seperate path into chunks and select last part
+		pathnames = new URL(imageData).pathname.split('/')
+		decodedName = decodeURIComponent(pathnames[pathnames.length - 1])
 		if (imageData.match(/\/\S+([.]\w+)$/)) {
 			// url does have file extension
-			name = decodeURIComponent(pathnames[pathnames.length - 1])
+			name = path.join('background', decodedName)
 		} else {
-			name = decodeURIComponent(pathnames[pathnames.length - 1] + '.jpg')
+			name = path.join('background', decodedName) + '.jpg'
 		}
 		urlToDownload = imageData
 		break
-	case 'attachment':
+	case imageTypes.backgroundThumb:
+		// seperate path into chunks and select last part
+		pathnames = new URL(imageData).pathname.split('/')
+		decodedName = decodeURIComponent(pathnames[pathnames.length - 1])
+		if (imageData.match(/\/\S+([.]\w+)$/)) {
+			// url does have file extension
+			name = path.join('background/thumbs', decodedName)
+		} else {
+			name = path.join('background/thumbs', decodedName) + '.jpg'
+		}
+		urlToDownload = imageData
+		break
+	case imageTypes.attachment:
 		var extension = imageData.url.match(/.+([.].+)/)
-		name = `${imageData.id}${extension[1]}`
+		name = path.join('attachments', `${imageData.id}${extension[1]}`)
 		urlToDownload = imageData.url
 		break
+	default:
+		throw new Error(`Wrong option in getImage`)
 	}
 	try {
 		return await trelloIO.checkExistence(name)
 	} catch (e) {
-		if (e !== 'ENOENT') { throw e }
+		if (e.code !== 'ENOENT') { throw e }
 		// download if needed
 		trelloIO.saveImage(name, await downloadImage(urlToDownload))
+		if (options.type === imageTypes.backgroundThumb) {
+			return globalProperties.getPath() + name
+		}
 		return globalProperties.getPath() + name
 	}
 }
@@ -277,3 +296,8 @@ function trelloApiPutRequest (path) {
 	})
 }
 // #endregion
+export const imageTypes = Object.freeze({
+	background: 0,
+	attachment: 1,
+	backgroundThumb: 2
+})

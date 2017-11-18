@@ -36,7 +36,7 @@ class TrelloModule extends React.Component {
 		ipcRenderer.send('trelloGetBoards')
 		ipcRenderer.on('trelloGetBoards-reply', (event, boards) => {
 			var boardComponents = boards.map((board) => {
-				return <BoardButton name={board.name} id={board.id}/>
+				return <BoardButton boardData={board} id={board.id} key={board.id}/>
 			})
 			this.setState({data: boardComponents})
 		})
@@ -71,11 +71,11 @@ class BoardButton extends React.Component {
 	}
 
 	openBoard () {
-		ipcRenderer.send('trelloOpenBoard', this.props.id)
+		ipcRenderer.send('trelloOpenBoard', this.props.boardData.id)
 	}
 
 	render () {
-		return <button onClick={this.openBoard} className='button' id={this.props.id}>{this.props.name}</button>
+		return <button onClick={this.openBoard} className='button' id={this.props.boardData.id}>{this.props.boardData.name}</button>
 	}
 }
 
@@ -125,7 +125,7 @@ class HelperModule extends React.Component {
 	}
 }
 
-class Homepage extends React.Component {
+export default class Homepage extends React.Component {
 	constructor (props) {
 		super(props)
 		this.clearCache = this.clearCache.bind(this)
@@ -158,8 +158,4 @@ class Homepage extends React.Component {
 			</div>
 		)
 	}
-}
-
-module.exports = {
-	Homepage: Homepage
 }

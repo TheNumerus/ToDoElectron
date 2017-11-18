@@ -1,5 +1,5 @@
-const ReactDOM = require('react-dom')
-const React = require('react')
-const {Homepage} = require('./homepageComponents')
+import React from 'react'
+import ReactDOM from 'react-dom'
+import Homepage from './homepageComponents'
 
 ReactDOM.render(<Homepage/>, document.querySelector('#container'))
