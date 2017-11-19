@@ -19,7 +19,7 @@ function openURL (url) {
 
 function createWindow () {
 	var size = settings.windowSize.get()
-	mainWindow = new BrowserWindow({ width: size.x, height: size.y, experimentalFeatures: true, show: false })
+	mainWindow = new BrowserWindow({ width: size.x, height: size.y, minHeight: 480, minWidth: 640, experimentalFeatures: true, show: false })
 	if (size.maximized) {
 		mainWindow.maximize()
 	}

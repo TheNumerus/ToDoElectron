@@ -1,3 +1,5 @@
+import HelperUI from './HelperUI'
+import * as path from 'path'
 const React = require('react')
 const ipcRenderer = require('electron').ipcRenderer
 const globalProperties = require('electron').remote.require('./globalProperties').default
@@ -58,7 +60,7 @@ class TrelloModule extends React.Component {
 				</div>
 				{authorizeButton}
 				{authorizedEelements}
-				<div>{this.state.data}</div>
+				<div className='dataContainer'>{this.state.data}</div>
 			</div>
 		)
 	}
@@ -75,7 +77,20 @@ class BoardButton extends React.Component {
 	}
 
 	render () {
-		return <button onClick={this.openBoard} className='button' id={this.props.boardData.id}>{this.props.boardData.name}</button>
+		var element = null
+		if (this.props.boardData.prefs.backgroundImage === null) {
+			element = <div className='boardBtnCover' style={{backgroundColor: this.props.boardData.prefs.backgroundColor}}></div>
+		} else {
+			var bgrImgUrl = this.props.boardData.prefs.backgroundImageScaled[0].url
+			var bgrImg = bgrImgUrl.match(/.*\/(.*[.].*)/)[1]
+			element = <img className='boardBtnCover' src={path.join(globalProperties.getPath(), 'background', 'thumbs', bgrImg)}/>
+		}
+		return (
+			<div className='boardBtn' onClick={this.openBoard}>
+				{element}
+				<div className='boardBtnCaption'><span>{this.props.boardData.name}</span></div>
+			</div>
+		)
 	}
 }
 

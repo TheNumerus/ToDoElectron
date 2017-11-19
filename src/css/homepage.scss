@@ -1,35 +1,94 @@
 .bottomInfo{
-    position: absolute;
-    bottom: 0px;
-    right: 0px;
-    padding: 5px;
-    color: white;
-    width: 100%;
-    text-align: right;
-    background: rgba(0,0,0,0.5);
+	position: absolute;
+	bottom: 0px;
+	right: 0px;
+	padding: 5px;
+	color: white;
+	width: 100%;
+	text-align: right;
+	background: rgba(0,0,0,0.5);
 }
 
 .title{
-    font-family: 'Montserrat';
-    font-weight: bold;
-    font-size: 275%;
-    background: rgba(0,0,0,0.5);
-    color: white;
-    margin: 0;
-    padding: 10px;
+	font-family: 'Montserrat';
+	font-weight: bold;
+	font-size: 275%;
+	background: rgba(0,0,0,0.5);
+	color: white;
+	margin: 0;
+	padding: 10px;
 }
 
 .container{
-    padding: 5px;
+	padding: 5px;
 }
 
 .moduleTitle{
-    font-size: 200%;
-    margin: 10px;
-    font-family: 'Montserrat';
-    font-weight: bold;
+	font-size: 200%;
+	margin: 10px;
+	font-family: 'Montserrat';
+	font-weight: bold;
 }
 
 .homeModule{
-    margin: 40px 5px;
+	margin: 40px 5px;
+}
+
+.dataContainer{
+	display: flex;
+	flex-wrap: wrap;
+}
+
+$btnWidth: 180px;
+$btnHeight: 120px;
+.boardBtn{
+	user-select: none;
+	border-radius: 3px;
+	animation-name: btnHoverDisable;
+	animation-duration: 0.1s;
+	margin: 5px;
+	width:$btnWidth;
+	height:$btnHeight;
+	flex: 0 0 auto;
+	overflow:hidden;
+	display:grid;
+	grid-template-rows: ($btnHeight - 40px) 40px;
+	grid-template-areas:
+	"."
+	"caption";
+
+	.boardBtnCover{
+		width:$btnWidth;
+		height:$btnHeight;
+		object-fit:cover;
+	}
+	
+	.boardBtnCaption{
+		background-Color:rgba(0,0,0,0.5);
+		color:white;
+		grid-area:caption;
+		text-align: center;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		span{
+			overflow: hidden;
+			text-overflow: ellipsis;
+			max-width: 160px;
+			max-height: 40px;
+		}
+	}
+}
+.boardBtn:hover{
+	animation-name: btnHover;
+	animation-duration: 0.1s;
+	transform:scale(1.05,1.05);
+}
+@keyframes btnHover {
+    from {transform:scale(1.0,1.0);}
+    to {transform:scale(1.05,1.05);}
+}
+@keyframes btnHoverDisable {
+    from {transform:scale(1.05,1.05);}
+    to {transform:scale(1.0,1.0);}
 }
