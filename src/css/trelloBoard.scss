@@ -83,15 +83,17 @@ $blur: if($useblur, blur(30px), none);
                     }
                 }
             }
-            .cardComponent:hover {
-                animation-name: fadeIn;
-                animation-duration: 0.1s;
-                background-color: rgba(255,255,255,0.75);
-            }
+        }
+        .cardComponent:hover, .addListButton:hover, .addCardButton:hover {
+            animation-name: fadeIn;
+            animation-duration: 0.1s;
+            background-color: rgba(255,255,255,0.75);
         }
         .addListButton, .addCardButton{
             padding: 5px;
             background: rgba(255,255,255,0.5);
+            animation-name: fadeOut;
+            animation-duration: 0.1s;
             border: 0;
             margin: 0 auto;
             width: 100%;

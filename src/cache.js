@@ -114,16 +114,18 @@ const calls = {
 				}
 			})
 		},
-		addCard: (idList, name) => {
+		addCard: (data) => {
 			var found = false
 			cache.sources.trello.boards.values.forEach((board) => {
-				if (board.values === undefined) return // handle non-cached boards
-				board.values.forEach((list) => {
-					if (!found && list.id === idList) {
-						found = true
-						list.cards.push({name: name})
-					}
-				})
+				if (board.id === data.idBoard) {
+					board.values.forEach((list) => {
+						if (!found && list.id === data.idList) {
+							found = true
+							list.cards.push({name: data.name})
+							saveCache()
+						}
+					})
+				}
 			})
 		},
 		getCard: (cardId) => {

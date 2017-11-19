@@ -72,26 +72,19 @@ function handleIpcCalls () {
 		}
 	})
 
-	ipcMain.on('trelloGetBoardData', (event, boardId, forceUpdate) => {
-		var boardData = cacheModule.calls.trello.getBoardData(boardId)
-		if (forceUpdate === true) {
-			getBoardData(boardId, boardData, event)
-		} else if (cacheModule.calls.helper.checkInvalidity(boardData)) {
-			getBoardData(boardId, boardData, event)
-		} else {
-			getBackground(boardData.prefs, event)
-			event.sender.send('trelloGetBoardData-reply', boardData)
-		}
-	})
+	ipcMain.on('trelloGetBoardData', (event, boardId, forceUpdate) => boardUpdate(event, boardId, forceUpdate))
 
 	ipcMain.on('trelloOpenBoard', (event, arg) => {
 		windowManager.openURL(new URL('file://' + __dirname + '/board.html?id=' + arg).toString())
 	})
 
-	ipcMain.on('trelloAddCard', (event, idList, name) => {
-		cacheModule.calls.trello.addCard(idList, name)
+	ipcMain.on('trelloAddCard', (event, data) => {
 		// TODO add offline card adding
-		TrelloApiNet.addCard({name: 'testCard', idList: idList})
+		cacheModule.calls.trello.addCard(data)
+		if (data.name !== '') {
+			TrelloApiNet.addCard(data)
+		}
+		boardUpdate(event, data.idBoard, true)
 	})
 
 	ipcMain.on('trelloAddList', (event, data) => {
@@ -182,6 +175,17 @@ function handleIpcCalls () {
 				TrelloApiNet.getImage(attachment, {type: TrelloApiNet.imageTypes.attachment})
 			}
 		})
+	}
+	function boardUpdate (event, boardId, forceUpdate) {
+		var boardData = cacheModule.calls.trello.getBoardData(boardId)
+		if (forceUpdate === true) {
+			getBoardData(boardId, boardData, event)
+		} else if (cacheModule.calls.helper.checkInvalidity(boardData)) {
+			getBoardData(boardId, boardData, event)
+		} else {
+			getBackground(boardData.prefs, event)
+			event.sender.send('trelloGetBoardData-reply', boardData)
+		}
 	}
 }
 

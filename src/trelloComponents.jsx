@@ -391,16 +391,48 @@ class BoardName extends React.Component {
 class AddCardButton extends React.Component {
 	constructor (props) {
 		super(props)
-		this.handleClick = this.handleClick.bind(this)
+		this.state = {clicked: false, name: ''}
+		this.clicked = this.clicked.bind(this)
+		this.finishEdit = this.finishEdit.bind(this)
+		this.handleChange = this.handleChange.bind(this)
 	}
-	handleClick () {
-		this.props.handleClick()
-		ipcRenderer.send('trelloAddCart', this.props.listId)
+
+	clicked () {
+		this.setState({clicked: true})
+	}
+
+	finishEdit (event) {
+		this.setState({name: '', clicked: false})
+		ipcRenderer.send('trelloAddCard', {name: event.target.value, idList: this.props.listId, idBoard: boardId})
+	}
+
+	componentDidUpdate () {
+		autosize.update(this.nameInput)
+	}
+
+	handleChange (event) {
+		this.setState({name: event.target.value})
+	}
+
+	componentWillUnmount () {
+		autosize.destroy(this.nameInput)
 	}
 
 	render () {
+		var element = this.state.clicked
+			? <textarea rows='1'
+				onChange={this.handleChange}
+				value={this.state.name}
+				onBlur={this.finishEdit}
+				ref={(input) => {
+					this.nameInput = input
+					autosize(input)
+				}}/>
+			: <button className='addCardButton' onClick={this.clicked}>Click to add new card</button>
 		return (
-			<button className='addCardButton' onClick={this.handleClick}><i className="fa fa-plus" aria-hidden="true"></i></button>
+			<div>
+				{element}
+			</div>
 		)
 	}
 }
