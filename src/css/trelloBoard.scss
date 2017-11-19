@@ -88,13 +88,13 @@ $blur: if($useblur, blur(30px), none);
                 animation-duration: 0.1s;
                 background-color: rgba(255,255,255,0.75);
             }
-            .addCardButton{
-                padding: 5px;
-                background: rgba(255,255,255,0.5);
-                border: 0;
-                margin: 0 auto;
-                width: 100%;
-            }
+        }
+        .addListButton, .addCardButton{
+            padding: 5px;
+            background: rgba(255,255,255,0.5);
+            border: 0;
+            margin: 0 auto;
+            width: 100%;
         }
         .cardContainer::-webkit-scrollbar {
             display: none;
@@ -144,7 +144,7 @@ body{
     opacity: 0.5;
 }
 
-.dueLabel{
+.dueLabel, .checkFull{
     padding: 1px 5px;
     border-radius: 1px;
 }
@@ -156,7 +156,7 @@ body{
     background-color: #b43c27;
     color: white;
 }
-.dueComplete {
+.dueComplete, .checkFull {
     background-color: #a1ca30;
     color: white;
 }

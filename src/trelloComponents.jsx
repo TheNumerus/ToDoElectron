@@ -76,7 +76,7 @@ class AddableList extends React.Component {
 					this.nameInput = input
 					autosize(input)
 				}}/>
-			: <button onClick={this.clicked}>Click to add card</button>
+			: <button className='addListButton' onClick={this.clicked}>Click to add new list</button>
 		return (
 			<div className='listComponent'>
 				{element}
@@ -138,7 +138,6 @@ class CardComponent extends React.Component {
 		var card = this.props.card
 		// setting these variables to null, so React won't create any DOM element
 		var labels = null
-		var checks = null
 		var desc = null
 		var due = null
 		var comments = null
@@ -148,10 +147,6 @@ class CardComponent extends React.Component {
 			labels = card.labels.map((label) => {
 				return <Label key={label.id} labelData={label}/>
 			})
-
-			if (card.badges.checkItems !== 0) {
-				checks = <div><i className="fa fa-check-square-o"></i>{` ${card.badges.checkItemsChecked}/${card.badges.checkItems}`}</div>
-			}
 
 			if (card.desc !== '') {
 				desc = <div><i className="fa fa-align-left cardInfoDescIcon"></i></div>
@@ -182,7 +177,10 @@ class CardComponent extends React.Component {
 				<div className='cardTitle'>{card.name}</div>
 				<div className='cardInfo'>{due}
 					<DueDate cardData={card}/>
-					{desc}{checks}{comments}{attachments}
+					{desc}
+					<CheckListBadge badges={card.badges}/>
+					{comments}
+					{attachments}
 				</div>
 			</div>
 		)
@@ -221,6 +219,20 @@ class DueDate extends React.Component {
 		}
 		return (
 			<div className={classes.join(' ')}><i className='fa fa-calendar-o'></i>{dateString}</div>
+		)
+	}
+}
+
+class CheckListBadge extends React.Component {
+	render () {
+		if (this.props.badges.checkItems === 0) {
+			return null
+		}
+		return (
+			<div className={this.props.badges.checkItemsChecked === this.props.badges.checkItems ? 'checkFull' : ''}>
+				<i className="fa fa-check-square-o"></i>
+				{` ${this.props.badges.checkItemsChecked}/${this.props.badges.checkItems}`}
+			</div>
 		)
 	}
 }
@@ -291,7 +303,6 @@ export default class Board extends React.Component {
 	handleBackgroundScroll () {
 		var target = document.querySelector('.boardRoot')
 		target.addEventListener('wheel', (e) => {
-			console.log(e)
 			if (target === e.target) {
 				e.preventDefault()
 				window.scrollBy({behavior: 'smooth', left: e.deltaY * 5, top: 0})
