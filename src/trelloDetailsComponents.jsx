@@ -66,7 +66,7 @@ export default class CardDetail extends React.Component {
 						<Name cardData={cardData}/>
 						<Description cardData={cardData}/>
 						<div>{labels}</div>
-						<DueDate due={cardData.due}/>
+						<DueDate cardData={cardData}/>
 						{checklists}
 						{comments}
 					</div>
@@ -323,12 +323,41 @@ class Name extends React.Component {
 
 class DueDate extends React.Component {
 	render () {
-		if (this.props.due === null) { return null }
+		var classes = ['dueLabel']
+		var due = this.props.cardData.due
+		// handle non set due date
+		if (due === null) { return null }
+		var date = new Date(due)
 		var today = new Date()
-		var date = new Date(this.props.due)
-		var dateString = ` ${date.getDate()}.${date.getMonth() + 1}.`
+		var dateString = ` ${date.getDate()}. ${date.getMonth() + 1}. ${today.getFullYear() === date.getFullYear() ? '' : date.getFullYear()}`
+		const clock = ` - ${date.getHours()}:${date.getMinutes() > 9 ? date.getMinutes() : '0' + date.getMinutes()}`
+		if (this.props.cardData.dueComplete) {
+			classes.push('dueComplete')
+		} else {
+			switch (HelperUI.returnDueState(date.getTime())) {
+			case HelperUI.dueStates.overdueNear:
+				classes.push('dueOverdueNear')
+				dateString += clock
+				break
+			case HelperUI.dueStates.overdue:
+				classes.push('dueOverdue')
+				break
+			case HelperUI.dueStates.near:
+				classes.push('dueNear')
+				dateString += clock
+				break
+			case HelperUI.dueStates.later:
+				break
+			default:
+				throw new Error(`Wrong date on card with id ${this.props.cardData.id}`)
+			}
+		}
 		return (
-			<div className={today > date ? 'dueLabel' : ''}><i className='fa fa-calendar-o'></i>{dateString}</div>
+			<div className={classes.join(' ')}>
+				<i className='fa fa-calendar-o'></i>
+				{dateString}
+				<input type='checkbox'/>
+			</div>
 		)
 	}
 }
