@@ -180,7 +180,7 @@ export async function addList (data) {
 /**
  * Sends request to TrelloAPI
  * @param {string} path - path to send request to
- * @returns {Promise<String>} - data from request
+ * @returns {Promise<object>} - data from request
  */
 function trelloApiRequest (path) {
 	return new Promise((resolve, reject) => {

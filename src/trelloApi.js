@@ -1,4 +1,5 @@
 import GlobalProperties from './globalProperties'
+import * as path from 'path'
 const {BrowserWindow, ipcMain} = require('electron')
 const URL = require('url').URL
 const OAuth = require('oauth').OAuth
@@ -130,13 +131,25 @@ function handleIpcCalls () {
 		windowManager.openURL(new URL('file://' + __dirname + '/trelloDetails.html?id=' + arg).toString())
 	})
 	// #endregion ipc
+
+	/**
+	 * Gets all board data and sends it to renderer process
+	 * @param {string} boardId 
+	 * @param {object} boardData
+	 * @param {string} boardData.name
+	 * @param {object} boardData.prefs
+	 * @param {Array<object>} boardData.values
+	 * @param {event} event 
+	 */
 	async function getBoardData (boardId, boardData, event) {
 		var json = await TrelloApiNet.getBoardData(boardId)
-		boardData.values = json.lists
+		// send background color right away
+		getBackground(json.prefs, event)
 		boardData.name = json.name
 		boardData.prefs = json.prefs
+		boardData.values = json.lists
 		// sort cards
-		for (let i = 0; i < boardData.values.length; i++) {
+		for (let i = 0; i < json.lists.length; i++) {
 			boardData.values[i].cards = []
 			json.cards.forEach((card) => {
 				if (card.idList === boardData.values[i].id) {
@@ -144,7 +157,6 @@ function handleIpcCalls () {
 				}
 			})
 		}
-		await getBackground(boardData.prefs, event)
 		for (var listIndex in boardData.values) {
 			for (var cardIndex in boardData.values[listIndex].cards) {
 				if (boardData.values[listIndex].cards[cardIndex].badges.attachments > 0) {
@@ -157,15 +169,19 @@ function handleIpcCalls () {
 		boardData.date = Date.now()
 		cacheModule.calls.trello.setBoardData(boardId, boardData)
 		cacheModule.saveCache()
-		event.sender.send('trelloGetBoardData-reply', boardData, boardId)
+		event.sender.send('trelloGetBoardData-reply', boardData)
 	}
 
 	async function getBackground (prefs, event) {
 		// download background if necessary
 		if (prefs.backgroundImage !== null) {
-			event.sender.send('trelloSetBackground', await TrelloApiNet.getImage(prefs.backgroundImage, {type: TrelloApiNet.imageTypes.background}))
-		} else if (prefs.backgroundColor !== null) {
-			event.sender.send('trelloSetBackground', prefs.backgroundColor)
+			// we send blurry version for faster loading, in background we download full resolution image and then we send it
+			var filename = prefs.backgroundImageScaled[0].url.match(/.*\/(.*)/)[1]
+			var pathName = path.join(GlobalProperties.getPath(), 'background', 'thumbs', filename)
+			event.sender.send('trelloSetBackground', pathName, {preview: true})
+			event.sender.send('trelloSetBackground', await TrelloApiNet.getImage(prefs.backgroundImage, {type: TrelloApiNet.imageTypes.background}), {preview: false})
+		} else {
+			event.sender.send('trelloSetBackground', prefs.backgroundColor, {preview: false})
 		}
 	}
 

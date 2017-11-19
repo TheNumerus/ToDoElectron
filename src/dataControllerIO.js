@@ -12,8 +12,6 @@ async function initialize () {
 		await checkForFolders()
 	} catch (e) {
 		await createFolders()
-		await cacheModule.saveCache()
-		return
 	}
 	try {
 		await cacheModule.loadCache()

@@ -275,18 +275,27 @@ export default class Board extends React.Component {
 	}
 
 	handleIpc () {
-		ipcRenderer.on('trelloGetBoardData-reply', (event, boardData, imagePath) => {
+		ipcRenderer.on('trelloGetBoardData-reply', (event, boardData) => {
 			this.setState({boardData: boardData})
 			// stop spinning refresh icon
 			document.querySelector('#updateIcon').classList.remove('fa-spin')
 		})
 
-		ipcRenderer.on('trelloSetBackground', (event, imagePath) => {
-		// handle solid color background
+		ipcRenderer.on('trelloSetBackground', (event, imagePath, options) => {
+			// handle solid color background
 			if (imagePath[0] === '#') {
 				document.querySelector('body').style.backgroundColor = imagePath
 			} else {
-				document.querySelector('body').background = imagePath
+				switch (options.preview) {
+				case true:
+					document.querySelector('body').background = imagePath
+					break
+				case false:
+					document.querySelector('body').background = imagePath
+					break
+				default:
+					throw new Error('wrong option type in trelloSetBackground')
+				}
 			}
 		})
 	}
