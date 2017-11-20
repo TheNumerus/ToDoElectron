@@ -20,28 +20,36 @@ class TrelloModule extends React.Component {
 		this.authorize = this.authorize.bind(this)
 		this.getUserInfo = this.getUserInfo.bind(this)
 		this.getBoards = this.getBoards.bind(this)
+		this.handleIpc()
 		this.state = {data: ''}
 	}
 
 	authorize () {
 		ipcRenderer.send('trelloAuthorize')
 	}
-
-	getUserInfo () {
-		ipcRenderer.send('trelloGetAllUserInfo')
+	handleIpc () {
 		ipcRenderer.on('trelloGetAllUserInfo-reply', (event, value) => {
 			this.setState({data: JSON.stringify(value)})
 		})
-	}
-
-	getBoards () {
-		ipcRenderer.send('trelloGetBoards')
 		ipcRenderer.on('trelloGetBoards-reply', (event, boards) => {
 			var boardComponents = boards.map((board) => {
 				return <BoardButton boardData={board} id={board.id} key={board.id}/>
 			})
 			this.setState({data: boardComponents})
 		})
+	}
+	getUserInfo () {
+		ipcRenderer.send('trelloGetAllUserInfo')
+	}
+
+	componentWillReceiveProps (nextprops) {
+		if (nextprops.authorized) {
+			ipcRenderer.send('trelloGetBoards')
+		}
+	}
+
+	getBoards () {
+		ipcRenderer.send('trelloGetBoards')
 	}
 
 	render () {
@@ -152,6 +160,9 @@ export default class Homepage extends React.Component {
 	getAuthorization () {
 		ipcRenderer.send('trelloIsAuthorized')
 		ipcRenderer.on('trelloIsAuthorized-reply', (event, data) => {
+			if (data) {
+				ipcRenderer.send('trelloGetBoards')
+			}
 			this.setState({trelloAuthorized: data})
 		})
 	}

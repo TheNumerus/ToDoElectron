@@ -56,7 +56,7 @@ function handleIpcCalls () {
 			boards.date = Date.now()
 			cacheModule.calls.trello.setBoards(boards)
 			cacheModule.saveCache()
-			event.sender.send('trelloGetBoards-reply', json)
+			windowManager.sendMessage('trelloGetBoards-reply', json)
 			// now download images in background
 			boards.values.forEach(board => {
 				if (board.prefs.backgroundImageScaled !== null) {
@@ -69,7 +69,7 @@ function handleIpcCalls () {
 					TrelloApiNet.getImage(board.prefs.backgroundImageScaled[0].url, {type: TrelloApiNet.imageTypes.backgroundThumb})
 				}
 			})
-			event.sender.send('trelloGetBoards-reply', boards.values)
+			windowManager.sendMessage('trelloGetBoards-reply', boards.values)
 		}
 	})
 

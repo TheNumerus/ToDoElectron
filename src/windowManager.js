@@ -12,12 +12,12 @@ var mainWindow
  * Opens provided url in main window
  * @param {url.URL} url - url to load
  */
-function openURL (url) {
+export function openURL (url) {
 	history.push(url)
 	mainWindow.loadURL(url)
 }
 
-function createWindow () {
+export function createWindow () {
 	var size = settings.windowSize.get()
 	mainWindow = new BrowserWindow({ width: size.x, height: size.y, minHeight: 480, minWidth: 640, experimentalFeatures: true, show: false })
 	if (size.maximized) {
@@ -36,7 +36,7 @@ function createWindow () {
 	})
 }
 
-function save () {
+export function save () {
 	var size = mainWindow.getSize()
 	var maximized = mainWindow.isMaximized()
 	settings.windowSize.set({ x: size[0], y: size[1], maximized: maximized })
@@ -54,9 +54,12 @@ ipcMain.on('readyToShow', (event) => {
 	mainWindow.show()
 })
 
-module.exports = {
-	openURL: openURL,
-	save: save,
-	createWindow: createWindow,
-	getMainWindow: () => { return mainWindow }
+/**
+ * Sends message to renderer process
+ * 
+ * @param {string} channel 
+ * @param {any} data 
+ */
+export function sendMessage (channel, data) {
+	mainWindow.webContents.send(channel, data)
 }
