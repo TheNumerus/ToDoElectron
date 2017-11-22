@@ -21,7 +21,7 @@ class TrelloModule extends React.Component {
 		this.getUserInfo = this.getUserInfo.bind(this)
 		this.getBoards = this.getBoards.bind(this)
 		this.handleIpc()
-		this.state = {data: ''}
+		this.state = {data: '', updating: false}
 	}
 
 	authorize () {
@@ -35,7 +35,7 @@ class TrelloModule extends React.Component {
 			var boardComponents = boards.map((board) => {
 				return <BoardButton boardData={board} id={board.id} key={board.id}/>
 			})
-			this.setState({data: boardComponents})
+			this.setState({data: boardComponents, updating: false})
 		})
 	}
 	getUserInfo () {
@@ -43,13 +43,17 @@ class TrelloModule extends React.Component {
 	}
 
 	componentWillReceiveProps (nextprops) {
-		if (nextprops.authorized) {
+		if (nextprops.authorized && !this.state.updating) {
 			ipcRenderer.send('trelloGetBoards')
+			this.setState({updating: true})
 		}
 	}
 
 	getBoards () {
-		ipcRenderer.send('trelloGetBoards')
+		if (!this.state.updating) {
+			ipcRenderer.send('trelloGetBoards')
+			this.setState({updating: true})
+		}
 	}
 
 	render () {
@@ -169,7 +173,6 @@ export default class Homepage extends React.Component {
 
 	clearCache () {
 		ipcRenderer.send('clearCache')
-		this.getAuthorization()
 	}
 
 	render () {

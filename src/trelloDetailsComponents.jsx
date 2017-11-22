@@ -161,7 +161,7 @@ class ImageAttachment extends React.Component {
 	render () {
 		var extension = this.props.attData.url.match(/.+([.].+)/)
 		var filename = `${this.props.attData.id}${extension[1]}`
-		var path = globalProperties.getPath() + filename
+		var path = `${globalProperties.getPath()}attachments/${filename}`
 		var date = new Date(this.props.attData.date)
 		var dateString = `${date.getUTCDate()}.${date.getUTCMonth() + 1}.${date.getUTCFullYear()} - ${date.getUTCHours()}:${date.getUTCMinutes()}`
 		return (

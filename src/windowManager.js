@@ -63,3 +63,7 @@ ipcMain.on('readyToShow', (event) => {
 export function sendMessage (channel, data) {
 	mainWindow.webContents.send(channel, data)
 }
+
+export function getMainWindow () {
+	return mainWindow
+}

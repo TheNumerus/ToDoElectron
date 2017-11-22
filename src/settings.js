@@ -9,7 +9,8 @@ var settings = {
 	},
 	theme: 'default',
 	board: {
-		useProgessBars: false
+		useProgessBars: false,
+		animateGIFs: true
 	}
 }
 

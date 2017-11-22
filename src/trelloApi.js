@@ -1,11 +1,11 @@
 import GlobalProperties from './globalProperties'
 import * as path from 'path'
+import * as windowManager from './windowManager'
 const {BrowserWindow, ipcMain} = require('electron')
 const URL = require('url').URL
 const OAuth = require('oauth').OAuth
 const TrelloApiNet = require('./trelloApiNet')
 const TrelloApiIO = require('./trelloApiIO')
-const windowManager = require('./windowManager')
 const cacheModule = require('./cache')
 
 // constants and variables for connection to trello api
@@ -50,13 +50,17 @@ function handleIpcCalls () {
 		if (cacheModule.calls.helper.checkInvalidity(boards)) {
 			var json = await TrelloApiNet.getBoards()
 			// format data for internal use
-			boards.values = json.map((board) => {
-				return {id: board.id, name: board.name, prefs: board.prefs}
+			// clean up first
+			boards.values = []
+			json.forEach((board) => {
+				if (!board.closed) {
+					boards.values.push({id: board.id, name: board.name, prefs: board.prefs})
+				}
 			})
 			boards.date = Date.now()
 			cacheModule.calls.trello.setBoards(boards)
 			cacheModule.saveCache()
-			windowManager.sendMessage('trelloGetBoards-reply', json)
+			windowManager.sendMessage('trelloGetBoards-reply', boards)
 			// now download images in background
 			boards.values.forEach(board => {
 				if (board.prefs.backgroundImageScaled !== null) {
