@@ -38,7 +38,7 @@ function save () {
 	})
 }
 
-export var functions = {
+var functions = {
 	windowSize: {
 		get: () => {
 			return settings.windowSize
@@ -66,3 +66,5 @@ export var functions = {
 	},
 	save: save
 }
+// TODO rewrite
+module.exports = functions

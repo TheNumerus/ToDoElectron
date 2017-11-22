@@ -98,6 +98,34 @@ $blur: if($useblur, blur(30px), none);
             margin: 0 auto;
             width: 100%;
         }
+        .addCardInputContainer{
+            padding: 5px;
+            background: rgba(255,255,255,0.5);
+        }
+        .addableInput{
+            resize: none;
+            border: none;
+            outline: none;
+            font-family: 'Roboto';
+            &.card{
+                width: 300px;
+                font-size: 100%;
+                background: none;
+                &:focus{
+                    border-bottom: 2px solid black;
+                }
+            }
+            &.list{
+                width: 316px;
+                background: none;
+                font-size: 18px;
+                font-weight: bold;
+                margin: 10px 2px;
+                &:focus{
+                    border-bottom: 2px solid black;
+                }
+            }
+        }
         .cardContainer::-webkit-scrollbar {
             display: none;
         }

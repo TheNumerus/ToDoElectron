@@ -73,24 +73,25 @@ function handleIpcCalls () {
 		}
 	})
 
-	ipcMain.on('trelloGetBoardData', (event, boardId, forceUpdate) => boardUpdate(event, boardId, forceUpdate))
+	ipcMain.on('trelloGetBoardData', (event, boardId, options) => boardUpdate(event, boardId, options))
 
 	ipcMain.on('trelloOpenBoard', (event, arg) => {
 		windowManager.openURL(new URL('file://' + __dirname + '/board.html?id=' + arg).toString())
 	})
 
-	ipcMain.on('trelloAddCard', (event, data) => {
+	ipcMain.on('trelloAddCard', async (event, data) => {
 		// TODO add offline card adding
 		cacheModule.calls.trello.addCard(data)
 		if (data.name !== '') {
-			TrelloApiNet.addCard(data)
+			await TrelloApiNet.addCard(data)
+			boardUpdate(event, data.idBoard, {forceUpdate: true, refresh: true})
 		}
-		boardUpdate(event, data.idBoard, true)
 	})
 
-	ipcMain.on('trelloAddList', (event, data) => {
+	ipcMain.on('trelloAddList', async (event, data) => {
 		if (data.name !== '') {
-			TrelloApiNet.addList(data)
+			await TrelloApiNet.addList(data)
+			boardUpdate(event, data.idBoard, {forceUpdate: true, refresh: true})
 		}
 	})
 
@@ -141,10 +142,12 @@ function handleIpcCalls () {
 	 * @param {Array<object>} boardData.values
 	 * @param {event} event 
 	 */
-	async function getBoardData (boardId, boardData, event) {
+	async function getBoardData (boardId, boardData, event, refresh) {
 		var json = await TrelloApiNet.getBoardData(boardId)
-		// send background color right away
-		getBackground(json.prefs, event)
+		if (!refresh) {
+			// send background color right away
+			getBackground(json.prefs, event)
+		}
 		boardData.name = json.name
 		boardData.prefs = json.prefs
 		boardData.values = json.lists
@@ -192,10 +195,17 @@ function handleIpcCalls () {
 			}
 		})
 	}
-	function boardUpdate (event, boardId, forceUpdate) {
+	/**
+	 * @param {event} event 
+	 * @param {string} boardId 
+	 * @param {object} options
+	 * @param {bool} options.forceUpdate
+	 * @param {bool} options.refresh
+	 */
+	function boardUpdate (event, boardId, options) {
 		var boardData = cacheModule.calls.trello.getBoardData(boardId)
-		if (forceUpdate === true) {
-			getBoardData(boardId, boardData, event)
+		if (options.forceUpdate === true) {
+			getBoardData(boardId, boardData, event, options.refresh)
 		} else if (cacheModule.calls.helper.checkInvalidity(boardData)) {
 			getBoardData(boardId, boardData, event)
 		} else {

@@ -54,12 +54,19 @@ class AddableList extends React.Component {
 	}
 
 	finishEdit (event) {
-		this.setState({name: event.target.value})
-		ipcRenderer.send('trelloAddList', {name: event.target.value, idBoard: boardId})
+		if (event.target.value === '') {
+			this.setState({clicked: false})
+		} else {
+			this.setState({name: '', clicked: false})
+			ipcRenderer.send('trelloAddList', {name: event.target.value, idBoard: boardId})
+		}
 	}
 
 	componentDidUpdate () {
 		autosize.update(this.nameInput)
+		if (this.state.clicked) {
+			this.nameInput.focus()
+		}
 	}
 
 	handleChange (event) {
@@ -67,21 +74,27 @@ class AddableList extends React.Component {
 	}
 
 	render () {
-		var element = this.state.clicked
-			? <textarea rows='1'
-				onChange={this.handleChange}
-				value={this.state.name}
-				onBlur={this.finishEdit}
-				ref={(input) => {
-					this.nameInput = input
-					autosize(input)
-				}}/>
-			: <button className='addListButton' onClick={this.clicked}>Click to add new list</button>
-		return (
-			<div className='listComponent'>
-				{element}
-			</div>
-		)
+		if (this.state.clicked) {
+			return (
+				<div className='listComponent'>
+					<textarea rows='1'
+						className='addableInput list'
+						onChange={this.handleChange}
+						value={this.state.name}
+						onBlur={this.finishEdit}
+						ref={(input) => {
+							this.nameInput = input
+							autosize(input)
+						}}/>
+				</div>
+			)
+		} else {
+			return (
+				<div className='listComponent'>
+					<button className='addListButton' onClick={this.clicked}>Click to add new list</button>
+				</div>
+			)
+		}
 	}
 }
 
@@ -303,7 +316,7 @@ export default class Board extends React.Component {
 	async componentDidMount () {
 		this.handleBackgroundScroll()
 		this.handleIpc()
-		ipcRenderer.send('trelloGetBoardData', boardId, false)
+		ipcRenderer.send('trelloGetBoardData', boardId, {forceUpdate: false, refresh: false})
 		if (connCheck.state) {
 			this.update()
 		}
@@ -335,7 +348,7 @@ export default class Board extends React.Component {
 
 	update () {
 		document.querySelector('#updateIcon').classList.add('fa-spin')
-		ipcRenderer.send('trelloGetBoardData', boardId, true)
+		ipcRenderer.send('trelloGetBoardData', boardId, {forceUpdate: true, refresh: true})
 	}
 
 	goBack () {
@@ -411,11 +424,18 @@ class AddCardButton extends React.Component {
 	}
 
 	finishEdit (event) {
-		this.setState({name: '', clicked: false})
-		ipcRenderer.send('trelloAddCard', {name: event.target.value, idList: this.props.listId, idBoard: boardId})
+		if (event.target.value === '') {
+			this.setState({clicked: false})
+		} else {
+			this.setState({name: '', clicked: false})
+			ipcRenderer.send('trelloAddCard', {name: event.target.value, idList: this.props.listId, idBoard: boardId})
+		}
 	}
 
 	componentDidUpdate () {
+		if (this.state.clicked) {
+			this.nameInput.focus()
+		}
 		autosize.update(this.nameInput)
 	}
 
@@ -428,20 +448,22 @@ class AddCardButton extends React.Component {
 	}
 
 	render () {
-		var element = this.state.clicked
-			? <textarea rows='1'
-				onChange={this.handleChange}
-				value={this.state.name}
-				onBlur={this.finishEdit}
-				ref={(input) => {
-					this.nameInput = input
-					autosize(input)
-				}}/>
-			: <button className='addCardButton' onClick={this.clicked}>Click to add new card</button>
-		return (
-			<div>
-				{element}
-			</div>
-		)
+		if (this.state.clicked) {
+			return (
+				<div className='addCardInputContainer'>
+					<textarea rows='1'
+						className='addableInput card'
+						onChange={this.handleChange}
+						value={this.state.name}
+						onBlur={this.finishEdit}
+						ref={(input) => {
+							this.nameInput = input
+							autosize(input)
+						}}/>
+				</div>
+			)
+		} else {
+			return <button className='addCardButton' onClick={this.clicked}>Click to add new card</button>
+		}
 	}
 }
