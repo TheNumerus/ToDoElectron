@@ -1,5 +1,5 @@
 import globalProperties from './globalProperties'
-const fs = require('fs')
+import * as fs from 'fs'
 
 var settings = {
 	windowSize: {
@@ -7,7 +7,10 @@ var settings = {
 		y: 900,
 		maximized: false
 	},
-	theme: 'default'
+	theme: 'default',
+	board: {
+		useProgessBars: false
+	}
 }
 
 function load () {
@@ -35,7 +38,7 @@ function save () {
 	})
 }
 
-var functions = {
+export var functions = {
 	windowSize: {
 		get: () => {
 			return settings.windowSize
@@ -63,5 +66,3 @@ var functions = {
 	},
 	save: save
 }
-
-module.exports = functions
