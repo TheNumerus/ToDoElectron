@@ -190,18 +190,12 @@ function trelloApiRequest (path) {
 			var completeResponse = ''
 			response.on('data', (chunk) => {
 				completeResponse += chunk.toString()
-				var error = handleResponseErrors(completeResponse)
-				if (error) {
-					reject(error)
+				if (response.statusCode !== 200) {
+					throw handleResponseErrors(completeResponse)
 				}
 			})
 			// long responses usually take more than one buffer, so we wait for all data to arrive
 			response.on('end', () => {
-				var error = handleResponseErrors(completeResponse)
-				if (error) {
-					reject(error)
-					return
-				}
 				// convert to JSON
 				json = JSON.parse(completeResponse)
 				resolve(json)
@@ -223,10 +217,8 @@ function downloadImage (path) {
 		var data = Buffer.alloc(0)
 		request.on('response', (response) => {
 			response.on('data', (chunk) => {
-				var error = handleResponseErrors(chunk)
-				if (error) {
-					reject(error)
-					return
+				if (response.statusCode !== 200) {
+					throw handleResponseErrors(chunk.toString())
 				}
 				// merge data into one buffer
 				data = Buffer.concat([data, chunk])
@@ -239,16 +231,21 @@ function downloadImage (path) {
 		request.end()
 	})
 }
-
+/**
+ * Cheks for invalid responses
+ * @param {string} chunk 
+ * @returns {Error}
+ */
 function handleResponseErrors (chunk) {
-	if (chunk.toString() === 'invalid token') {
-		return new Error('Invalid token')
-	} else if (chunk.toString() === 'invalid id') {
-		return new Error('Invalid id')
-	} else if (chunk === '') {
+	if (chunk === '') {
 		return new Error('Empty response')
-	} else if (chunk === 'Request Timeout') {
-		return new Error('Request Timeout')
+	} else {
+		const possibleErrors = ['invalid token', 'invalid id', 'Request Timeout']
+		for (let error of possibleErrors) {
+			if (error === chunk) {
+				return new Error(chunk)
+			}
+		}
 	}
 }
 
@@ -263,9 +260,11 @@ function trelloApiPostRequest (path) {
 			var completeResponse = ''
 			response.on('data', (chunk) => {
 				completeResponse += chunk.toString()
+				if (response.statusCode !== 200) {
+					throw handleResponseErrors(completeResponse)
+				}
 			})
 			response.on('end', () => {
-				handleResponseErrors(completeResponse, reject)
 				resolve()
 			})
 		})
@@ -285,9 +284,11 @@ function trelloApiPutRequest (path) {
 			var completeResponse = ''
 			response.on('data', (chunk) => {
 				completeResponse += chunk.toString()
+				if (response.statusCode !== 200) {
+					throw handleResponseErrors(completeResponse)
+				}
 			})
 			response.on('end', () => {
-				handleResponseErrors(completeResponse, reject)
 				resolve()
 			})
 		})
