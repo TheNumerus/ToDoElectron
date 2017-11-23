@@ -117,8 +117,8 @@ export async function getChecklist (idChecklist) {
 // #region UPDATERS
 /**
  * Updates card
- * @param {string} idCard 
- * @param {Array<Array<string>>} options 
+ * @param {string} idCard
+ * @param {Array<Array<string>>} options
  */
 export async function updateCard (idCard, options) {
 	var path = `/1/cards/${idCard}?`
@@ -130,8 +130,8 @@ export async function updateCard (idCard, options) {
 }
 /**
  * Updates list
- * @param {string} idList 
- * @param {Array<Array<string>>} options 
+ * @param {string} idList
+ * @param {Array<Array<string>>} options
  */
 export async function updateList (idList, options) {
 	var path = `/1/lists/${idList}?`
@@ -158,7 +158,7 @@ export async function updateBoard (idBoard, options) {
 // #region ADDERS
 /**
  * Adds card
- * @param {Object} data 
+ * @param {Object} data
  * @param {string} data.name
  * @param {string} data.idList
  */
@@ -168,7 +168,7 @@ export async function addCard (data) {
 
 /**
  * Adds list
- * @param {Object} data 
+ * @param {Object} data
  * @param {string} data.name
  * @param {string} data.idBoard
  */
@@ -233,7 +233,7 @@ function downloadImage (path) {
 }
 /**
  * Cheks for invalid responses
- * @param {string} chunk 
+ * @param {string} chunk
  * @returns {Error}
  */
 function handleResponseErrors (chunk) {
@@ -251,7 +251,7 @@ function handleResponseErrors (chunk) {
 
 /**
  * Sends POST request to Trello API
- * @param {string} path 
+ * @param {string} path
  */
 function trelloApiPostRequest (path) {
 	return new Promise((resolve, reject) => {
@@ -275,7 +275,7 @@ function trelloApiPostRequest (path) {
 
 /**
  * Sends PUT request to Trello API
- * @param {string} path 
+ * @param {string} path
  */
 function trelloApiPutRequest (path) {
 	return new Promise((resolve, reject) => {

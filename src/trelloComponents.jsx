@@ -363,9 +363,9 @@ export default class Board extends React.Component {
 		return (
 			<div id='lists'>
 				<div id='headerBoard'>
-					<button onClick={this.goBack} className='button back header'><i className='fa fa-arrow-left fa-2x'></i></button>
+					<button onClick={this.goBack} className='buttonHeader'><i className='fa fa-arrow-left fa-2x'></i></button>
 					<BoardName boardData={this.state.boardData}/>
-					<button onClick={this.update} className='button header' style={{marginLeft: 'auto'}}><i id='updateIcon' className='fa fa-refresh fa-2x'></i></button>
+					<button onClick={this.update} className='buttonHeader' style={{marginLeft: 'auto'}}><i id='updateIcon' className='fa fa-refresh fa-2x'></i></button>
 				</div>
 				<div className='boardRoot'>
 					{components}

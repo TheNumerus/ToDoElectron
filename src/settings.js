@@ -45,8 +45,8 @@ var functions = {
 			return settings.windowSize
 		},
 		set: (obj) => {
-			if (obj.x !== undefined || obj.y !== undefined) {
-				if (typeof (obj.x) === 'number' || typeof (obj.y) === 'number') {
+			if (obj.x !== undefined && obj.y !== undefined) {
+				if (typeof (obj.x) === 'number' && typeof (obj.y) === 'number') {
 					settings.windowSize.x = obj.x
 					settings.windowSize.y = obj.y
 					settings.windowSize.maximized = obj.maximized
@@ -55,6 +55,23 @@ var functions = {
 				}
 			} else {
 				throw new Error('invalid object in function setWindowSize')
+			}
+		}
+	},
+	board: {
+		get: () => {
+			return settings.board
+		},
+		set: (obj) => {
+			if (obj.animateGIFs !== undefined && obj.animateGIFs !== undefined) {
+				if (typeof (obj.animateGIFs) === 'boolean' && typeof (obj.animateGIFs) === 'boolean') {
+					settings.board.animateGIFs = obj.animateGIFs
+					settings.board.useProgessBars = obj.useProgessBars
+				} else {
+					throw new Error('invalid values in function setBoard')
+				}
+			} else {
+				throw new Error('invalid object in function setBoard')
 			}
 		}
 	},

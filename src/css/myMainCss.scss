@@ -28,3 +28,30 @@ body{
     border-radius: 3px;
     box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.325);
 }
+
+.buttonHeader{
+    background: rgba(0,0,0,0);
+    border: 0;
+    margin: 4px;
+    i{
+        color: white;
+    }
+    box-shadow: none;
+    &:focus, &:active{
+        outline: none;
+    }
+}
+
+.titleHeader{
+	font-family: 'Montserrat';
+	font-weight: bold;
+	background: rgba(0,0,0,0.5);
+	color: white;
+	margin: 0;
+	padding: 10px;
+	display: flex;
+	h1{
+		font-size: 44px;
+		margin: 0;
+	}
+}

@@ -178,12 +178,34 @@ export default class Homepage extends React.Component {
 	render () {
 		return (
 			<div>
-				<h1 className="title">ToDoElectron</h1>
+				<Header/>
 				<TrelloModule authorized={this.state.trelloAuthorized}/>
 				<GoogleModule/>
 				<OfflineModule/>
 				<HelperModule clearCache={this.clearCache}/>
 				<AppInfoBar/>
+			</div>
+		)
+	}
+}
+
+class Header extends React.Component {
+	constructor (props) {
+		super(props)
+		this.goToSettings = this.goToSettings.bind(this)
+	}
+
+	goToSettings () {
+		ipcRenderer.send('goToSettings')
+	}
+
+	render () {
+		return (
+			<div className="titleHeader">
+				<h1>ToDoElectron</h1>
+				<button className='buttonHeader' onClick={this.goToSettings} style={{marginLeft: 'auto'}}>
+					<i className='fa fa-wrench fa-3x'></i>
+				</button>
 			</div>
 		)
 	}

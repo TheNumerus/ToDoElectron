@@ -80,7 +80,7 @@ function handleIpcCalls () {
 	ipcMain.on('trelloGetBoardData', (event, boardId, options) => boardUpdate(event, boardId, options))
 
 	ipcMain.on('trelloOpenBoard', (event, arg) => {
-		windowManager.openURL(new URL('file://' + __dirname + '/board.html?id=' + arg).toString())
+		windowManager.openURL('board.html?id=' + arg)
 	})
 
 	ipcMain.on('trelloAddCard', async (event, data) => {
@@ -133,18 +133,18 @@ function handleIpcCalls () {
 	})
 
 	ipcMain.on('trelloOpenCard', (event, arg) => {
-		windowManager.openURL(new URL('file://' + __dirname + '/trelloDetails.html?id=' + arg).toString())
+		windowManager.openURL('/trelloDetails.html?id=' + arg)
 	})
 	// #endregion ipc
 
 	/**
 	 * Gets all board data and sends it to renderer process
-	 * @param {string} boardId 
+	 * @param {string} boardId
 	 * @param {object} boardData
 	 * @param {string} boardData.name
 	 * @param {object} boardData.prefs
 	 * @param {Array<object>} boardData.values
-	 * @param {event} event 
+	 * @param {event} event
 	 */
 	async function getBoardData (boardId, boardData, event, refresh) {
 		var json = await TrelloApiNet.getBoardData(boardId)
@@ -200,8 +200,8 @@ function handleIpcCalls () {
 		})
 	}
 	/**
-	 * @param {event} event 
-	 * @param {string} boardId 
+	 * @param {event} event
+	 * @param {string} boardId
 	 * @param {object} options
 	 * @param {bool} options.forceUpdate
 	 * @param {bool} options.refresh

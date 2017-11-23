@@ -18,7 +18,7 @@ export default class CardDetail extends React.Component {
 		ipcRenderer.send('trelloGetCardData', cardId, false)
 		if (connCheck.state) {
 			/* I have to comment this shit because fucking JS somehow managed to merge two seperate function calls into one,
-			 which returned comments and checklists twice. 
+			 which returned comments and checklists twice.
 			this.update() */
 		}
 	}
@@ -97,7 +97,7 @@ class Header extends React.Component {
 		return (
 			<div id='headerBoard'>
 				<button onClick={this.goBack}><i className='fa fa-arrow-left fa-2x'></i></button>
-				<button onClick={this.update} style={{marginLeft: 'auto'}}><i id='updateIcon' className='fa fa-refresh fa-2x'></i></button>
+				<button className='buttonHeader' onClick={this.update} style={{marginLeft: 'auto'}}><i id='updateIcon' className='fa fa-refresh fa-2x'></i></button>
 			</div>
 		)
 	}

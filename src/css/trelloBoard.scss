@@ -154,15 +154,6 @@ $blur: if($useblur, blur(30px), none);
         width: 100%;
     }
 }
-button.button.header{
-    background: rgba(0,0,0,0);
-    border: 0;
-    margin: 4px;
-    i{
-        color: white;
-    }
-    box-shadow: none;
-}
 body{
     background-repeat: no-repeat;
     background-size: cover;
