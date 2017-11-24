@@ -32,7 +32,7 @@ class TrelloModule extends React.Component {
 			this.setState({data: JSON.stringify(value)})
 		})
 		ipcRenderer.on('trelloGetBoards-reply', (event, boards) => {
-			var boardComponents = boards.map((board) => {
+			var boardComponents = boards.values.map((board) => {
 				return <BoardButton boardData={board} id={board.id} key={board.id}/>
 			})
 			this.setState({data: boardComponents, updating: false})

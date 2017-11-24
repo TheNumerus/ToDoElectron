@@ -36,12 +36,7 @@ function loadCache () {
 	return new Promise(function (resolve, reject) {
 		fs.readFile(globalProperties.getPath() + filename, (error, data) => {
 			if (error) {
-				// handle non-existing file
-				if (error.code === 'ENOENT') {
-					saveCache()
-				} else {
-					reject(error)
-				}
+				reject(error)
 			} else {
 				if (data.length === 0) {
 					reject(Error('Empty file'))

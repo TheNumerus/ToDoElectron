@@ -23,7 +23,11 @@ function load () {
 				if (data.length === 0) {
 					reject(new Error('Empty file'))
 				}
-				settings = JSON.parse(data.toString())
+				try {
+					settings = JSON.parse(data.toString())
+				} catch (e) {
+					reject(new Error('JEBAT'))
+				}
 				resolve()
 			}
 		})

@@ -73,7 +73,7 @@ function handleIpcCalls () {
 					TrelloApiNet.getImage(board.prefs.backgroundImageScaled[0].url, {type: TrelloApiNet.imageTypes.backgroundThumb})
 				}
 			})
-			windowManager.sendMessage('trelloGetBoards-reply', boards.values)
+			windowManager.sendMessage('trelloGetBoards-reply', boards)
 		}
 	})
 
