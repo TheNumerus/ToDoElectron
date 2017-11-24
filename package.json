@@ -4,6 +4,7 @@
   "version": "0.0.3",
   "description": "To Do app written in Electron",
   "main": "bin/main.js",
+  "types": "bin/settings.d.ts",
   "scripts": {
     "build": "babel src -d lib",
     "start": "electron ."

@@ -10,7 +10,7 @@ var settings = {
 	},
 	theme: 'default',
 	board: {
-		useProgessBars: false,
+		useProgressBars: false,
 		animateGIFs: true
 	}
 }
@@ -71,7 +71,7 @@ var functions = {
 			if (obj.animateGIFs !== undefined && obj.animateGIFs !== undefined) {
 				if (typeof (obj.animateGIFs) === 'boolean' && typeof (obj.animateGIFs) === 'boolean') {
 					settings.board.animateGIFs = obj.animateGIFs
-					settings.board.useProgessBars = obj.useProgessBars
+					settings.board.useProgressBars = obj.useProgressBars
 				} else {
 					throw new Error('invalid values in function setBoard')
 				}

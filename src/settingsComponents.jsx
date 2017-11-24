@@ -1,3 +1,4 @@
+/// <reference path="settings.d.ts" />
 import React from 'react'
 import {ipcRenderer} from 'electron'
 
@@ -38,13 +39,13 @@ class Checkboxes extends React.Component {
 	constructor (props) {
 		super(props)
 		ipcRenderer.send('getSettings')
-		this.state = {settings: {}}
+		this.state = {settings: {theme: null, board: { useProgressBars: null, animatedGIFs: null }}}
 		this.handleIpc()
 	}
 
 	handleIpc () {
 		ipcRenderer.on('getSettings-reply', (event, values) => {
-			this.setState({settings: values.board})
+			this.setState({settings: values})
 		})
 	}
 
@@ -55,17 +56,35 @@ class Checkboxes extends React.Component {
 		}
 		return (
 			<div>
-				{values}
+				<h2>Appearance</h2>
+				<div className='lineDivider'></div>
+				<h3>Trello board view</h3>
+				<Checkbox isChecked={this.state.settings.board.useProgressBars} name='Use progess bars'/>
+				<Checkbox isChecked={this.state.settings.board.animateGIFs} name='Use animated images'/>
 			</div>
 		)
 	}
 }
 
 class Checkbox extends React.Component {
+	constructor (props) {
+		super(props)
+		this.onChange = this.onChange.bind(this)
+		this.state = {checked: this.props.isChecked}
+	}
+
+	onChange (event) {
+		this.setState({checked: event.target.isChecked})
+	}
+
+	componentWillReceiveProps (nextProps) {
+		this.setState({checked: nextProps.isChecked})
+	}
+
 	render () {
 		return (
 			<div>
-				<input type='checkbox' checked={this.props.value}/> {this.props.value.constructor.name}
+				<input type='checkbox' onChange={this.onChange} checked={this.state.isChecked}/> {this.props.name}
 			</div>
 		)
 	}
