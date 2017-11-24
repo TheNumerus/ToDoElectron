@@ -1,5 +1,6 @@
 import globalProperties from './globalProperties'
 import * as fs from 'fs'
+import {ipcMain} from 'electron'
 
 var settings = {
 	windowSize: {
@@ -85,8 +86,16 @@ var functions = {
 		} catch (e) {
 			await save()
 		}
+		handleIpc()
 	},
 	save: save
 }
+
+function handleIpc () {
+	ipcMain.on('getSettings', (event) => {
+		event.sender.send('getSettings-reply', settings)
+	})
+}
+
 // TODO rewrite
 module.exports = functions
