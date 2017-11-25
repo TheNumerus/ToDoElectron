@@ -1,8 +1,8 @@
 /// <reference path="settings.d.ts" />
-import React from 'react'
+import * as React from 'react'
 import {ipcRenderer} from 'electron'
 
-export default class Settings extends React.Component {
+export default class Settings extends React.Component<any, any> {
 	render () {
 		return (
 			<div>
@@ -13,7 +13,7 @@ export default class Settings extends React.Component {
 	}
 }
 
-class Header extends React.Component {
+class Header extends React.Component<any, any> {
 	constructor (props) {
 		super(props)
 		this.goBack = this.goBack.bind(this)
@@ -35,7 +35,7 @@ class Header extends React.Component {
 	}
 }
 
-class Checkboxes extends React.Component {
+class Checkboxes extends React.Component<any, any> {
 	constructor (props) {
 		super(props)
 		ipcRenderer.send('getSettings')
@@ -66,7 +66,7 @@ class Checkboxes extends React.Component {
 	}
 }
 
-class Checkbox extends React.Component {
+class Checkbox extends React.Component<any, any> {
 	constructor (props) {
 		super(props)
 		this.onChange = this.onChange.bind(this)

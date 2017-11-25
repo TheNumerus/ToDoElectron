@@ -4,35 +4,29 @@
   "version": "0.0.3",
   "description": "To Do app written in Electron",
   "main": "bin/main.js",
-  "types": "bin/settings.d.ts",
   "scripts": {
-    "build": "babel src -d lib",
+    "build": "tsc && npm run css",
+    "css": "./node_modules/.bin/node-sass src/ -o bin/",
     "start": "electron ."
   },
   "repository": "https://github.com/TheNumerus/ToDoElectron",
   "author": "TheNumerus",
   "devDependencies": {
-    "babel-cli": "^6.24.1",
-    "babel-preset-env": "^1.6.0",
-    "babel-preset-react": "^6.24.1",
+    "typescript": "~2.6.1",
     "electron": "~1.7.6",
     "electron-rebuild": "^1.6.0",
-    "eslint": "4.10.0",
-    "eslint-config-standard": "^10.2.1",
-    "eslint-plugin-import": "^2.7.0",
-    "eslint-plugin-node": "^5.2.0",
-    "eslint-plugin-promise": "^3.5.0",
-    "eslint-plugin-react": "^7.4.0",
-    "eslint-plugin-standard": "^3.0.1",
-    "node-sass": "4.5.3"
+    "node-sass": "4.5.3",
+    "gulp": "~3.9.1"
   },
   "dependencies": {
+    "@types/react": "^16.0.25",
+    "@types/react-dom":"~16.0.3",
+    "autosize": "^4.0.0",
+    "is-online": "~7.0.0",
     "oauth": "0.9.15",
     "react": "~16.0.0",
     "react-dom": "~16.0.0",
-    "sortablejs": "^1.6.1",
-    "is-online": "~7.0.0",
-    "autosize": "^4.0.0",
-    "sharp": "~0.18.4"
+    "sharp": "~0.18.4",
+    "sortablejs": "^1.6.1"
   }
 }

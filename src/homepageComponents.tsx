@@ -1,10 +1,12 @@
-import HelperUI from './HelperUI'
+/// <reference path="trelloComponents.d.tsx" />
+
+import {HelperUI} from './HelperUI'
 import * as path from 'path'
-const React = require('react')
+import * as React from 'React'
 const ipcRenderer = require('electron').ipcRenderer
 const globalProperties = require('electron').remote.require('./globalProperties').default
 
-class AppInfoBar extends React.Component {
+class AppInfoBar extends React.Component<any, any> {
 	render () {
 		return (
 			<div className='bottomInfo'>
@@ -14,7 +16,7 @@ class AppInfoBar extends React.Component {
 	}
 }
 
-class TrelloModule extends React.Component {
+class TrelloModule extends React.Component<any, any> {
 	constructor (props) {
 		super(props)
 		this.authorize = this.authorize.bind(this)
@@ -33,7 +35,7 @@ class TrelloModule extends React.Component {
 		})
 		ipcRenderer.on('trelloGetBoards-reply', (event, boards) => {
 			var boardComponents = boards.values.map((board) => {
-				return <BoardButton boardData={board} id={board.id} key={board.id}/>
+				return <BoardButton boardData={board} key={board.id}/>
 			})
 			this.setState({data: boardComponents, updating: false})
 		})
@@ -78,7 +80,7 @@ class TrelloModule extends React.Component {
 	}
 }
 
-class BoardButton extends React.Component {
+class BoardButton extends React.Component<BoardProps, any> {
 	constructor (props) {
 		super(props)
 		this.openBoard = this.openBoard.bind(this)
@@ -106,7 +108,7 @@ class BoardButton extends React.Component {
 	}
 }
 
-class GoogleModule extends React.Component {
+class GoogleModule extends React.Component<any, any> {
 	render () {
 		return (
 			<div className='homeModule'>
@@ -118,7 +120,7 @@ class GoogleModule extends React.Component {
 	}
 }
 
-class OfflineModule extends React.Component {
+class OfflineModule extends React.Component<any, any> {
 	render () {
 		return (
 			<div className='homeModule'>
@@ -130,7 +132,7 @@ class OfflineModule extends React.Component {
 	}
 }
 
-class HelperModule extends React.Component {
+class HelperModule extends React.Component<any, any> {
 	constructor (props) {
 		super(props)
 		this.clearCache = this.clearCache.bind(this)
@@ -152,7 +154,7 @@ class HelperModule extends React.Component {
 	}
 }
 
-export default class Homepage extends React.Component {
+export default class Homepage extends React.Component<any, any> {
 	constructor (props) {
 		super(props)
 		this.clearCache = this.clearCache.bind(this)
@@ -189,7 +191,7 @@ export default class Homepage extends React.Component {
 	}
 }
 
-class Header extends React.Component {
+class Header extends React.Component<any, any> {
 	constructor (props) {
 		super(props)
 		this.goToSettings = this.goToSettings.bind(this)

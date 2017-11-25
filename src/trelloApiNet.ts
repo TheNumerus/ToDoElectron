@@ -1,5 +1,8 @@
+/// <reference path="trelloApi.d.ts" />
+
 import globalProperties from './globalProperties'
 import * as path from 'path'
+import {ImageOptions} from './trelloApi'
 const {net} = require('electron')
 const trelloIO = require('./trelloApiIO')
 const URL = require('url').URL
@@ -24,44 +27,38 @@ export async function getAllUserInfo () {
 /**
  * Get all boards
  */
-export async function getBoards () {
+export async function getBoards (): Promise<Array<BoardData>> {
 	return trelloApiRequest('/1/member/me/boards?&key=' + appKey + '&token=' + token + '&fields=name,id,prefs,closed')
 }
 
 /**
  * Get board data
- * @param {string} idBoard
  */
-export async function getBoardData (idBoard) {
+export async function getBoardData (idBoard: string) {
 	return trelloApiRequest('/1/boards/' + idBoard + '/?&key=' + appKey + '&token=' + token + '&fields=id,name,prefs&lists=open&list_fields=id,name&cards=open')
 }
 
 /**
  * Get attachments
- * @param {string} idCard
  */
-export async function getAttachments (idCard) {
+export async function getAttachments (idCard: string): Promise<Attachment[]> {
 	return trelloApiRequest('/1/cards/' + idCard + '/attachments/?&key=' + appKey + '&token=' + token + '&fields=all&filter=false')
 }
 
 /**
  * Get card actions
- * @param {string} idCard
  */
-export async function getActions (idCard) {
+export async function getActions (idCard: string) {
 	return trelloApiRequest('/1/cards/' + idCard + '/actions/?&key=' + appKey + '&token=' + token)
 }
 
 /**
  * 	Get image, save it and return its path
- * @param {string} imageData - url to download image from
- * @param {object} options
- * @param {number} options.type
  */
-export async function getImage (imageData, options) {
+export async function getImage (imageData: any, options: ImageOptions) {
 	var name, urlToDownload, pathnames, decodedName
-	switch (options.type) {
-	case imageTypes.background:
+	switch (options) {
+	case ImageOptions.background:
 		// seperate path into chunks and select last part
 		pathnames = new URL(imageData).pathname.split('/')
 		decodedName = decodeURIComponent(pathnames[pathnames.length - 1])
@@ -73,7 +70,7 @@ export async function getImage (imageData, options) {
 		}
 		urlToDownload = imageData
 		break
-	case imageTypes.backgroundThumb:
+	case ImageOptions.backgroundThumb:
 		// seperate path into chunks and select last part
 		pathnames = new URL(imageData).pathname.split('/')
 		decodedName = decodeURIComponent(pathnames[pathnames.length - 1])
@@ -85,7 +82,7 @@ export async function getImage (imageData, options) {
 		}
 		urlToDownload = imageData
 		break
-	case imageTypes.attachment:
+	case ImageOptions.attachment:
 		var extension = imageData.url.match(/.+([.].+)/)
 		name = path.join('attachments', `${imageData.id}${extension[1]}`)
 		urlToDownload = imageData.url
@@ -99,7 +96,7 @@ export async function getImage (imageData, options) {
 		if (e.code !== 'ENOENT') { throw e }
 		// download if needed
 		trelloIO.saveImage(name, await downloadImage(urlToDownload))
-		if (options.type === imageTypes.backgroundThumb) {
+		if (options === ImageOptions.backgroundThumb) {
 			return globalProperties.getPath() + name
 		}
 		return globalProperties.getPath() + name
@@ -108,48 +105,41 @@ export async function getImage (imageData, options) {
 
 /**
  * Gets checklists
- * @param {string} idChecklist
  */
-export async function getChecklist (idChecklist) {
+export async function getChecklist (idChecklist: string) {
 	return trelloApiRequest('/1/checklists/' + idChecklist + '/?&key=' + appKey + '&token=' + token)
 }
 // #endregion
 // #region UPDATERS
 /**
  * Updates card
- * @param {string} idCard
- * @param {Array<Array<string>>} options
  */
-export async function updateCard (idCard, options) {
+export async function updateCard (idCard: string, options: UpdateOptions) {
 	var path = `/1/cards/${idCard}?`
 	options.forEach((option) => {
-		path += `${option[0]}=${encodeURIComponent(option[1])}&`
+		path += `${option.key}=${encodeURIComponent(option.value)}&`
 	})
 	path += `key=${appKey}&token=${token}`
 	return trelloApiPutRequest(path)
 }
 /**
  * Updates list
- * @param {string} idList
- * @param {Array<Array<string>>} options
  */
-export async function updateList (idList, options) {
+export async function updateList (idList: string, options: UpdateOptions) {
 	var path = `/1/lists/${idList}?`
 	options.forEach((option) => {
-		path += `${option[0]}=${encodeURIComponent(option[1])}&`
+		path += `${option.key}=${encodeURIComponent(option.value)}&`
 	})
 	path += `key=${appKey}&token=${token}`
 	return trelloApiPutRequest(path)
 }
 /**
  * Updates board
- * @param {string} idBoard
- * @param {Array<Array<string>>} options
  */
-export async function updateBoard (idBoard, options) {
+export async function updateBoard (idBoard: string, options: UpdateOptions) {
 	var path = `/1/boards/${idBoard}?`
 	options.forEach((option) => {
-		path += `${option[0]}=${encodeURIComponent(option[1])}&`
+		path += `${option.key}=${encodeURIComponent(option.value)}&`
 	})
 	path += `key=${appKey}&token=${token}`
 	return trelloApiPutRequest(path)
@@ -158,32 +148,24 @@ export async function updateBoard (idBoard, options) {
 // #region ADDERS
 /**
  * Adds card
- * @param {Object} data
- * @param {string} data.name
- * @param {string} data.idList
  */
-export async function addCard (data) {
-	return trelloApiPostRequest('/1/cards?name=' + encodeURIComponent(data.name) + '&idList=' + data.idList + '&key=' + appKey + '&token=' + token)
+export async function addCard (data: AddRequest) {
+	return trelloApiPostRequest('/1/cards?name=' + encodeURIComponent(data.name) + '&idList=' + data.id + '&key=' + appKey + '&token=' + token)
 }
 
 /**
  * Adds list
- * @param {Object} data
- * @param {string} data.name
- * @param {string} data.idBoard
  */
-export async function addList (data) {
-	return trelloApiPostRequest('/1/lists?name=' + encodeURIComponent(data.name) + '&idBoard=' + data.idBoard + '&pos=bottom&key=' + appKey + '&token=' + token)
+export async function addList (data: AddRequest) {
+	return trelloApiPostRequest('/1/lists?name=' + encodeURIComponent(data.name) + '&idBoard=' + data.id + '&pos=bottom&key=' + appKey + '&token=' + token)
 }
 // #endregion
 // #region REQUESTS
 /**
  * Sends request to TrelloAPI
- * @param {string} path - path to send request to
- * @returns {Promise<object>} - data from request
  */
-function trelloApiRequest (path) {
-	return new Promise((resolve, reject) => {
+function trelloApiRequest (path: string) {
+	return new Promise<any>((resolve, reject) => {
 		const request = net.request({ method: 'GET', hostname: 'trello.com', path: path })
 		var json
 		request.on('response', (response) => {
@@ -207,10 +189,9 @@ function trelloApiRequest (path) {
 
 /**
  *  Downloads image from provided url and returns buffer
- * @param {string} path - url to download image from
  */
-function downloadImage (path) {
-	return new Promise((resolve, reject) => {
+function downloadImage (path: string) {
+	return new Promise<Buffer>((resolve, reject) => {
 		var url = new URL(path)
 		const request = net.request({protocol: 'https:', method: 'GET', hostname: url.hostname, path: url.pathname})
 		// create empty buffer for later use
@@ -233,10 +214,8 @@ function downloadImage (path) {
 }
 /**
  * Cheks for invalid responses
- * @param {string} chunk
- * @returns {Error}
  */
-function handleResponseErrors (chunk) {
+function handleResponseErrors (chunk: string): Error {
 	if (chunk === '') {
 		return new Error('Empty response')
 	} else {
@@ -251,9 +230,8 @@ function handleResponseErrors (chunk) {
 
 /**
  * Sends POST request to Trello API
- * @param {string} path
  */
-function trelloApiPostRequest (path) {
+function trelloApiPostRequest (path: string) {
 	return new Promise((resolve, reject) => {
 		const request = net.request({ method: 'POST', protocol: 'https:', hostname: 'api.trello.com', path: path })
 		request.on('response', (response) => {
@@ -275,9 +253,8 @@ function trelloApiPostRequest (path) {
 
 /**
  * Sends PUT request to Trello API
- * @param {string} path
  */
-function trelloApiPutRequest (path) {
+function trelloApiPutRequest (path: string) {
 	return new Promise((resolve, reject) => {
 		const request = net.request({ method: 'PUT', protocol: 'https:', hostname: 'api.trello.com', path: path })
 		request.on('response', (response) => {
@@ -297,8 +274,3 @@ function trelloApiPutRequest (path) {
 	})
 }
 // #endregion
-export const imageTypes = Object.freeze({
-	background: 0,
-	attachment: 1,
-	backgroundThumb: 2
-})

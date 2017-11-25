@@ -1,11 +1,13 @@
+/// <reference path="trelloApi.d.ts" />
+
 import GlobalProperties from './globalProperties'
 import * as path from 'path'
 import * as windowManager from './windowManager'
-const {BrowserWindow, ipcMain} = require('electron')
+import {Event, BrowserWindow, ipcMain} from 'electron'
+import * as TrelloApiNet from "./trelloApiNet"
+import * as TrelloApiIO from './trelloApiIO'
 const URL = require('url').URL
 const OAuth = require('oauth').OAuth
-const TrelloApiNet = require('./trelloApiNet')
-const TrelloApiIO = require('./trelloApiIO')
 const cacheModule = require('./cache')
 
 // constants and variables for connection to trello api
@@ -14,7 +16,7 @@ const accessURL = 'https://trello.com/1/OAuthGetAccessToken'
 const authorizeURL = 'https://trello.com/1/OAuthAuthorizeToken'
 const oauth = new OAuth(requestURL, accessURL, GlobalProperties.getTrelloAppKey(), GlobalProperties.getTrelloSecretKey(), '1.0A', 'todoapp://trelloauth', 'HMAC-SHA1')
 var verificationToken = ''
-var homepageTrelloAuthEvent = null
+var homepageTrelloAuthEvent: Event = null
 // store authentification window variable here, so we can close it from another function
 var authorizeWindow
 
@@ -64,13 +66,13 @@ function handleIpcCalls () {
 			// now download images in background
 			boards.values.forEach(board => {
 				if (board.prefs.backgroundImageScaled !== null) {
-					TrelloApiNet.getImage(board.prefs.backgroundImageScaled[0].url, {type: TrelloApiNet.imageTypes.backgroundThumb})
+					TrelloApiNet.getImage(board.prefs.backgroundImageScaled[0].url, ImageOptions.backgroundThumb)
 				}
 			})
 		} else {
 			boards.values.forEach(board => {
 				if (board.prefs.backgroundImageScaled !== null) {
-					TrelloApiNet.getImage(board.prefs.backgroundImageScaled[0].url, {type: TrelloApiNet.imageTypes.backgroundThumb})
+					TrelloApiNet.getImage(board.prefs.backgroundImageScaled[0].url, ImageOptions.backgroundThumb)
 				}
 			})
 			windowManager.sendMessage('trelloGetBoards-reply', boards)
@@ -139,14 +141,12 @@ function handleIpcCalls () {
 
 	/**
 	 * Gets all board data and sends it to renderer process
-	 * @param {string} boardId
 	 * @param {object} boardData
 	 * @param {string} boardData.name
 	 * @param {object} boardData.prefs
 	 * @param {Array<object>} boardData.values
-	 * @param {event} event
 	 */
-	async function getBoardData (boardId, boardData, event, refresh) {
+	async function getBoardData (boardId: string, boardData: BoardData, event: Event, refresh: boolean) {
 		var json = await TrelloApiNet.getBoardData(boardId)
 		if (!refresh) {
 			// send background color right away
@@ -179,39 +179,33 @@ function handleIpcCalls () {
 		event.sender.send('trelloGetBoardData-reply', boardData)
 	}
 
-	async function getBackground (prefs, event) {
+	async function getBackground (prefs: BoardPrefs, event: Event) {
 		// download background if necessary
 		if (prefs.backgroundImage !== null) {
 			// we send blurry version for faster loading, in background we download full resolution image and then we send it
 			var filename = prefs.backgroundImageScaled[0].url.match(/.*\/(.*)/)[1]
 			var pathName = path.join(GlobalProperties.getPath(), 'background', 'thumbs', filename)
 			event.sender.send('trelloSetBackground', pathName, {preview: true})
-			event.sender.send('trelloSetBackground', await TrelloApiNet.getImage(prefs.backgroundImage, {type: TrelloApiNet.imageTypes.background}), {preview: false})
+			event.sender.send('trelloSetBackground', await TrelloApiNet.getImage(prefs.backgroundImage, ImageOptions.background), {preview: false})
 		} else {
 			event.sender.send('trelloSetBackground', prefs.backgroundColor, {preview: false})
 		}
 	}
 
-	async function downloadAttachments (attachmentData) {
+	async function downloadAttachments (attachmentData: Attachment[]) {
 		attachmentData.forEach((attachment) => {
 			if (attachment.isUpload) {
-				TrelloApiNet.getImage(attachment, {type: TrelloApiNet.imageTypes.attachment})
+				TrelloApiNet.getImage(attachment, ImageOptions.attachment)
 			}
 		})
 	}
-	/**
-	 * @param {event} event
-	 * @param {string} boardId
-	 * @param {object} options
-	 * @param {bool} options.forceUpdate
-	 * @param {bool} options.refresh
-	 */
-	function boardUpdate (event, boardId, options) {
+
+	function boardUpdate (event: Event, boardId: string, options: PageUpdateOptions) {
 		var boardData = cacheModule.calls.trello.getBoardData(boardId)
 		if (options.forceUpdate === true) {
 			getBoardData(boardId, boardData, event, options.refresh)
 		} else if (cacheModule.calls.helper.checkInvalidity(boardData)) {
-			getBoardData(boardId, boardData, event)
+			getBoardData(boardId, boardData, event, options.refresh)
 		} else {
 			getBackground(boardData.prefs, event)
 			event.sender.send('trelloGetBoardData-reply', boardData)
@@ -222,7 +216,7 @@ function handleIpcCalls () {
 /**
  * Function for authorizing Trello API
  */
-function authorize () {
+export function authorize () {
 	oauth.getOAuthRequestToken(function (error, token, tokenSecret, results) {
 		if (error) throw error
 		verificationToken = tokenSecret
@@ -242,9 +236,9 @@ function authorize () {
 }
 /**
  * Callback function for authorizing Trello API
- * @param {} url - custom adress to parse data from
+ * @param url - custom adress to parse data from
  */
-function authorizeCallback (url) {
+export function authorizeCallback (url: string) {
 	// close authentification window, because we don't need it at this point
 	authorizeWindow.close()
 	// parse oauth values
@@ -266,13 +260,14 @@ function callHomepageTrelloModule () {
 	homepageTrelloAuthEvent.sender.send('trelloIsAuthorized-reply', cacheModule.calls.trello.getUsed())
 }
 
-function initialize () {
+export function initialize () {
 	handleIpcCalls()
 	TrelloApiIO.initialize()
 	TrelloApiNet.initialize()
 }
-module.exports = {
-	authorize: authorize,
-	authorizeCallback: authorizeCallback,
-	initialize: initialize
+
+export enum ImageOptions {
+    background,
+	attachment,
+	backgroundThumb
 }

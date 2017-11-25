@@ -1,6 +1,5 @@
 // Place your settings in this file to overwrite default and user settings.
 {
-	"eslint.enable": true,
 	"editor.useTabStops": true,
 	"editor.tabSize": 4
 }

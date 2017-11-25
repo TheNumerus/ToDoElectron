@@ -1,5 +1,7 @@
-export default class HelperUI {
-	static returnColor (color) {
+/// <reference path="trelloApi.d.ts" />
+
+export class HelperUI {
+	static returnColor (color: string) {
 		switch (color) {
 		case 'red':
 			return '#eb5a46'
@@ -26,47 +28,40 @@ export default class HelperUI {
 		}
 	}
 
-	static returnDueState (time) {
+	static returnDueState (time: number): DueStates {
 		var today = new Date()
 		if (wasDueToday(time)) {
-			return this.dueStates.overdueNear
+			return DueStates.overdueNear
 		} else if (time < today.getTime()) {
-			return this.dueStates.overdue
+			return DueStates.overdue
 		} else if (isTommorowOrNear(time)) {
-			return this.dueStates.near
+			return DueStates.near
 		} else {
-			return this.dueStates.later
-		}
-	}
-
-	static get dueStates () {
-		return {
-			overdue: 0,
-			overdueNear: 1,
-			near: 2,
-			later: 3,
-			completed: 4
+			return DueStates.later
 		}
 	}
 }
 
+export enum DueStates {
+	overdue,
+	overdueNear,
+	near,
+	later,
+	completed,
+}
 // #region non exported functions
 /** 
  * checks if due date is tommorow or before that
- * @param {number} time 
- * @returns {boolean}
  */
-function isTommorowOrNear (time) {
+function isTommorowOrNear (time: number): boolean {
 	var twoDaysLater = new Date(Date.now() + 172800000)
 	var endOfTommorow = new Date(twoDaysLater.getFullYear(), twoDaysLater.getMonth(), twoDaysLater.getDate())
 	return endOfTommorow.getTime() > time
 }
 /**
  * checks if due date was today
- * @param {number} time 
- * @returns {boolean}
  */
-function wasDueToday (time) {
+function wasDueToday (time: number): boolean {
 	var today = new Date()
 	var todayMidnight = new Date(today.getFullYear(), today.getMonth(), today.getDate())
 	return todayMidnight.getTime() < time && time < Date.now()

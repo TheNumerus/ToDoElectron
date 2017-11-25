@@ -1,8 +1,10 @@
+/// <reference path="trelloApi.d.ts" />
+
 import globalProperties from './globalProperties'
 const fs = require('fs')
 const filename = 'userCache'
 
-var cache = {
+export var cache = {
 	sources: {
 		trello: {
 			used: false,
@@ -23,7 +25,7 @@ var cache = {
 	}
 }
 
-function saveCache () {
+export function saveCache () {
 	return new Promise(function (resolve, reject) {
 		fs.writeFile(globalProperties.getPath() + filename, JSON.stringify(cache), (error) => {
 			if (error) reject(error)
@@ -32,7 +34,7 @@ function saveCache () {
 	})
 }
 
-function loadCache () {
+export function loadCache () {
 	return new Promise(function (resolve, reject) {
 		fs.readFile(globalProperties.getPath() + filename, (error, data) => {
 			if (error) {
@@ -66,12 +68,12 @@ function checkInvalidity (object) {
 	return false
 }
 
-function clearCache () {
+export function clearCache () {
 	cache.sources.trello.boards = {date: null, values: []}
 	saveCache()
 }
 
-const calls = {
+export const calls = {
 	trello: {
 		getBoards: () => {
 			return cache.sources.trello.boards
@@ -146,11 +148,4 @@ const calls = {
 		isOld: isOld,
 		checkInvalidity: checkInvalidity
 	}
-}
-module.exports = {
-	cache: cache,
-	loadCache: loadCache,
-	saveCache: saveCache,
-	calls: calls,
-	clearCache: clearCache
 }

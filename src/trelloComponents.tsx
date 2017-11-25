@@ -1,6 +1,6 @@
-import HelperUI from './HelperUI'
-import autosize from 'autosize'
-const React = require('react')
+import {HelperUI, DueStates} from './HelperUI'
+import * as autosize from 'autosize'
+import * as React from 'react'
 const Sortable = require('sortablejs')
 const ipcRenderer = require('electron').ipcRenderer
 const URL = require('url').URL
@@ -8,7 +8,7 @@ const boardId = new URL(window.location.href).searchParams.get('id')
 const globalProperties = require('electron').remote.require('./globalProperties').default
 const connCheck = require('./connectionChecker')
 
-class ListComponent extends React.Component {
+class ListComponent extends React.Component<any,any> {
 	constructor (props) {
 		super(props)
 		this.handleAddCard = this.handleAddCard.bind(this)
@@ -26,7 +26,7 @@ class ListComponent extends React.Component {
 
 	render () {
 		var elements = this.props.listData.cards.map((card) =>
-			<CardComponent key={card.id} card={card}/>
+			<CardComponent key={card.id} cardData={card}/>
 		)
 		return (
 			<div className='listComponent'>
@@ -40,7 +40,8 @@ class ListComponent extends React.Component {
 	}
 }
 
-class AddableList extends React.Component {
+class AddableList extends React.Component<any,any> {
+	nameInput: HTMLElement
 	constructor (props) {
 		super(props)
 		this.state = {clicked: false, name: ''}
@@ -77,7 +78,7 @@ class AddableList extends React.Component {
 		if (this.state.clicked) {
 			return (
 				<div className='listComponent'>
-					<textarea rows='1'
+					<textarea rows={1}
 						className='addableInput list'
 						onChange={this.handleChange}
 						value={this.state.name}
@@ -98,7 +99,8 @@ class AddableList extends React.Component {
 	}
 }
 
-class ListName extends React.Component {
+class ListName extends React.Component<any,any> {
+	nameInput: HTMLElement
 	constructor (props) {
 		super(props)
 		this.finishEdit = this.finishEdit.bind(this)
@@ -127,7 +129,7 @@ class ListName extends React.Component {
 
 	render () {
 		return <textarea className='listTitle'
-			rows='1'
+			rows={1}
 			onChange={this.handleChange}
 			value={this.state.name}
 			onBlur={this.finishEdit}
@@ -138,17 +140,17 @@ class ListName extends React.Component {
 	}
 }
 
-class CardComponent extends React.Component {
+class CardComponent extends React.Component<CardDataProps,any> {
 	constructor (props) {
 		super(props)
 		this.openCard = this.openCard.bind(this)
 	}
 
 	openCard () {
-		ipcRenderer.send('trelloOpenCard', this.props.card.id)
+		ipcRenderer.send('trelloOpenCard', this.props.cardData.id)
 	}
 	render () {
-		var card = this.props.card
+		var card = this.props.cardData
 		// setting these variables to null, so React won't create any DOM element
 		var labels = null
 		var desc = null
@@ -184,7 +186,7 @@ class CardComponent extends React.Component {
 			}
 		}
 		return (
-			<div className='cardComponent' onClick={this.openCard} id={card.id} draggable='true'>
+			<div className='cardComponent' onClick={this.openCard} id={card.id} draggable={true}>
 				{imageCover}
 				{labels}
 				<div className='cardTitle'>{card.name}</div>
@@ -199,7 +201,8 @@ class CardComponent extends React.Component {
 		)
 	}
 }
-class DueDate extends React.Component {
+
+class DueDate extends React.Component<CardDataProps, {}> {
 	render () {
 		var classes = ['dueLabel']
 		var due = this.props.cardData.due
@@ -213,18 +216,18 @@ class DueDate extends React.Component {
 			classes.push('dueComplete')
 		} else {
 			switch (HelperUI.returnDueState(date.getTime())) {
-			case HelperUI.dueStates.overdueNear:
+			case DueStates.overdueNear:
 				classes.push('dueOverdueNear')
 				dateString += clock
 				break
-			case HelperUI.dueStates.overdue:
+			case DueStates.overdue:
 				classes.push('dueOverdue')
 				break
-			case HelperUI.dueStates.near:
+			case DueStates.near:
 				classes.push('dueNear')
 				dateString += clock
 				break
-			case HelperUI.dueStates.later:
+			case DueStates.later:
 				break
 			default:
 				throw new Error(`Wrong date on card with id ${this.props.cardData.id}`)
@@ -236,7 +239,7 @@ class DueDate extends React.Component {
 	}
 }
 
-class CheckListBadge extends React.Component {
+class CheckListBadge extends React.Component<BadgesProps,any> {
 	render () {
 		if (this.props.badges.checkItems === 0) {
 			return null
@@ -250,7 +253,7 @@ class CheckListBadge extends React.Component {
 	}
 }
 
-class ImageCover extends React.Component {
+class ImageCover extends React.Component<AttachmentProps,any> {
 	render () {
 		var extension = this.props.attData.url.match(/.+([.].+)/)
 		var filename = `${this.props.attData.id}${extension[1]}`
@@ -263,7 +266,7 @@ class ImageCover extends React.Component {
 	}
 }
 
-class Label extends React.Component {
+class Label extends React.Component<LabelProps,any> {
 	render () {
 		var label = this.props.labelData
 		// if the color is set to null, the label will not show on board view
@@ -277,7 +280,7 @@ class Label extends React.Component {
 	}
 }
 
-export default class Board extends React.Component {
+export default class Board extends React.Component<any,any> {
 	constructor (props) {
 		super(props)
 		this.addCardToList = this.addCardToList.bind(this)
@@ -376,7 +379,7 @@ export default class Board extends React.Component {
 	}
 }
 
-class BoardName extends React.Component {
+class BoardName extends React.Component<any,any> {
 	constructor (props) {
 		super(props)
 		this.finishEdit = this.finishEdit.bind(this)
@@ -410,8 +413,9 @@ class BoardName extends React.Component {
 	}
 }
 
-class AddCardButton extends React.Component {
-	constructor (props) {
+class AddCardButton extends React.Component<any,any> {
+	nameInput: HTMLElement
+	constructor (props: any) {
 		super(props)
 		this.state = {clicked: false, name: ''}
 		this.clicked = this.clicked.bind(this)
@@ -451,7 +455,7 @@ class AddCardButton extends React.Component {
 		if (this.state.clicked) {
 			return (
 				<div className='addCardInputContainer'>
-					<textarea rows='1'
+					<textarea rows={1}
 						className='addableInput card'
 						onChange={this.handleChange}
 						value={this.state.name}

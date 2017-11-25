@@ -1,18 +1,15 @@
-import HelperUI from './HelperUI'
+/// <reference path="trelloApi.d.ts" />
+
+import {HelperUI, DueStates} from './HelperUI'
+import * as React from 'react'
 const autosize = require('autosize')
-const React = require('react')
 const globalProperties = require('electron').remote.require('./globalProperties').default
 const {shell, ipcRenderer} = require('electron')
 const URL = require('url').URL
 const cardId = new URL(window.location.href).searchParams.get('id')
 const connCheck = require('./connectionChecker')
 
-export default class CardDetail extends React.Component {
-	constructor (props) {
-		super(props)
-		this.state = {cardData: {name: ''}}
-	}
-
+export default class CardDetail extends React.Component<{}, CardDataProps> {
 	componentDidMount () {
 		this.handleIpc()
 		ipcRenderer.send('trelloGetCardData', cardId, false)
@@ -77,7 +74,7 @@ export default class CardDetail extends React.Component {
 	}
 }
 
-class Header extends React.Component {
+class Header extends React.Component<{},{}> {
 	constructor (props) {
 		super(props)
 		this.update = this.update.bind(this)
@@ -102,7 +99,7 @@ class Header extends React.Component {
 		)
 	}
 }
-class Checklist extends React.Component {
+class Checklist extends React.Component<ChecklistProps, {}> {
 	render () {
 		var checklistData = this.props.checklistData
 		// items store their order in a variable so we must sort them
@@ -110,7 +107,7 @@ class Checklist extends React.Component {
 			return a.pos - b.pos
 		})
 		var items = sorted.map((item) => {
-			return <ChecklistItem data={item}/>
+			return <ChecklistItem check={item}/>
 		})
 		return (
 			<div>
@@ -121,19 +118,19 @@ class Checklist extends React.Component {
 	}
 }
 
-class ChecklistItem extends React.Component {
+class ChecklistItem extends React.Component<CheckProps, {}> {
 	render () {
-		var icon = this.props.data.state === 'complete'
+		var icon = this.props.check.state === 'complete'
 			? <i className="fa fa-check-square"></i>
 			: <i className="fa fa-square"></i>
 		return (
 			<div>
-				{icon}<span>{this.props.data.name}</span>
+				{icon}<span>{this.props.check.name}</span>
 			</div>
 		)
 	}
 }
-class Comment extends React.Component {
+class Comment extends React.Component<CommentProps, {}> {
 	render () {
 		var commentData = this.props.commentData
 		return (
@@ -144,17 +141,17 @@ class Comment extends React.Component {
 		)
 	}
 }
-class ImageAttachment extends React.Component {
+class ImageAttachment extends React.Component<AttachmentControlProps, {}> {
 	constructor (props) {
 		super(props)
 		this.changeCover = this.changeCover.bind(this)
 	}
 
-	openImage (path) {
+	openImage (path: string) {
 		shell.openExternal(path)
 	}
 
-	changeCover (idCover) {
+	changeCover (idCover: string) {
 		this.props.changeCover(idCover)
 	}
 
@@ -181,15 +178,15 @@ class ImageAttachment extends React.Component {
 	}
 }
 
-class Attachments extends React.Component {
+class Attachments extends React.Component<CardDataProps, any> {
 	constructor (props) {
 		super(props)
 		this.changeCover = this.changeCover.bind(this)
 		this.state = {currentCover: this.props.cardData.idAttachmentCover}
 	}
 
-	changeCover (idCover) {
-		var changedCover
+	changeCover (idCover: string) {
+		var changedCover: string
 		if (idCover === this.state.currentCover) {
 			changedCover = ''
 		} else {
@@ -197,11 +194,11 @@ class Attachments extends React.Component {
 		}
 		this.setState({currentCover: changedCover})
 		ipcRenderer.send('trelloUpdateCard', this.props.cardData.id, [
-			['idAttachmentCover', changedCover]
+			{key: 'idAttachmentCover', value: changedCover}
 		])
 	}
 
-	componentWillReceiveProps (nextProps) {
+	componentWillReceiveProps (nextProps: CardDataProps) {
 		if (nextProps.cardData.idAttachmentCover !== this.state.currentCover) {
 			this.setState({currentCover: nextProps.cardData.idAttachmentCover})
 		}
@@ -226,7 +223,7 @@ class Attachments extends React.Component {
 	}
 }
 
-class Label extends React.Component {
+class Label extends React.Component<LabelProps, {}> {
 	render () {
 		var label = this.props.labelData
 		const labelStyle = {
@@ -238,7 +235,8 @@ class Label extends React.Component {
 	}
 }
 
-class Description extends React.Component {
+class Description extends React.Component<CardDataProps, any> {
+	nameInput: HTMLElement
 	constructor (props) {
 		super(props)
 		this.finishEdit = this.finishEdit.bind(this)
@@ -267,7 +265,7 @@ class Description extends React.Component {
 
 	render () {
 		return <textarea className='desc'
-			rows='1'
+			rows={1}
 			placeholder='Add description'
 			onChange={this.handleChange}
 			value={this.state.desc}
@@ -279,7 +277,8 @@ class Description extends React.Component {
 	}
 }
 
-class Name extends React.Component {
+class Name extends React.Component<CardDataProps, any> {
+	nameInput: HTMLElement
 	constructor (props) {
 		super(props)
 		this.finishEdit = this.finishEdit.bind(this)
@@ -310,7 +309,7 @@ class Name extends React.Component {
 
 	render () {
 		return <textarea className='cardName'
-			rows='1'
+			rows={1}
 			onChange={this.handleChange}
 			value={this.state.name}
 			onBlur={this.finishEdit}
@@ -321,7 +320,7 @@ class Name extends React.Component {
 	}
 }
 
-class DueDate extends React.Component {
+class DueDate extends React.Component<CardDataProps, {}> {
 	render () {
 		var classes = ['dueLabel']
 		var due = this.props.cardData.due
@@ -335,18 +334,18 @@ class DueDate extends React.Component {
 			classes.push('dueComplete')
 		} else {
 			switch (HelperUI.returnDueState(date.getTime())) {
-			case HelperUI.dueStates.overdueNear:
+			case DueStates.overdueNear:
 				classes.push('dueOverdueNear')
 				dateString += clock
 				break
-			case HelperUI.dueStates.overdue:
+			case DueStates.overdue:
 				classes.push('dueOverdue')
 				break
-			case HelperUI.dueStates.near:
+			case DueStates.near:
 				classes.push('dueNear')
 				dateString += clock
 				break
-			case HelperUI.dueStates.later:
+			case DueStates.later:
 				break
 			default:
 				throw new Error(`Wrong date on card with id ${this.props.cardData.id}`)

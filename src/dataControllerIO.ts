@@ -1,12 +1,12 @@
 import globalProperties from './globalProperties'
 import * as path from 'path'
-const fs = require('fs')
-const cacheModule = require('./cache')
-const settings = require('./settings')
+import * as fs from 'fs'
+import * as cacheModule from './cache'
+import * as settings from './settings'
 const paths = ['', 'background/', 'background/thumbs/', 'attachments/']
 var pathToFolder
 
-async function initialize () {
+export async function initialize () {
 	pathToFolder = globalProperties.getPath()
 	try {
 		await checkForFolders()
@@ -40,8 +40,6 @@ async function createFolders () {
 }
 /**
  * asynchronusly checks for existence of folder
- * @param {string} pathToCheck - to check
- * @return {Promise} Promise
  */
 function checkForFolder (pathToCheck = '') {
 	return new Promise((resolve, reject) => {
@@ -56,7 +54,6 @@ function checkForFolder (pathToCheck = '') {
 
 /**
  * Creates folder
- * @param {string} pathToCheck - to check
  */
 function createFolder (pathToCheck = '') {
 	return new Promise((resolve, reject) => {
@@ -67,8 +64,4 @@ function createFolder (pathToCheck = '') {
 			resolve(true)
 		})
 	})
-}
-
-module.exports = {
-	initialize: initialize
 }

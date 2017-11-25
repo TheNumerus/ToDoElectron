@@ -2,20 +2,26 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "command": "${workspaceRoot}/node_modules/.bin/babel src --out-dir bin --source-maps --copy-files",
-            "taskName": "compile",
-            "type": "shell"
+            "type": "typescript",
+            "tsconfig": "tsconfig.json",
+            "label": "compile"
         },
         {
             "command": "${workspaceRoot}/node_modules/.bin/node-sass src/ -o bin/",
-            "taskName": "css",
+            "label": "css",
             "type": "shell"
         },
         {
-            "taskName": "Build",
+            "type": "gulp",
+            "task": "copy",
+            "label": "copy"
+        },
+        {
+            "label": "Build",
             "dependsOn": [
                 "compile",
-                "css"
+                "css",
+                "copy"
             ],
             "group": {
                 "kind": "build",

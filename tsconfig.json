@@ -1,0 +1,17 @@
+{
+    "compilerOptions": {
+        "target": "es5",
+        "module": "commonjs",
+        "sourceMap": true,
+        "outDir": "bin/",
+        "jsx": "react",
+        "stripInternal": true,
+        "moduleResolution": "node",
+        "lib": ["es2015", "dom"]
+    },
+    "exclude": [
+        "node_modules",
+        "**/node_modules/*",
+        "bin"
+    ]
+}

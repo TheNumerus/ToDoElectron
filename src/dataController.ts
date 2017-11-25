@@ -4,7 +4,7 @@ const {ipcMain} = require('electron')
 const cacheModule = require('./cache')
 const trelloApi = require('./trelloApi')
 
-async function initialize () {
+export async function initialize () {
 	await dataControllerIO.initialize()
 	trelloApi.initialize()
 	handleIpcCalls()
@@ -18,8 +18,4 @@ function handleIpcCalls () {
 	ipcMain.on('goToSettings', (event) => {
 		windowManager.openURL('settingsPage.html')
 	})
-}
-
-module.exports = {
-	initialize: initialize
 }

@@ -1,5 +1,5 @@
 import {app} from 'electron'
-import os from 'os'
+import * as os from 'os'
 
 export default class Properties {
 	/**

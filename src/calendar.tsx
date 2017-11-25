@@ -43,3 +43,5 @@ document.querySelector('#goRight').addEventListener('click', (event) => {
 })
 
 window.onload = init
+
+export = {}

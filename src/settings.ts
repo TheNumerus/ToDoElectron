@@ -1,21 +1,12 @@
+/// <reference path="settings.d.ts" />
+
 import globalProperties from './globalProperties'
 import * as fs from 'fs'
-import {ipcMain} from 'electron'
+import {ipcMain, Event} from 'electron'
 
-var settings = {
-	windowSize: {
-		x: 1600,
-		y: 900,
-		maximized: false
-	},
-	theme: 'default',
-	board: {
-		useProgressBars: false,
-		animateGIFs: true
-	}
-}
+var settings: SettingsType
 
-function load () {
+export function load () {
 	return new Promise(function (resolve, reject) {
 		fs.readFile(globalProperties.getPath() + 'settings', (error, data) => {
 			if (error) {
@@ -35,7 +26,7 @@ function load () {
 	})
 }
 
-function save () {
+export function save () {
 	return new Promise(function (resolve, reject) {
 		fs.writeFile(globalProperties.getPath() + 'settings', JSON.stringify(settings), (error) => {
 			if (error) reject(error)
@@ -44,20 +35,16 @@ function save () {
 	})
 }
 
-var functions = {
+export const functions = {
 	windowSize: {
 		get: () => {
 			return settings.windowSize
 		},
 		set: (obj) => {
 			if (obj.x !== undefined && obj.y !== undefined) {
-				if (typeof (obj.x) === 'number' && typeof (obj.y) === 'number') {
-					settings.windowSize.x = obj.x
-					settings.windowSize.y = obj.y
-					settings.windowSize.maximized = obj.maximized
-				} else {
-					throw new Error('invalid values in function setWindowSize')
-				}
+				settings.windowSize.x = obj.x
+				settings.windowSize.y = obj.y
+				settings.windowSize.maximized = obj.maximized
 			} else {
 				throw new Error('invalid object in function setWindowSize')
 			}
@@ -69,33 +56,60 @@ var functions = {
 		},
 		set: (obj) => {
 			if (obj.animateGIFs !== undefined && obj.animateGIFs !== undefined) {
-				if (typeof (obj.animateGIFs) === 'boolean' && typeof (obj.animateGIFs) === 'boolean') {
-					settings.board.animateGIFs = obj.animateGIFs
-					settings.board.useProgressBars = obj.useProgressBars
-				} else {
-					throw new Error('invalid values in function setBoard')
-				}
+				settings.board.animateGIFs = obj.animateGIFs
+				settings.board.useProgressBars = obj.useProgressBars
 			} else {
 				throw new Error('invalid object in function setBoard')
 			}
 		}
-	},
-	initialize: async () => {
-		try {
-			await load()
-		} catch (e) {
-			await save()
-		}
-		handleIpc()
-	},
-	save: save
+	}
 }
 
 function handleIpc () {
-	ipcMain.on('getSettings', (event) => {
+	ipcMain.on('getSettings', (event: Event) => {
 		event.sender.send('getSettings-reply', settings)
 	})
 }
 
-// TODO rewrite
-module.exports = functions
+function setDefaultValues () {
+	settings = {
+		board:{
+			animateGIFs: true,
+			useProgressBars: false
+		},
+		theme: Theme.light,
+		windowSize: {
+			x: 1600,
+			y: 900,
+			maximized: false
+		}
+	}
+}
+
+export enum Theme {
+    light,
+    dark
+}
+
+export type SettingsType = {
+    windowSize: {
+        x:number,
+        y:number,
+        maximized: boolean
+    },
+    theme: Theme,
+    board: {
+        useProgressBars: boolean,
+        animateGIFs: boolean
+    }
+}
+
+export async function initialize () {
+	try {
+		await load()
+	} catch (e) {
+		setDefaultValues()
+		await save()
+	}
+	handleIpc()
+}

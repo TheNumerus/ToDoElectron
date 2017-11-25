@@ -1,8 +1,8 @@
-const React = require('react')
+import * as React from 'React'
 const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 var monthLenghts = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
 
-class DayTile extends React.Component {
+class DayTile extends React.Component<any, any> {
 	render () {
 		var weekday = this.props.date.getDay()
 		var isWeekend = weekday === 0 || weekday === 6
@@ -17,7 +17,7 @@ class DayTile extends React.Component {
 	}
 }
 
-class CalendarRoot extends React.Component {
+class CalendarRoot extends React.Component<any, any> {
 	render () {
 		var month = this.props.date.getMonth()
 		var year = this.props.date.getFullYear()
@@ -48,7 +48,7 @@ class CalendarRoot extends React.Component {
 	}
 }
 
-class WeekRow extends React.Component {
+class WeekRow extends React.Component<any, any> {
 	render () {
 		var date = this.props.date
 		var elements = [<td className='weekNumber'>{getWeekNumber(date)}</td>]
@@ -68,7 +68,7 @@ function getFirstWeekInYear (year) {
 		// start of the year isn't a week 1
 		let offsetToStart = 7 - firstDayInYear.getDay()
 		return new Date(year, 0, firstDayInYear.getDate() + offsetToStart)
-	} else if (firstDayInYear.getDay < 4) {
+	} else if (firstDayInYear.getDay() < 4) {
 		// start of the year is a week 1
 		let offsetToStart = -2 - firstDayInYear.getDay()
 		return new Date(year, 0, firstDayInYear.getDate() + offsetToStart)
@@ -103,7 +103,7 @@ function getWeeksToRender (date) {
 function getWeekNumber (date) {
 	var year = date.getFullYear()
 	var firstWeekStart = getFirstWeekInYear(year)
-	var weekNumber = Math.ceil((date - firstWeekStart) / 604800000)
+	var weekNumber = Math.ceil((date - firstWeekStart.valueOf()) / 604800000)
 	return weekNumber
 }
 

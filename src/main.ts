@@ -1,13 +1,13 @@
+import * as electron from 'electron'
 import * as protocols from './protocols'
-const electron = require('electron')
+import * as windowManager from './windowManager'
+import * as dataController from './dataController'
+import * as connectionChecker from './connectionChecker'
 const app = electron.app
 // enable backdrop blur in css
 app.commandLine.appendSwitch('--enable-experimental-web-platform-features')
-const windowManager = require('./windowManager')
-const dataController = require('./dataController')
-const connectionChecker = require('./connectionChecker')
 
-let mainWindow
+let mainWindow : Electron.BrowserWindow
 
 /**
  * call methods after app has loaded
