@@ -1,7 +1,7 @@
 {
   "name": "to-do-electron",
   "productName": "ToDoElectron",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "To Do app written in Electron",
   "main": "bin/main.js",
   "scripts": {
