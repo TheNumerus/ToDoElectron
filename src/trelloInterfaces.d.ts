@@ -1,5 +1,5 @@
 export module TrelloTypes {
-		interface AddRequest {
+	interface AddRequest {
 		name: string,
 		id: string
 	}

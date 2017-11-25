@@ -196,7 +196,8 @@ class Attachments extends React.Component<TrelloInterfacesProps.ICardDataProps, 
 		}
 		this.setState({currentCover: changedCover})
 		ipcRenderer.send('trelloUpdateCard', this.props.cardData.id, [
-			{key: 'idAttachmentCover', value: changedCover}])
+			{key: 'idAttachmentCover', value: changedCover}
+		])
 	}
 
 	public componentWillReceiveProps (nextProps: TrelloInterfacesProps.ICardDataProps) {
@@ -248,7 +249,7 @@ class Description extends React.Component<TrelloInterfacesProps.ICardDataProps, 
 	public finishEdit (event) {
 		this.setState({desc: event.target.value})
 		ipcRenderer.send('trelloUpdateCard', this.props.cardData.id, [
-			['desc', this.state.desc]
+			{key: 'desc', value: this.state.desc}
 		])
 	}
 
