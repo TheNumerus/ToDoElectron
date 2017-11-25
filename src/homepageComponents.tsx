@@ -135,7 +135,7 @@ class HelperModule extends React.Component<any, any> {
 	constructor (props) {
 		super(props)
 		this.clearCache = this.clearCache.bind(this)
-		this.clearCache = this.clearImageCache.bind(this)
+		this.clearImageCache = this.clearImageCache.bind(this)
 	}
 
 	public clearCache () {

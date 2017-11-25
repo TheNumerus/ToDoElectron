@@ -26,24 +26,22 @@ export async function initialize () {
 }
 
 async function checkForFolders () {
-	const checks = paths.map((folder) => {
-		return checkForFolder(path.join(pathToFolder, folder))
-	})
-	return Promise.all(checks)
+	for (const folder of paths) {
+		await checkForFolder(folder)
+	}
 }
 
 async function createFolders () {
-	const checks = paths.map((folder) => {
-		return createFolder(path.join(pathToFolder, folder))
-	})
-	return Promise.all(checks)
+	for (const folder of paths) {
+		await createFolder(folder)
+	}
 }
 /**
  * asynchronusly checks for existence of folder
  */
-function checkForFolder (pathToCheck = '') {
+function checkForFolder (pathToCheck: string) {
 	return new Promise((resolve, reject) => {
-		fs.access(pathToCheck, fs.constants.F_OK, (error) => {
+		fs.access(pathToFolder + pathToCheck, fs.constants.F_OK, (error) => {
 			if (error && error.code !== 'EEXIST') {
 				reject(error)
 			}
@@ -55,13 +53,69 @@ function checkForFolder (pathToCheck = '') {
 /**
  * Creates folder
  */
-function createFolder (pathToCheck = '') {
+function createFolder (pathToCreate: string) {
 	return new Promise((resolve, reject) => {
-		fs.mkdir(pathToCheck, (error) => {
+		fs.mkdir(pathToFolder + pathToCreate, (error) => {
 			if (error && error.code !== 'EEXIST') {
 				reject(error)
 			}
 			resolve(true)
 		})
 	})
+}
+
+/**
+ * Deletes file
+ */
+function deleteFile (pathToDelete: string) {
+	return new Promise((resolve, reject) => {
+		fs.unlink(pathToFolder + pathToDelete, (error) => {
+			if (error) {
+				reject(error)
+			}
+			resolve(true)
+		})
+	})
+}
+
+/**
+ * Deletes file
+ */
+function deleteFolder (pathToDelete: string) {
+	return new Promise((resolve, reject) => {
+		fs.rmdir(pathToFolder + pathToDelete, (error) => {
+			if (error) {
+				reject(error)
+			}
+			resolve(true)
+		})
+	})
+}
+
+function getFolderContents (pathToCheck: string): Promise<string[]> {
+	return new Promise((resolve, reject) => {
+		fs.readdir(pathToFolder + pathToCheck, (error: Error, files: string[]) => {
+			if (error) {
+				reject(error)
+			}
+			resolve(files)
+		})
+	})
+}
+/**
+ * deletes all downloaded images
+ */
+export async function deleteImageCache (event: Event) {
+	let images = await getFolderContents('background/thumbs/')
+	for (const image of images) {
+		await deleteFile('background/thumbs/' + image)
+	}
+	images = await getFolderContents('background/')
+	for (const image of images) {
+		await deleteFile('background/' + image)
+	}
+	images = await getFolderContents('attachments/')
+	for (const image of images) {
+		await deleteFile('attachments/' + image)
+	}
 }
