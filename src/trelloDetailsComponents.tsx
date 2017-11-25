@@ -1,35 +1,37 @@
-/// <reference path="trelloApi.d.ts" />
-
-import {HelperUI, DueStates} from './HelperUI'
+import * as autosize from 'autosize'
+import {ipcRenderer, remote, shell} from 'electron'
 import * as React from 'react'
-const autosize = require('autosize')
-const globalProperties = require('electron').remote.require('./globalProperties').default
-const {shell, ipcRenderer} = require('electron')
-const URL = require('url').URL
+import {URL} from 'url'
+import * as connCheck from './connectionChecker'
+import {DueStates, HelperUI} from './HelperUI'
+import {TrelloTypes} from './trelloInterfaces'
+import {TrelloInterfacesProps} from './trelloInterfacesProps'
+const globalProperties = remote.require('./globalProperties').default
 const cardId = new URL(window.location.href).searchParams.get('id')
-const connCheck = require('./connectionChecker')
 
-export default class CardDetail extends React.Component<{}, CardDataProps> {
-	componentDidMount () {
+export default class CardDetail extends React.Component<{}, any> {
+	constructor (props) {
+		super(props)
 		this.handleIpc()
 		ipcRenderer.send('trelloGetCardData', cardId, false)
-		if (connCheck.state) {
+		if (connCheck.getState()) {
 			/* I have to comment this shit because fucking JS somehow managed to merge two seperate function calls into one,
 			 which returned comments and checklists twice.
 			this.update() */
 		}
+		this.state = {cardData: {name: ''}}
 	}
 
-	handleIpc () {
+	public handleIpc () {
 		ipcRenderer.on('trelloGetCardData-reply', (event, cardData) => {
-			this.setState({cardData: cardData})
+			this.setState({cardData})
 			// stop spinning refresh icon
 			document.querySelector('#updateIcon').classList.remove('fa-spin')
 		})
 	}
 
-	render () {
-		var cardData = this.state.cardData
+	public render () {
+		const cardData: TrelloTypes.CardData = this.state.cardData
 		// solve empty data
 		if (cardData.url === undefined) { return null }
 		if (cardData.name.length > 20) {
@@ -37,21 +39,21 @@ export default class CardDetail extends React.Component<{}, CardDataProps> {
 		} else {
 			document.title = `${cardData.name} | To-Do app in Electron`
 		}
-		var checklists = null
+		let checklists = null
 		if (cardData.checklistData !== undefined) {
 			checklists = cardData.checklistData.map((data) => {
 				return <Checklist checklistData={data} key={data.id}/>
 			})
 		}
-		var comments = null
+		let comments = null
 		if (cardData.comments !== undefined) {
-			comments = cardData.comments.map(data => {
+			comments = cardData.comments.map((data) => {
 				return <Comment commentData={data} key={data.id}/>
 			})
 		}
-		var labels = null
+		let labels = null
 		if (cardData.labels !== undefined) {
-			labels = cardData.labels.map(data => {
+			labels = cardData.labels.map((data) => {
 				return <Label labelData={data}/>
 			})
 		}
@@ -74,23 +76,23 @@ export default class CardDetail extends React.Component<{}, CardDataProps> {
 	}
 }
 
-class Header extends React.Component<{},{}> {
+class Header extends React.Component<{}, {}> {
 	constructor (props) {
 		super(props)
 		this.update = this.update.bind(this)
 		this.goBack = this.goBack.bind(this)
 	}
 
-	goBack () {
+	public goBack () {
 		ipcRenderer.send('goBack')
 	}
 
-	update () {
+	public update () {
 		document.querySelector('#updateIcon').classList.add('fa-spin')
 		ipcRenderer.send('trelloGetCardData', cardId, true)
 	}
 
-	render () {
+	public render () {
 		return (
 			<div id='headerBoard'>
 				<button onClick={this.goBack}><i className='fa fa-arrow-left fa-2x'></i></button>
@@ -99,14 +101,14 @@ class Header extends React.Component<{},{}> {
 		)
 	}
 }
-class Checklist extends React.Component<ChecklistProps, {}> {
-	render () {
-		var checklistData = this.props.checklistData
+class Checklist extends React.Component<TrelloInterfacesProps.IChecklistProps, {}> {
+	public render () {
+		const checklistData = this.props.checklistData
 		// items store their order in a variable so we must sort them
-		var sorted = checklistData.checkItems.sort((a, b) => {
+		const sorted = checklistData.checkItems.sort((a, b) => {
 			return a.pos - b.pos
 		})
-		var items = sorted.map((item) => {
+		const items = sorted.map((item) => {
 			return <ChecklistItem check={item}/>
 		})
 		return (
@@ -118,11 +120,11 @@ class Checklist extends React.Component<ChecklistProps, {}> {
 	}
 }
 
-class ChecklistItem extends React.Component<CheckProps, {}> {
-	render () {
-		var icon = this.props.check.state === 'complete'
-			? <i className="fa fa-check-square"></i>
-			: <i className="fa fa-square"></i>
+class ChecklistItem extends React.Component<TrelloInterfacesProps.ICheckProps, {}> {
+	public render () {
+		const icon = this.props.check.state === 'complete'
+			? <i className='fa fa-check-square'></i>
+			: <i className='fa fa-square'></i>
 		return (
 			<div>
 				{icon}<span>{this.props.check.name}</span>
@@ -130,9 +132,9 @@ class ChecklistItem extends React.Component<CheckProps, {}> {
 		)
 	}
 }
-class Comment extends React.Component<CommentProps, {}> {
-	render () {
-		var commentData = this.props.commentData
+class Comment extends React.Component<TrelloInterfacesProps.ICommentProps, {}> {
+	public render () {
+		const commentData = this.props.commentData
 		return (
 			<div>
 				<span style={{fontSize: '150%'}}>{commentData.memberCreator.fullName}</span>
@@ -141,26 +143,26 @@ class Comment extends React.Component<CommentProps, {}> {
 		)
 	}
 }
-class ImageAttachment extends React.Component<AttachmentControlProps, {}> {
+class ImageAttachment extends React.Component<TrelloInterfacesProps.IAttachmentControlProps, {}> {
 	constructor (props) {
 		super(props)
 		this.changeCover = this.changeCover.bind(this)
 	}
 
-	openImage (path: string) {
+	public openImage (path: string) {
 		shell.openExternal(path)
 	}
 
-	changeCover (idCover: string) {
+	public changeCover (idCover: string) {
 		this.props.changeCover(idCover)
 	}
 
-	render () {
-		var extension = this.props.attData.url.match(/.+([.].+)/)
-		var filename = `${this.props.attData.id}${extension[1]}`
-		var path = `${globalProperties.getPath()}attachments/${filename}`
-		var date = new Date(this.props.attData.date)
-		var dateString = `${date.getUTCDate()}.${date.getUTCMonth() + 1}.${date.getUTCFullYear()} - ${date.getUTCHours()}:${date.getUTCMinutes()}`
+	public render () {
+		const extension = this.props.attData.url.match(/.+([.].+)/)
+		const filename = `${this.props.attData.id}${extension[1]}`
+		const path = `${globalProperties.getPath()}attachments/${filename}`
+		const date = new Date(this.props.attData.date)
+		const dateString = `${date.getUTCDate()}.${date.getUTCMonth() + 1}.${date.getUTCFullYear()} - ${date.getUTCHours()}:${date.getUTCMinutes()}`
 		return (
 			<div className='att'>
 				<div className='attControl'>
@@ -178,15 +180,15 @@ class ImageAttachment extends React.Component<AttachmentControlProps, {}> {
 	}
 }
 
-class Attachments extends React.Component<CardDataProps, any> {
+class Attachments extends React.Component<TrelloInterfacesProps.ICardDataProps, any> {
 	constructor (props) {
 		super(props)
 		this.changeCover = this.changeCover.bind(this)
 		this.state = {currentCover: this.props.cardData.idAttachmentCover}
 	}
 
-	changeCover (idCover: string) {
-		var changedCover: string
+	public changeCover (idCover: string) {
+		let changedCover: string
 		if (idCover === this.state.currentCover) {
 			changedCover = ''
 		} else {
@@ -194,21 +196,20 @@ class Attachments extends React.Component<CardDataProps, any> {
 		}
 		this.setState({currentCover: changedCover})
 		ipcRenderer.send('trelloUpdateCard', this.props.cardData.id, [
-			{key: 'idAttachmentCover', value: changedCover}
-		])
+			{key: 'idAttachmentCover', value: changedCover}])
 	}
 
-	componentWillReceiveProps (nextProps: CardDataProps) {
+	public componentWillReceiveProps (nextProps: TrelloInterfacesProps.ICardDataProps) {
 		if (nextProps.cardData.idAttachmentCover !== this.state.currentCover) {
 			this.setState({currentCover: nextProps.cardData.idAttachmentCover})
 		}
 	}
 
-	render () {
-		var attachments = null
+	public render () {
+		let attachments = null
 		if (this.props.cardData.attachments !== undefined) {
-			attachments = this.props.cardData.attachments.map(data => {
-				var isCover = data.id === this.state.currentCover
+			attachments = this.props.cardData.attachments.map((data) => {
+				const isCover = data.id === this.state.currentCover
 				return <ImageAttachment attData={data} key={data.id} isCover={isCover} changeCover={this.changeCover}/>
 			})
 		} else {
@@ -223,9 +224,9 @@ class Attachments extends React.Component<CardDataProps, any> {
 	}
 }
 
-class Label extends React.Component<LabelProps, {}> {
-	render () {
-		var label = this.props.labelData
+class Label extends React.Component<TrelloInterfacesProps.ILabelProps, {}> {
+	public render () {
+		const label = this.props.labelData
 		const labelStyle = {
 			backgroundColor: HelperUI.returnColor(label.color)
 		}
@@ -235,8 +236,8 @@ class Label extends React.Component<LabelProps, {}> {
 	}
 }
 
-class Description extends React.Component<CardDataProps, any> {
-	nameInput: HTMLElement
+class Description extends React.Component<TrelloInterfacesProps.ICardDataProps, any> {
+	public nameInput: HTMLElement
 	constructor (props) {
 		super(props)
 		this.finishEdit = this.finishEdit.bind(this)
@@ -244,26 +245,26 @@ class Description extends React.Component<CardDataProps, any> {
 		this.state = {desc: this.props.cardData.desc}
 	}
 
-	finishEdit (event) {
+	public finishEdit (event) {
 		this.setState({desc: event.target.value})
 		ipcRenderer.send('trelloUpdateCard', this.props.cardData.id, [
 			['desc', this.state.desc]
 		])
 	}
 
-	componentDidUpdate () {
+	public componentDidUpdate () {
 		autosize.update(this.nameInput)
 	}
 
-	handleChange (event) {
+	public handleChange (event) {
 		this.setState({desc: event.target.value})
 	}
 
-	componentWillReceiveProps () {
+	public componentWillReceiveProps () {
 		this.setState({desc: this.props.cardData.desc})
 	}
 
-	render () {
+	public render () {
 		return <textarea className='desc'
 			rows={1}
 			placeholder='Add description'
@@ -277,8 +278,8 @@ class Description extends React.Component<CardDataProps, any> {
 	}
 }
 
-class Name extends React.Component<CardDataProps, any> {
-	nameInput: HTMLElement
+class Name extends React.Component<TrelloInterfacesProps.ICardDataProps, any> {
+	public nameInput: HTMLElement
 	constructor (props) {
 		super(props)
 		this.finishEdit = this.finishEdit.bind(this)
@@ -286,28 +287,28 @@ class Name extends React.Component<CardDataProps, any> {
 		this.state = {name: this.props.cardData.name}
 	}
 
-	finishEdit (event) {
+	public finishEdit (event) {
 		this.setState({name: event.target.value})
 		if (this.state.name.length > 1) {
 			ipcRenderer.send('trelloUpdateCard', this.props.cardData.id, [
-				['name', this.state.name]
+				{key: 'name', value: this.state.name}
 			])
 		}
 	}
 
-	componentDidUpdate () {
+	public componentDidUpdate () {
 		autosize.update(this.nameInput)
 	}
 
-	handleChange (event) {
+	public handleChange (event) {
 		this.setState({name: event.target.value})
 	}
 
-	componentWillReceiveProps () {
+	public componentWillReceiveProps () {
 		this.setState({name: this.props.cardData.name})
 	}
 
-	render () {
+	public render () {
 		return <textarea className='cardName'
 			rows={1}
 			onChange={this.handleChange}
@@ -320,15 +321,15 @@ class Name extends React.Component<CardDataProps, any> {
 	}
 }
 
-class DueDate extends React.Component<CardDataProps, {}> {
-	render () {
-		var classes = ['dueLabel']
-		var due = this.props.cardData.due
+class DueDate extends React.Component<TrelloInterfacesProps.ICardDataProps, {}> {
+	public render () {
+		const classes = ['dueLabel']
+		const due = this.props.cardData.due
 		// handle non set due date
 		if (due === null) { return null }
-		var date = new Date(due)
-		var today = new Date()
-		var dateString = ` ${date.getDate()}. ${date.getMonth() + 1}. ${today.getFullYear() === date.getFullYear() ? '' : date.getFullYear()}`
+		const date = new Date(due)
+		const today = new Date()
+		let dateString = ` ${date.getDate()}. ${date.getMonth() + 1}. ${today.getFullYear() === date.getFullYear() ? '' : date.getFullYear()}`
 		const clock = ` - ${date.getHours()}:${date.getMinutes() > 9 ? date.getMinutes() : '0' + date.getMinutes()}`
 		if (this.props.cardData.dueComplete) {
 			classes.push('dueComplete')

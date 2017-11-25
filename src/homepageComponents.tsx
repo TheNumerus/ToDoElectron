@@ -1,13 +1,12 @@
-/// <reference path="trelloComponents.d.tsx" />
-
-import {HelperUI} from './HelperUI'
+import {ipcRenderer, remote} from 'electron'
 import * as path from 'path'
 import * as React from 'React'
-const ipcRenderer = require('electron').ipcRenderer
-const globalProperties = require('electron').remote.require('./globalProperties').default
+import {HelperUI} from './HelperUI'
+import {TrelloInterfacesProps} from './trelloInterfacesProps'
+const globalProperties = remote.require('./globalProperties').default
 
 class AppInfoBar extends React.Component<any, any> {
-	render () {
+	public render () {
 		return (
 			<div className='bottomInfo'>
 				Version {globalProperties.getAppVersion()} | Node.js {process.versions.node} | Chromium {process.versions.chrome} | Electron {process.versions.electron}
@@ -26,46 +25,46 @@ class TrelloModule extends React.Component<any, any> {
 		this.state = {data: '', updating: false}
 	}
 
-	authorize () {
+	public authorize () {
 		ipcRenderer.send('trelloAuthorize')
 	}
-	handleIpc () {
+	public handleIpc () {
 		ipcRenderer.on('trelloGetAllUserInfo-reply', (event, value) => {
 			this.setState({data: JSON.stringify(value)})
 		})
 		ipcRenderer.on('trelloGetBoards-reply', (event, boards) => {
-			var boardComponents = boards.values.map((board) => {
+			const boardComponents = boards.values.map((board) => {
 				return <BoardButton boardData={board} key={board.id}/>
 			})
 			this.setState({data: boardComponents, updating: false})
 		})
 	}
-	getUserInfo () {
+	public getUserInfo () {
 		ipcRenderer.send('trelloGetAllUserInfo')
 	}
 
-	componentWillReceiveProps (nextprops) {
+	public componentWillReceiveProps (nextprops) {
 		if (nextprops.authorized && !this.state.updating) {
 			ipcRenderer.send('trelloGetBoards')
 			this.setState({updating: true})
 		}
 	}
 
-	getBoards () {
+	public getBoards () {
 		if (!this.state.updating) {
 			ipcRenderer.send('trelloGetBoards')
 			this.setState({updating: true})
 		}
 	}
 
-	render () {
-		var showAuthBtns = this.props.authorized
-		var authorizedEelements = showAuthBtns ? [<button className='button' onClick={this.getUserInfo}>Get all user info</button>,
+	public render () {
+		const showAuthBtns = this.props.authorized
+		const authorizedEelements = showAuthBtns ? [<button className='button' onClick={this.getUserInfo}>Get all user info</button>,
 			<button className='button' onClick={this.getBoards}>Get boards</button>]
 			: null
-		var authorizeButton = showAuthBtns ? null
+		const authorizeButton = showAuthBtns ? null
 			: <button className='button' onClick={this.authorize}>Authorize Trello</button>
-		var authorized = showAuthBtns ? <span style={{fontSize: '50%'}}>- authorized</span>
+		const authorized = showAuthBtns ? <span style={{fontSize: '50%'}}>- authorized</span>
 			: null
 		return (
 			<div className='homeModule'>
@@ -80,23 +79,23 @@ class TrelloModule extends React.Component<any, any> {
 	}
 }
 
-class BoardButton extends React.Component<BoardProps, any> {
+class BoardButton extends React.Component<TrelloInterfacesProps.IBoardProps, any> {
 	constructor (props) {
 		super(props)
 		this.openBoard = this.openBoard.bind(this)
 	}
 
-	openBoard () {
+	public openBoard () {
 		ipcRenderer.send('trelloOpenBoard', this.props.boardData.id)
 	}
 
-	render () {
-		var element = null
+	public render () {
+		let element = null
 		if (this.props.boardData.prefs.backgroundImage === null) {
 			element = <div className='boardBtnCover' style={{backgroundColor: this.props.boardData.prefs.backgroundColor}}></div>
 		} else {
-			var bgrImgUrl = this.props.boardData.prefs.backgroundImageScaled[0].url
-			var bgrImg = bgrImgUrl.match(/.*\/(.*[.].*)/)[1]
+			const bgrImgUrl = this.props.boardData.prefs.backgroundImageScaled[0].url
+			const bgrImg = bgrImgUrl.match(/.*\/(.*[.].*)/)[1]
 			element = <img className='boardBtnCover' src={path.join(globalProperties.getPath(), 'background', 'thumbs', bgrImg)}/>
 		}
 		return (
@@ -109,7 +108,7 @@ class BoardButton extends React.Component<BoardProps, any> {
 }
 
 class GoogleModule extends React.Component<any, any> {
-	render () {
+	public render () {
 		return (
 			<div className='homeModule'>
 				<div className='moduleTitle'>
@@ -121,7 +120,7 @@ class GoogleModule extends React.Component<any, any> {
 }
 
 class OfflineModule extends React.Component<any, any> {
-	render () {
+	public render () {
 		return (
 			<div className='homeModule'>
 				<div className='moduleTitle'>
@@ -136,19 +135,25 @@ class HelperModule extends React.Component<any, any> {
 	constructor (props) {
 		super(props)
 		this.clearCache = this.clearCache.bind(this)
+		this.clearCache = this.clearImageCache.bind(this)
 	}
 
-	clearCache () {
-		this.props.clearCache()
+	public clearCache () {
+		ipcRenderer.send('clearCache')
 	}
 
-	render () {
+	public clearImageCache () {
+		ipcRenderer.send('clearImageCache')
+	}
+
+	public render () {
 		return (
 			<div className='homeModule'>
 				<div className='moduleTitle'>
 					<i className='fa fa-info-circle'></i> Helper
 				</div>
 				<button className='button' onClick={this.clearCache}>Clear cache</button>
+				<button className='button' onClick={this.clearImageCache}>Clear image cache</button>
 			</div>
 		)
 	}
@@ -163,7 +168,7 @@ export default class Homepage extends React.Component<any, any> {
 		ipcRenderer.send('readyToShow')
 	}
 
-	getAuthorization () {
+	public getAuthorization () {
 		ipcRenderer.send('trelloIsAuthorized')
 		ipcRenderer.on('trelloIsAuthorized-reply', (event, data) => {
 			if (data) {
@@ -173,18 +178,18 @@ export default class Homepage extends React.Component<any, any> {
 		})
 	}
 
-	clearCache () {
+	public clearCache () {
 		ipcRenderer.send('clearCache')
 	}
 
-	render () {
+	public render () {
 		return (
 			<div>
 				<Header/>
 				<TrelloModule authorized={this.state.trelloAuthorized}/>
 				<GoogleModule/>
 				<OfflineModule/>
-				<HelperModule clearCache={this.clearCache}/>
+				<HelperModule/>
 				<AppInfoBar/>
 			</div>
 		)
@@ -197,13 +202,13 @@ class Header extends React.Component<any, any> {
 		this.goToSettings = this.goToSettings.bind(this)
 	}
 
-	goToSettings () {
+	public goToSettings () {
 		ipcRenderer.send('goToSettings')
 	}
 
-	render () {
+	public render () {
 		return (
-			<div className="titleHeader">
+			<div className='titleHeader'>
 				<h1>ToDoElectron</h1>
 				<button className='buttonHeader' onClick={this.goToSettings} style={{marginLeft: 'auto'}}>
 					<i className='fa fa-wrench fa-3x'></i>

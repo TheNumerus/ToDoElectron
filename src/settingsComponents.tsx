@@ -1,9 +1,9 @@
-/// <reference path="settings.d.ts" />
-import * as React from 'react'
 import {ipcRenderer} from 'electron'
+import * as React from 'react'
+import {ISettings, setDefaultValues} from './settings'
 
 export default class Settings extends React.Component<any, any> {
-	render () {
+	public render () {
 		return (
 			<div>
 				<Header/>
@@ -12,20 +12,19 @@ export default class Settings extends React.Component<any, any> {
 		)
 	}
 }
-
 class Header extends React.Component<any, any> {
 	constructor (props) {
 		super(props)
 		this.goBack = this.goBack.bind(this)
 	}
 
-	goBack () {
+	public goBack () {
 		ipcRenderer.send('goBack')
 	}
 
-	render () {
+	public render () {
 		return (
-			<div className="titleHeader">
+			<div className='titleHeader'>
 				<button className='buttonHeader' onClick={this.goBack}>
 					<i className='fa fa-arrow-left fa-2x'></i>
 				</button>
@@ -35,23 +34,23 @@ class Header extends React.Component<any, any> {
 	}
 }
 
-class Checkboxes extends React.Component<any, any> {
+class Checkboxes extends React.Component<any, {settings: ISettings}> {
 	constructor (props) {
 		super(props)
 		ipcRenderer.send('getSettings')
-		this.state = {settings: {theme: null, board: { useProgressBars: null, animatedGIFs: null }}}
+		this.state = {settings: setDefaultValues()}
 		this.handleIpc()
 	}
 
-	handleIpc () {
+	public handleIpc () {
 		ipcRenderer.on('getSettings-reply', (event, values) => {
 			this.setState({settings: values})
 		})
 	}
 
-	render () {
-		var values = []
-		for (var value in this.state.settings) {
+	public render () {
+		const values = []
+		for (const value in this.state.settings) {
 			values.push(<Checkbox value={value}/>)
 		}
 		return (
@@ -73,15 +72,15 @@ class Checkbox extends React.Component<any, any> {
 		this.state = {checked: this.props.isChecked}
 	}
 
-	onChange (event) {
+	public onChange (event) {
 		this.setState({checked: event.target.isChecked})
 	}
 
-	componentWillReceiveProps (nextProps) {
+	public componentWillReceiveProps (nextProps) {
 		this.setState({checked: nextProps.isChecked})
 	}
 
-	render () {
+	public render () {
 		return (
 			<div>
 				<input type='checkbox' onChange={this.onChange} checked={this.state.isChecked}/> {this.props.name}

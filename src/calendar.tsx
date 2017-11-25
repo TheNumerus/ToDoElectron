@@ -1,12 +1,12 @@
-const ReactDOM = require('react-dom')
-const React = require('react')
-const CalendarRoot = require('./calendarComponents.js').CalendarRoot
-const ipcRenderer = require('electron').ipcRenderer
-var month = 0
-var year = 2017
+import {ipcRenderer} from 'electron'
+import * as React from 'react'
+import * as ReactDOM from 'react-dom'
+import {CalendarRoot} from './calendarComponents'
+let month = 0
+let year = 2017
 
 function init () {
-	var today = new Date()
+	const today = new Date()
 	month = today.getMonth()
 	year = today.getFullYear()
 	render()
@@ -14,7 +14,7 @@ function init () {
 
 function render () {
 	document.querySelector('#date').innerHTML = `${month + 1} - ${year}`
-	var calendarRoot = <CalendarRoot date={new Date(year, month)}/>
+	const calendarRoot = <CalendarRoot date={new Date(year, month)}/>
 	ReactDOM.render(calendarRoot, document.querySelector('#calendarRoot'))
 }
 

@@ -1,8 +1,8 @@
+import {ipcMain} from 'electron'
+import * as cacheModule from './cache'
+import * as dataControllerIO from './dataControllerIO'
+import * as trelloApi from './trelloApi'
 import * as windowManager from './windowManager'
-const dataControllerIO = require('./dataControllerIO')
-const {ipcMain} = require('electron')
-const cacheModule = require('./cache')
-const trelloApi = require('./trelloApi')
 
 export async function initialize () {
 	await dataControllerIO.initialize()

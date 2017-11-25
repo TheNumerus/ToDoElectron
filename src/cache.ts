@@ -1,10 +1,9 @@
-/// <reference path="trelloApi.d.ts" />
-
+import * as fs from 'fs'
 import globalProperties from './globalProperties'
-const fs = require('fs')
+import {TrelloTypes} from './trelloInterfaces'
 const filename = 'userCache'
 
-export var cache = {
+export let cache = {
 	sources: {
 		trello: {
 			used: false,
@@ -26,16 +25,16 @@ export var cache = {
 }
 
 export function saveCache () {
-	return new Promise(function (resolve, reject) {
+	return new Promise((resolve, reject) => {
 		fs.writeFile(globalProperties.getPath() + filename, JSON.stringify(cache), (error) => {
-			if (error) reject(error)
+			if (error) {reject(error)}
 			resolve()
 		})
 	})
 }
 
 export function loadCache () {
-	return new Promise(function (resolve, reject) {
+	return new Promise((resolve, reject) => {
 		fs.readFile(globalProperties.getPath() + filename, (error, data) => {
 			if (error) {
 				reject(error)
@@ -55,9 +54,9 @@ export function loadCache () {
 }
 
 function isOld (object) {
-	if (object === undefined) return
-	var now = Date.now()
-	var then = new Date(object.date).valueOf()
+	if (object === undefined) {return}
+	const now = Date.now()
+	const then = new Date(object.date).valueOf()
 	return now - then > 86400000
 }
 
@@ -94,8 +93,8 @@ export const calls = {
 			cache.sources.trello.used = value
 		},
 		getBoardData: (id) => {
-			var found = false
-			var value = null
+			let found = false
+			let value = null
 			cache.sources.trello.boards.values.forEach((element) => {
 				if (!found || element.id === id) {
 					found = true
@@ -112,7 +111,7 @@ export const calls = {
 			})
 		},
 		addCard: (data) => {
-			var found = false
+			let found = false
 			cache.sources.trello.boards.values.forEach((board) => {
 				if (board.id === data.idBoard) {
 					board.values.forEach((list) => {
@@ -126,8 +125,8 @@ export const calls = {
 			})
 		},
 		getCard: (cardId) => {
-			var found = false
-			var value = null
+			let found = false
+			let value = null
 			cache.sources.trello.boards.values.forEach((board) => {
 				if (found || (!found && board.values === undefined)) { return } // handle non-cached boards
 				board.values.forEach((list) => {
@@ -145,7 +144,7 @@ export const calls = {
 		}
 	},
 	helper: {
-		isOld: isOld,
-		checkInvalidity: checkInvalidity
+		isOld,
+		checkInvalidity
 	}
 }

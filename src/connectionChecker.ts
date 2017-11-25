@@ -1,5 +1,5 @@
 import * as isOnline from 'is-online'
-var currentState = true
+let currentState = true
 
 export async function checkConnection () {
 	currentState = await isOnline()
@@ -11,6 +11,6 @@ export function startCheck () {
 	setInterval(checkConnection, 60000)
 }
 
-export function getState() {
+export function getState () {
 	return currentState
 }

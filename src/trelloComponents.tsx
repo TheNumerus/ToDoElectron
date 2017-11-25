@@ -1,31 +1,29 @@
-import {HelperUI, DueStates} from './HelperUI'
 import * as autosize from 'autosize'
+import {Event, ipcRenderer, remote} from 'electron'
 import * as React from 'react'
-const Sortable = require('sortablejs')
-const ipcRenderer = require('electron').ipcRenderer
-const URL = require('url').URL
+import * as Sortable from 'sortablejs'
+import {URL} from 'url'
+import * as connCheck from './connectionChecker'
+import {DueStates, HelperUI} from './HelperUI'
+import {ImageOptions} from './trelloApi'
+import {TrelloInterfacesProps} from './trelloInterfacesProps'
 const boardId = new URL(window.location.href).searchParams.get('id')
-const globalProperties = require('electron').remote.require('./globalProperties').default
-const connCheck = require('./connectionChecker')
+const globalProperties = remote.require('./globalProperties').default
 
-class ListComponent extends React.Component<any,any> {
+class ListComponent extends React.Component<any, TrelloInterfacesProps.IListProps> {
 	constructor (props) {
 		super(props)
-		this.handleAddCard = this.handleAddCard.bind(this)
 		this.addSortable = this.addSortable.bind(this)
 	}
 
-	handleAddCard () {
-		this.props.onAddCard(this.props.listData.id)
-	}
-	addSortable (input) {
+	public addSortable (input) {
 		if (input !== null) {
 			Sortable.create(input, {group: 'cards', animation: 150, ghostClass: 'cardGhost'})
 		}
 	}
 
-	render () {
-		var elements = this.props.listData.cards.map((card) =>
+	public render () {
+		const elements = this.props.listData.cards.map((card) =>
 			<CardComponent key={card.id} cardData={card}/>
 		)
 		return (
@@ -33,15 +31,15 @@ class ListComponent extends React.Component<any,any> {
 				<ListName listData={this.props.listData}/>
 				<div className='cardContainer' ref={(input) => { this.addSortable(input) }} id={this.props.listData.id}>
 					{elements}
-					<AddCardButton handleClick={this.handleAddCard} listId={this.props.listData.id}/>
+					<AddCardButton listId={this.props.listData.id}/>
 				</div>
 			</div>
 		)
 	}
 }
 
-class AddableList extends React.Component<any,any> {
-	nameInput: HTMLElement
+class AddableList extends React.Component<any, any> {
+	public nameInput: HTMLElement
 	constructor (props) {
 		super(props)
 		this.state = {clicked: false, name: ''}
@@ -50,11 +48,11 @@ class AddableList extends React.Component<any,any> {
 		this.handleChange = this.handleChange.bind(this)
 	}
 
-	clicked () {
+	public clicked () {
 		this.setState({clicked: true})
 	}
 
-	finishEdit (event) {
+	public finishEdit (event) {
 		if (event.target.value === '') {
 			this.setState({clicked: false})
 		} else {
@@ -63,18 +61,18 @@ class AddableList extends React.Component<any,any> {
 		}
 	}
 
-	componentDidUpdate () {
+	public componentDidUpdate () {
 		autosize.update(this.nameInput)
 		if (this.state.clicked) {
 			this.nameInput.focus()
 		}
 	}
 
-	handleChange (event) {
+	public handleChange (event) {
 		this.setState({name: event.target.value})
 	}
 
-	render () {
+	public render () {
 		if (this.state.clicked) {
 			return (
 				<div className='listComponent'>
@@ -99,8 +97,8 @@ class AddableList extends React.Component<any,any> {
 	}
 }
 
-class ListName extends React.Component<any,any> {
-	nameInput: HTMLElement
+class ListName extends React.Component<TrelloInterfacesProps.IListProps, any> {
+	public nameInput: HTMLElement
 	constructor (props) {
 		super(props)
 		this.finishEdit = this.finishEdit.bind(this)
@@ -108,26 +106,26 @@ class ListName extends React.Component<any,any> {
 		this.state = {name: this.props.listData.name}
 	}
 
-	finishEdit (event) {
+	public finishEdit (event) {
 		this.setState({name: event.target.value})
 		ipcRenderer.send('trelloUpdateList', this.props.listData.id, [
 			['name', this.state.name]
 		])
 	}
 
-	componentDidUpdate () {
+	public componentDidUpdate () {
 		autosize.update(this.nameInput)
 	}
 
-	handleChange (event) {
+	public handleChange (event) {
 		this.setState({name: event.target.value})
 	}
 
-	componentWillReceiveProps () {
+	public componentWillReceiveProps () {
 		this.setState({name: this.props.listData.name})
 	}
 
-	render () {
+	public render () {
 		return <textarea className='listTitle'
 			rows={1}
 			onChange={this.handleChange}
@@ -140,43 +138,42 @@ class ListName extends React.Component<any,any> {
 	}
 }
 
-class CardComponent extends React.Component<CardDataProps,any> {
+class CardComponent extends React.Component<TrelloInterfacesProps.ICardDataProps, any> {
 	constructor (props) {
 		super(props)
 		this.openCard = this.openCard.bind(this)
 	}
 
-	openCard () {
+	public openCard () {
 		ipcRenderer.send('trelloOpenCard', this.props.cardData.id)
 	}
-	render () {
-		var card = this.props.cardData
+	public render () {
+		const card = this.props.cardData
 		// setting these variables to null, so React won't create any DOM element
-		var labels = null
-		var desc = null
-		var due = null
-		var comments = null
-		var attachments = null
-		var imageCover = null
+		let labels = null
+		let desc = null
+		let comments = null
+		let attachments = null
+		let imageCover = null
 		if (card.placeholder === undefined) {
 			labels = card.labels.map((label) => {
 				return <Label key={label.id} labelData={label}/>
 			})
 
 			if (card.desc !== '') {
-				desc = <div><i className="fa fa-align-left cardInfoDescIcon"></i></div>
+				desc = <div><i className='fa fa-align-left cardInfoDescIcon'></i></div>
 			}
 
 			if (card.badges.comments > 0) {
-				comments = <div><i className="fa fa-comment-o"></i>{card.badges.comments}</div>
+				comments = <div><i className='fa fa-comment-o'></i>{card.badges.comments}</div>
 			}
 
 			if (card.badges.attachments > 0) {
-				attachments = <div><i className="fa fa-paperclip"></i>{card.badges.attachments}</div>
+				attachments = <div><i className='fa fa-paperclip'></i>{card.badges.attachments}</div>
 			}
 
 			if (card.idAttachmentCover && card.attachments) {
-				var attachment
+				let attachment
 				card.attachments.forEach((element) => {
 					if (element.id === card.idAttachmentCover) {
 						attachment = element
@@ -190,7 +187,7 @@ class CardComponent extends React.Component<CardDataProps,any> {
 				{imageCover}
 				{labels}
 				<div className='cardTitle'>{card.name}</div>
-				<div className='cardInfo'>{due}
+				<div className='cardInfo'>
 					<DueDate cardData={card}/>
 					{desc}
 					<CheckListBadge badges={card.badges}/>
@@ -202,15 +199,15 @@ class CardComponent extends React.Component<CardDataProps,any> {
 	}
 }
 
-class DueDate extends React.Component<CardDataProps, {}> {
-	render () {
-		var classes = ['dueLabel']
-		var due = this.props.cardData.due
+class DueDate extends React.Component<TrelloInterfacesProps.ICardDataProps, {}> {
+	public render () {
+		const classes = ['dueLabel']
+		const due = this.props.cardData.due
 		// handle non set due date
 		if (due === null) { return null }
-		var date = new Date(due)
-		var today = new Date()
-		var dateString = ` ${date.getDate()}. ${date.getMonth() + 1}. ${today.getFullYear() === date.getFullYear() ? '' : date.getFullYear()}`
+		const date = new Date(due)
+		const today = new Date()
+		let dateString = ` ${date.getDate()}. ${date.getMonth() + 1}. ${today.getFullYear() === date.getFullYear() ? '' : date.getFullYear()}`
 		const clock = ` - ${date.getHours()}:${date.getMinutes() > 9 ? date.getMinutes() : '0' + date.getMinutes()}`
 		if (this.props.cardData.dueComplete) {
 			classes.push('dueComplete')
@@ -239,25 +236,25 @@ class DueDate extends React.Component<CardDataProps, {}> {
 	}
 }
 
-class CheckListBadge extends React.Component<BadgesProps,any> {
-	render () {
+class CheckListBadge extends React.Component<TrelloInterfacesProps.IBadgesProps, any> {
+	public render () {
 		if (this.props.badges.checkItems === 0) {
 			return null
 		}
 		return (
 			<div className={this.props.badges.checkItemsChecked === this.props.badges.checkItems ? 'checkFull' : ''}>
-				<i className="fa fa-check-square-o"></i>
+				<i className='fa fa-check-square-o'></i>
 				{` ${this.props.badges.checkItemsChecked}/${this.props.badges.checkItems}`}
 			</div>
 		)
 	}
 }
 
-class ImageCover extends React.Component<AttachmentProps,any> {
-	render () {
-		var extension = this.props.attData.url.match(/.+([.].+)/)
-		var filename = `${this.props.attData.id}${extension[1]}`
-		var pathToImage = `${globalProperties.getPath()}attachments/${filename}`
+class ImageCover extends React.Component<TrelloInterfacesProps.IAttachmentProps, any> {
+	public render () {
+		const extension = this.props.attData.url.match(/.+([.].+)/)
+		const filename = `${this.props.attData.id}${extension[1]}`
+		const pathToImage = `${globalProperties.getPath()}attachments/${filename}`
 		return (
 			<div style={{backgroundColor: this.props.attData.edgeColor}}>
 				<img className='imgCover' src={pathToImage}/>
@@ -266,9 +263,9 @@ class ImageCover extends React.Component<AttachmentProps,any> {
 	}
 }
 
-class Label extends React.Component<LabelProps,any> {
-	render () {
-		var label = this.props.labelData
+class Label extends React.Component<TrelloInterfacesProps.ILabelProps, any> {
+	public render () {
+		const label = this.props.labelData
 		// if the color is set to null, the label will not show on board view
 		if (label.color === null) { return null }
 		const labelStyle = {
@@ -280,24 +277,23 @@ class Label extends React.Component<LabelProps,any> {
 	}
 }
 
-export default class Board extends React.Component<any,any> {
+export default class Board extends React.Component<{}, any> {
 	constructor (props) {
 		super(props)
-		this.addCardToList = this.addCardToList.bind(this)
 		this.update = this.update.bind(this)
 		this.goBack = this.goBack.bind(this)
 		// add empty list to speed up the process later
 		this.state = { boardData: { name: '', values: [{cards: [], name: '', id: ''}] } }
 	}
 
-	handleIpc () {
-		ipcRenderer.on('trelloGetBoardData-reply', (event, boardData) => {
-			this.setState({boardData: boardData})
+	public handleIpc () {
+		ipcRenderer.on('trelloGetBoardData-reply', (event: Event, boardData) => {
+			this.setState({boardData})
 			// stop spinning refresh icon
 			document.querySelector('#updateIcon').classList.remove('fa-spin')
 		})
 
-		ipcRenderer.on('trelloSetBackground', (event, imagePath, options) => {
+		ipcRenderer.on('trelloSetBackground', (event: Event, imagePath: string, options) => {
 			// handle solid color background
 			if (imagePath[0] === '#') {
 				document.querySelector('body').style.backgroundColor = imagePath
@@ -316,17 +312,17 @@ export default class Board extends React.Component<any,any> {
 		})
 	}
 
-	async componentDidMount () {
+	public async componentDidMount () {
 		this.handleBackgroundScroll()
 		this.handleIpc()
 		ipcRenderer.send('trelloGetBoardData', boardId, {forceUpdate: false, refresh: false})
-		if (connCheck.state) {
+		if (connCheck.getState()) {
 			this.update()
 		}
 	}
 
-	handleBackgroundScroll () {
-		var target = document.querySelector('.boardRoot')
+	public handleBackgroundScroll () {
+		const target = document.querySelector('.boardRoot')
 		target.addEventListener('wheel', (e) => {
 			if (target === e.target) {
 				e.preventDefault()
@@ -335,32 +331,18 @@ export default class Board extends React.Component<any,any> {
 		})
 	}
 
-	addCardToList (id) {
-		this.setState((prevState) => {
-			for (var i = 0; i < prevState.boardData.values.length; i++) {
-				if (prevState.boardData.values[i].id === id) {
-					prevState.boardData.values[i].cards.push({name: 'new card', placeholder: true})
-				}
-			}
-			return {
-				cards: prevState
-			}
-		})
-		ipcRenderer.send('trelloAddCard', id)
-	}
-
-	update () {
+	public update () {
 		document.querySelector('#updateIcon').classList.add('fa-spin')
 		ipcRenderer.send('trelloGetBoardData', boardId, {forceUpdate: true, refresh: true})
 	}
 
-	goBack () {
+	public goBack () {
 		ipcRenderer.send('goBack')
 	}
 
-	render () {
-		var components = this.state.boardData.values.map((list) => {
-			return <ListComponent onAddCard={this.addCardToList} listData={list} key={list.id}/>
+	public render () {
+		const components = this.state.boardData.values.map((list) => {
+			return <ListComponent listData={list} key={list.id}/>
 		})
 		document.title = `${this.state.boardData.name} | To-Do app in Electron`
 		return (
@@ -379,7 +361,7 @@ export default class Board extends React.Component<any,any> {
 	}
 }
 
-class BoardName extends React.Component<any,any> {
+class BoardName extends React.Component<any, any> {
 	constructor (props) {
 		super(props)
 		this.finishEdit = this.finishEdit.bind(this)
@@ -387,24 +369,25 @@ class BoardName extends React.Component<any,any> {
 		this.state = {name: ''}
 	}
 
-	finishEdit (event) {
+	public finishEdit (event) {
 		this.setState({name: event.target.value})
-		ipcRenderer.send('trelloUpdateBoard', this.props.boardData.id, [
-			['name', this.state.name]
-		])
+		const updater = [
+			{key: 'name', value: this.state.name}
+		]
+		ipcRenderer.send('trelloUpdateBoard', this.props.boardData.id, updater)
 	}
 
-	handleChange (event) {
+	public handleChange (event) {
 		this.setState({name: event.target.value})
 	}
 
-	componentWillReceiveProps (nextProps) {
+	public componentWillReceiveProps (nextProps) {
 		if (nextProps.boardData) {
 			this.setState({name: nextProps.boardData.name})
 		}
 	}
 
-	render () {
+	public render () {
 		return <input id='boardName'
 			type='text'
 			onChange={this.handleChange}
@@ -413,8 +396,8 @@ class BoardName extends React.Component<any,any> {
 	}
 }
 
-class AddCardButton extends React.Component<any,any> {
-	nameInput: HTMLElement
+class AddCardButton extends React.Component<any, any> {
+	public nameInput: HTMLElement
 	constructor (props: any) {
 		super(props)
 		this.state = {clicked: false, name: ''}
@@ -423,11 +406,11 @@ class AddCardButton extends React.Component<any,any> {
 		this.handleChange = this.handleChange.bind(this)
 	}
 
-	clicked () {
+	public clicked () {
 		this.setState({clicked: true})
 	}
 
-	finishEdit (event) {
+	public finishEdit (event) {
 		if (event.target.value === '') {
 			this.setState({clicked: false})
 		} else {
@@ -436,22 +419,22 @@ class AddCardButton extends React.Component<any,any> {
 		}
 	}
 
-	componentDidUpdate () {
+	public componentDidUpdate () {
 		if (this.state.clicked) {
 			this.nameInput.focus()
 		}
 		autosize.update(this.nameInput)
 	}
 
-	handleChange (event) {
+	public handleChange (event) {
 		this.setState({name: event.target.value})
 	}
 
-	componentWillUnmount () {
+	public componentWillUnmount () {
 		autosize.destroy(this.nameInput)
 	}
 
-	render () {
+	public render () {
 		if (this.state.clicked) {
 			return (
 				<div className='addCardInputContainer'>

@@ -1,13 +1,13 @@
 import * as React from 'React'
 const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
-var monthLenghts = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+const monthLenghts = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
 
 class DayTile extends React.Component<any, any> {
-	render () {
-		var weekday = this.props.date.getDay()
-		var isWeekend = weekday === 0 || weekday === 6
-		var isMonthRight = this.props.date.getMonth() === this.props.intendedMonth
-		var style = {
+	public render () {
+		const weekday = this.props.date.getDay()
+		const isWeekend = weekday === 0 || weekday === 6
+		const isMonthRight = this.props.date.getMonth() === this.props.intendedMonth
+		const style = {
 			backgroundColor: isWeekend ? '#EEEEEE' : '',
 			color: isMonthRight ? '#000' : '#888'
 		}
@@ -17,26 +17,26 @@ class DayTile extends React.Component<any, any> {
 	}
 }
 
-class CalendarRoot extends React.Component<any, any> {
-	render () {
-		var month = this.props.date.getMonth()
-		var year = this.props.date.getFullYear()
-		var firstDayInMonth = new Date(year, month)
+export class CalendarRoot extends React.Component<any, any> {
+	public render () {
+		const month = this.props.date.getMonth()
+		const year = this.props.date.getFullYear()
+		const firstDayInMonth = new Date(year, month)
 		if (isLeap(year)) {
 			monthLenghts[1] = 29
 		} else {
 			monthLenghts[1] = 28
 		}
-		var weeksToRender = getWeeksToRender(firstDayInMonth)
-		var weekRows = []
+		const weeksToRender = getWeeksToRender(firstDayInMonth)
+		const weekRows = []
 		for (let i = 0; i < weeksToRender; i++) {
-			let element = <WeekRow intendedMonth={month} date={new Date(year, month, i * 7 + 1 - firstDayInMonth.getDay())}/>
+			const element = <WeekRow intendedMonth={month} date={new Date(year, month, i * 7 + 1 - firstDayInMonth.getDay())}/>
 			weekRows.push(element)
 		}
 		// we add one empty element for week number column
-		var dayNames = [<th></th>]
+		const dayNames = [<th></th>]
 		for (let i = 0; i < 7; i++) {
-			let element = <th>{days[i]}</th>
+			const element = <th>{days[i]}</th>
 			dayNames.push(element)
 		}
 		return (
@@ -49,11 +49,11 @@ class CalendarRoot extends React.Component<any, any> {
 }
 
 class WeekRow extends React.Component<any, any> {
-	render () {
-		var date = this.props.date
-		var elements = [<td className='weekNumber'>{getWeekNumber(date)}</td>]
-		for (var i = 0; i < 7; i++) {
-			var dateDay = new Date(date.getFullYear(), date.getMonth(), date.getDate() + i)
+	public render () {
+		const date = this.props.date
+		const elements = [<td className='weekNumber'>{getWeekNumber(date)}</td>]
+		for (let i = 0; i < 7; i++) {
+			const dateDay = new Date(date.getFullYear(), date.getMonth(), date.getDate() + i)
 			elements.push(<DayTile intendedMonth={this.props.intendedMonth} date={dateDay}/>)
 		}
 		return (
@@ -63,14 +63,14 @@ class WeekRow extends React.Component<any, any> {
 }
 
 function getFirstWeekInYear (year) {
-	var firstDayInYear = new Date(year, 0)
+	const firstDayInYear = new Date(year, 0)
 	if (firstDayInYear.getDay() > 4) {
 		// start of the year isn't a week 1
-		let offsetToStart = 7 - firstDayInYear.getDay()
+		const offsetToStart = 7 - firstDayInYear.getDay()
 		return new Date(year, 0, firstDayInYear.getDate() + offsetToStart)
 	} else if (firstDayInYear.getDay() < 4) {
 		// start of the year is a week 1
-		let offsetToStart = -2 - firstDayInYear.getDay()
+		const offsetToStart = -2 - firstDayInYear.getDay()
 		return new Date(year, 0, firstDayInYear.getDate() + offsetToStart)
 	} else {
 		// year starts on thursday
@@ -101,12 +101,8 @@ function getWeeksToRender (date) {
 }
 
 function getWeekNumber (date) {
-	var year = date.getFullYear()
-	var firstWeekStart = getFirstWeekInYear(year)
-	var weekNumber = Math.ceil((date - firstWeekStart.valueOf()) / 604800000)
+	const year = date.getFullYear()
+	const firstWeekStart = getFirstWeekInYear(year)
+	const weekNumber = Math.ceil((date - firstWeekStart.valueOf()) / 604800000)
 	return weekNumber
-}
-
-module.exports = {
-	CalendarRoot: CalendarRoot
 }

@@ -1,10 +1,10 @@
-import globalProperties from './globalProperties'
-import * as path from 'path'
 import * as fs from 'fs'
+import * as path from 'path'
 import * as cacheModule from './cache'
+import globalProperties from './globalProperties'
 import * as settings from './settings'
 const paths = ['', 'background/', 'background/thumbs/', 'attachments/']
-var pathToFolder
+let pathToFolder
 
 export async function initialize () {
 	pathToFolder = globalProperties.getPath()
@@ -26,14 +26,14 @@ export async function initialize () {
 }
 
 async function checkForFolders () {
-	var checks = paths.map((folder) => {
+	const checks = paths.map((folder) => {
 		return checkForFolder(path.join(pathToFolder, folder))
 	})
 	return Promise.all(checks)
 }
 
 async function createFolders () {
-	var checks = paths.map((folder) => {
+	const checks = paths.map((folder) => {
 		return createFolder(path.join(pathToFolder, folder))
 	})
 	return Promise.all(checks)

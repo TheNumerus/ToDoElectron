@@ -1,13 +1,11 @@
-/// <reference path="settings.d.ts" />
-
-import globalProperties from './globalProperties'
+import {Event, ipcMain} from 'electron'
 import * as fs from 'fs'
-import {ipcMain, Event} from 'electron'
+import globalProperties from './globalProperties'
 
-var settings: SettingsType
+let settings: ISettings
 
 export function load () {
-	return new Promise(function (resolve, reject) {
+	return new Promise((resolve, reject) => {
 		fs.readFile(globalProperties.getPath() + 'settings', (error, data) => {
 			if (error) {
 				reject(error)
@@ -27,9 +25,9 @@ export function load () {
 }
 
 export function save () {
-	return new Promise(function (resolve, reject) {
+	return new Promise((resolve, reject) => {
 		fs.writeFile(globalProperties.getPath() + 'settings', JSON.stringify(settings), (error) => {
-			if (error) reject(error)
+			if (error) {reject(error)}
 			resolve()
 		})
 	})
@@ -71,9 +69,9 @@ function handleIpc () {
 	})
 }
 
-function setDefaultValues () {
-	settings = {
-		board:{
+export function setDefaultValues (): ISettings {
+	return {
+		board: {
 			animateGIFs: true,
 			useProgressBars: false
 		},
@@ -87,28 +85,28 @@ function setDefaultValues () {
 }
 
 export enum Theme {
-    light,
-    dark
+	light,
+	dark
 }
 
-export type SettingsType = {
-    windowSize: {
-        x:number,
-        y:number,
-        maximized: boolean
-    },
-    theme: Theme,
-    board: {
-        useProgressBars: boolean,
-        animateGIFs: boolean
-    }
+export interface ISettings {
+	windowSize: {
+		x: number,
+		y: number,
+		maximized: boolean
+	},
+	theme: Theme,
+	board: {
+		useProgressBars: boolean,
+		animateGIFs: boolean
+	}
 }
 
 export async function initialize () {
 	try {
 		await load()
 	} catch (e) {
-		setDefaultValues()
+		settings = setDefaultValues()
 		await save()
 	}
 	handleIpc()
