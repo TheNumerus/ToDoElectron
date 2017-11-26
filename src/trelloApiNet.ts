@@ -1,14 +1,15 @@
 import {net} from 'electron'
 import * as path from 'path'
+import * as sharp from 'sharp'
 import {URL} from 'url'
 import * as cacheModule from './cache'
 import globalProperties from './globalProperties'
+import * as settings from './settings'
 import {ImageOptions} from './trelloApi'
 import * as trelloIO from './trelloApiIO'
 import {TrelloTypes} from './trelloInterfaces'
 const appKey = globalProperties.getTrelloAppKey()
 let token
-
 /**
  * Initializes variables required for connection to Trello API
  */
@@ -54,57 +55,52 @@ export async function getActions (idCard: string): Promise<TrelloTypes.Action[]>
 /**
  * 	Get image, save it and return its path
  */
-export async function getImage (imageData: any, options: ImageOptions) {
-	let name
-	let urlToDownload
-	let pathnames
-	let decodedName
-	switch (options) {
-	case ImageOptions.background:
-		// seperate path into chunks and select last part
-		pathnames = new URL(imageData).pathname.split('/')
-		decodedName = decodeURIComponent(pathnames[pathnames.length - 1])
-		if (imageData.match(/\/\S+([.]\w+)$/)) {
-			// url does have file extension
-			name = path.join('background', decodedName)
-		} else {
-			name = path.join('background', decodedName) + '.jpg'
+export async function getImage (imageData: TrelloTypes.Attachment, options: ImageOptions) {
+	const extension = imageData.url.match(/.+([.].+)/)
+	let name = path.join('attachments', `${imageData.id}${extension[1]}`)
+	const animate = settings.functions.board.get().animateGIFs
+	try {
+		return await trelloIO.checkExistence(name)
+	} catch (e) {
+		if (e.code !== 'ENOENT') { throw e }
+		// download if needed
+		const imageBuffer = await downloadImage(imageData.url)
+		trelloIO.saveImage(name, imageBuffer)
+		if (!animate && extension[1].toLowerCase() === '.gif') {
+			name = path.join('attachments', `${imageData.id}.png`)
+			trelloIO.saveImage(name, await sharp(imageBuffer).png().toBuffer())
 		}
-		urlToDownload = imageData
-		break
-	case ImageOptions.backgroundThumb:
-		// seperate path into chunks and select last part
-		pathnames = new URL(imageData).pathname.split('/')
-		decodedName = decodeURIComponent(pathnames[pathnames.length - 1])
-		if (imageData.match(/\/\S+([.]\w+)$/)) {
-			// url does have file extension
-			name = path.join('background/thumbs', decodedName)
-		} else {
-			name = path.join('background/thumbs', decodedName) + '.jpg'
-		}
-		urlToDownload = imageData
-		break
-	case ImageOptions.attachment:
-		const extension = imageData.url.match(/.+([.].+)/)
-		name = path.join('attachments', `${imageData.id}${extension[1]}`)
-		urlToDownload = imageData.url
-		break
-	default:
-		throw new Error(`Wrong option in getImage`)
+		return globalProperties.getPath() + name
+	}
+}
+
+/**
+ * Get background and save it
+ */
+export async function getBackground (imageUrl: string, options: ImageOptions) {
+	let pathnames: string[]
+	let decodedName: string
+	// seperate path into chunks and select last part
+	pathnames = new URL(imageUrl).pathname.split('/')
+	decodedName = decodeURIComponent(pathnames[pathnames.length - 1])
+	const pathToAdd = options === ImageOptions.backgroundThumb ? 'background/thumbs' : 'background'
+	let name: string = path.join(pathToAdd, decodedName)
+	// check for extension
+	if (!imageUrl.match(/.+([.].+)/)) {
+		name += '.jpg'
 	}
 	try {
 		return await trelloIO.checkExistence(name)
 	} catch (e) {
 		if (e.code !== 'ENOENT') { throw e }
 		// download if needed
-		trelloIO.saveImage(name, await downloadImage(urlToDownload))
+		trelloIO.saveImage(name, await downloadImage(imageUrl))
 		if (options === ImageOptions.backgroundThumb) {
 			return globalProperties.getPath() + name
 		}
 		return globalProperties.getPath() + name
 	}
 }
-
 /**
  * Gets checklists
  */

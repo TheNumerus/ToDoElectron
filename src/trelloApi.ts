@@ -65,13 +65,13 @@ function handleIpcCalls () {
 			// now download images in background
 			boards.values.forEach((board: TrelloTypes.BoardData) => {
 				if (board.prefs.backgroundImageScaled !== null) {
-					TrelloApiNet.getImage(board.prefs.backgroundImageScaled[0].url, ImageOptions.backgroundThumb)
+					TrelloApiNet.getBackground(board.prefs.backgroundImageScaled[0].url, ImageOptions.backgroundThumb)
 				}
 			})
 		} else {
 			boards.values.forEach((board: TrelloTypes.BoardData) => {
 				if (board.prefs.backgroundImageScaled !== null) {
-					TrelloApiNet.getImage(board.prefs.backgroundImageScaled[0].url, ImageOptions.backgroundThumb)
+					TrelloApiNet.getBackground(board.prefs.backgroundImageScaled[0].url, ImageOptions.backgroundThumb)
 				}
 			})
 			windowManager.sendMessage('trelloGetBoards-reply', boards)
@@ -181,7 +181,7 @@ function handleIpcCalls () {
 			const filename = prefs.backgroundImageScaled[0].url.match(/.*\/(.*)/)[1]
 			const pathName = path.join(GlobalProperties.getPath(), 'background', 'thumbs', filename)
 			event.sender.send('trelloSetBackground', pathName, {preview: true})
-			event.sender.send('trelloSetBackground', await TrelloApiNet.getImage(prefs.backgroundImage, ImageOptions.background), {preview: false})
+			event.sender.send('trelloSetBackground', await TrelloApiNet.getBackground(prefs.backgroundImage, ImageOptions.background), {preview: false})
 		} else {
 			event.sender.send('trelloSetBackground', prefs.backgroundColor, {preview: false})
 		}
