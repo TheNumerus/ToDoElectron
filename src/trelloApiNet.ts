@@ -58,17 +58,22 @@ export async function getActions (idCard: string): Promise<TrelloTypes.Action[]>
 export async function getImage (imageData: TrelloTypes.Attachment, options: ImageOptions) {
 	const extension = imageData.url.match(/.+([.].+)/)
 	let name = path.join('attachments', `${imageData.id}${extension[1]}`)
-	const animate = settings.functions.board.get().animateGIFs
+	const animate = settings.get().animateGIFs
 	try {
+		if (!animate) {
+			name = path.join('attachments', `${imageData.id}.png`)
+		}
 		return await trelloIO.checkExistence(name)
 	} catch (e) {
 		if (e.code !== 'ENOENT') { throw e }
 		// download if needed
 		const imageBuffer = await downloadImage(imageData.url)
-		trelloIO.saveImage(name, imageBuffer)
 		if (!animate && extension[1].toLowerCase() === '.gif') {
 			name = path.join('attachments', `${imageData.id}.png`)
 			trelloIO.saveImage(name, await sharp(imageBuffer).png().toBuffer())
+		} else {
+			name = path.join('attachments', `${imageData.id}${extension[1]}`)
+			trelloIO.saveImage(name, imageBuffer)
 		}
 		return globalProperties.getPath() + name
 	}

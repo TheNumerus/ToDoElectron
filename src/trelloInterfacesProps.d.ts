@@ -1,8 +1,10 @@
 import {TrelloTypes} from './trelloInterfaces'
+import {ISettings} from './settings'
 
 export module TrelloInterfacesProps {
 	interface IAttachmentProps {
-		attData: TrelloTypes.Attachment
+		attData: TrelloTypes.Attachment,
+		settings?: ISettings
 	}
 
 	interface IAttachmentControlProps extends IAttachmentProps {
@@ -15,7 +17,8 @@ export module TrelloInterfacesProps {
 	}
 
 	interface ICardDataProps {
-		cardData: TrelloTypes.CardData
+		cardData: TrelloTypes.CardData,
+		settings?: ISettings
 	}
 
 	interface ILabelProps {
@@ -27,7 +30,8 @@ export module TrelloInterfacesProps {
 	}
 
 	interface IListProps {
-		listData: TrelloTypes.ListData
+		listData: TrelloTypes.ListData,
+		settings?: ISettings
 	}
 
 	interface IChecklistProps {

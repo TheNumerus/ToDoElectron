@@ -29,13 +29,13 @@ export function openURL (filename: string) {
 }
 
 export function createWindow () {
-	const size = settings.functions.windowSize.get()
+	const size = settings.get()
 	const menu = Menu.buildFromTemplate(menuTemplate)
 	Menu.setApplicationMenu(menu)
-	mainWindow = new BrowserWindow({ height: size.y, minHeight: 480, minWidth: 640, show: false, width: size.x,
+	mainWindow = new BrowserWindow({ height: size.windowY, minHeight: 480, minWidth: 640, show: false, width: size.windowX,
 		webPreferences: {experimentalFeatures: true, nodeIntegration: true} })
 	// mainWindow.setMenuBarVisibility(false)
-	if (size.maximized) {
+	if (size.windowMaximized) {
 		mainWindow.maximize()
 	}
 	openURL('homepage.html')
@@ -50,7 +50,11 @@ export function createWindow () {
 export function save () {
 	const size = mainWindow.getSize()
 	const maximized = mainWindow.isMaximized()
-	settings.functions.windowSize.set({ x: size[0], y: size[1], maximized })
+	settings.set([
+		['windowX', size[0]],
+		['windoxY', size[1]],
+		['windowMaximized', maximized]
+	])
 	settings.save()
 }
 

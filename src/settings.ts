@@ -33,32 +33,14 @@ export function save () {
 	})
 }
 
-export const functions = {
-	windowSize: {
-		get: () => {
-			return settings.windowSize
-		},
-		set: (obj) => {
-			if (obj.x !== undefined && obj.y !== undefined) {
-				settings.windowSize.x = obj.x
-				settings.windowSize.y = obj.y
-				settings.windowSize.maximized = obj.maximized
-			} else {
-				throw new Error('invalid object in function setWindowSize')
-			}
-		}
-	},
-	board: {
-		get: () => {
-			return settings.board
-		},
-		set: (obj) => {
-			if (obj.animateGIFs !== undefined && obj.animateGIFs !== undefined) {
-				settings.board.animateGIFs = obj.animateGIFs
-				settings.board.useProgressBars = obj.useProgressBars
-			} else {
-				throw new Error('invalid object in function setBoard')
-			}
+export function get () {
+	return settings
+}
+
+export function set (object: IChangeSettings[]) {
+	for (const setting of object) {
+		if (setting[0] !== undefined && setting[1] !== undefined) {
+			settings[setting[0]] = setting[1]
 		}
 	}
 }
@@ -67,38 +49,21 @@ function handleIpc () {
 	ipcMain.on('getSettings', (event: Event) => {
 		event.sender.send('getSettings-reply', settings)
 	})
+
+	ipcMain.on('changeSettings', (event: Event, data: IChangeSettings) => {
+		set(data)
+		save()
+	})
 }
 
 export function setDefaultValues (): ISettings {
 	return {
-		board: {
-			animateGIFs: true,
-			useProgressBars: false
-		},
+		animateGIFs: true,
+		useProgressBars: false,
 		theme: Theme.light,
-		windowSize: {
-			x: 1600,
-			y: 900,
-			maximized: false
-		}
-	}
-}
-
-export enum Theme {
-	light,
-	dark
-}
-
-export interface ISettings {
-	windowSize: {
-		x: number,
-		y: number,
-		maximized: boolean
-	},
-	theme: Theme,
-	board: {
-		useProgressBars: boolean,
-		animateGIFs: boolean
+		windowMaximized: false,
+		windowX: 1600,
+		windowY: 900
 	}
 }
 
@@ -110,4 +75,20 @@ export async function initialize () {
 		await save()
 	}
 	handleIpc()
+}
+
+enum Theme {
+	light,
+	dark
+}
+
+export type IChangeSettings = [string, any]
+
+export interface ISettings {
+	windowX?: number,
+	windowY?: number,
+	windowMaximized?: boolean,
+	theme?: Theme,
+	useProgressBars?: boolean,
+	animateGIFs?: boolean
 }

@@ -1,6 +1,6 @@
 import {ipcRenderer} from 'electron'
 import * as React from 'react'
-import {ISettings, setDefaultValues} from './settings'
+import {IChangeSettings, ISettings, setDefaultValues} from './settings'
 
 export default class Settings extends React.Component<any, any> {
 	public render () {
@@ -49,17 +49,13 @@ class Checkboxes extends React.Component<any, {settings: ISettings}> {
 	}
 
 	public render () {
-		const values = []
-		for (const value in this.state.settings) {
-			values.push(<Checkbox value={value}/>)
-		}
 		return (
 			<div>
 				<h2>Appearance</h2>
 				<div className='lineDivider'></div>
 				<h3>Trello board view</h3>
-				<Checkbox isChecked={this.state.settings.board.useProgressBars} name='Use progess bars'/>
-				<Checkbox isChecked={this.state.settings.board.animateGIFs} name='Use animated images'/>
+				<Checkbox property='useProgressBars' isChecked={this.state.settings.useProgressBars} name='Use progess bars'/>
+				<Checkbox property='animateGIFs' isChecked={this.state.settings.animateGIFs} name='Use animated images'/>
 			</div>
 		)
 	}
@@ -69,15 +65,16 @@ class Checkbox extends React.Component<any, any> {
 	constructor (props) {
 		super(props)
 		this.onChange = this.onChange.bind(this)
-		this.state = {checked: this.props.isChecked}
+		this.state = {isChecked: this.props.isChecked}
 	}
 
-	public onChange (event) {
-		this.setState({checked: event.target.isChecked})
+	public onChange (event: React.FormEvent<HTMLInputElement>) {
+		ipcRenderer.send('changeSettings', [[this.props.property, event.currentTarget.checked]])
+		this.setState({isChecked: event.currentTarget.checked})
 	}
 
 	public componentWillReceiveProps (nextProps) {
-		this.setState({checked: nextProps.isChecked})
+		this.setState({isChecked: nextProps.isChecked})
 	}
 
 	public render () {

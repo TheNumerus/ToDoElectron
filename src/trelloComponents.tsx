@@ -5,12 +5,14 @@ import * as Sortable from 'sortablejs'
 import {URL} from 'url'
 import * as connCheck from './connectionChecker'
 import {DueStates, HelperUI} from './HelperUI'
+import { ISettings } from './settings'
 import {ImageOptions} from './trelloApi'
 import {TrelloInterfacesProps} from './trelloInterfacesProps'
 const boardId = new URL(window.location.href).searchParams.get('id')
 const globalProperties = remote.require('./globalProperties').default
+let settings: ISettings
 
-class ListComponent extends React.Component<any, TrelloInterfacesProps.IListProps> {
+class ListComponent extends React.Component<TrelloInterfacesProps.IListProps, any> {
 	constructor (props) {
 		super(props)
 		this.addSortable = this.addSortable.bind(this)
@@ -24,7 +26,7 @@ class ListComponent extends React.Component<any, TrelloInterfacesProps.IListProp
 
 	public render () {
 		const elements = this.props.listData.cards.map((card) =>
-			<CardComponent key={card.id} cardData={card}/>
+			<CardComponent key={card.id} cardData={card} settings={this.props.settings}/>
 		)
 		return (
 			<div className='listComponent'>
@@ -179,7 +181,7 @@ class CardComponent extends React.Component<TrelloInterfacesProps.ICardDataProps
 						attachment = element
 					}
 				})
-				imageCover = <ImageCover attData={attachment}/>
+				imageCover = <ImageCover attData={attachment} settings={this.props.settings}/>
 			}
 		}
 		return (
@@ -252,8 +254,11 @@ class CheckListBadge extends React.Component<TrelloInterfacesProps.IBadgesProps,
 
 class ImageCover extends React.Component<TrelloInterfacesProps.IAttachmentProps, any> {
 	public render () {
-		const extension = this.props.attData.url.match(/.+([.].+)/)
-		const filename = `${this.props.attData.id}${extension[1]}`
+		let extension: string = this.props.attData.url.match(/.+([.].+)/)[1]
+		if (this.props.settings !== undefined && !this.props.settings.animateGIFs && extension === '.gif') {
+			extension = '.png'
+		}
+		const filename = `${this.props.attData.id}${extension}`
 		const pathToImage = `${globalProperties.getPath()}attachments/${filename}`
 		return (
 			<div style={{backgroundColor: this.props.attData.edgeColor}}>
@@ -283,7 +288,7 @@ export default class Board extends React.Component<{}, any> {
 		this.update = this.update.bind(this)
 		this.goBack = this.goBack.bind(this)
 		// add empty list to speed up the process later
-		this.state = { boardData: { name: '', values: [{cards: [], name: '', id: ''}] } }
+		this.state = { boardData: { name: '', values: [{cards: [], name: '', id: ''}] } , settings: {}}
 	}
 
 	public handleIpc () {
@@ -310,12 +315,17 @@ export default class Board extends React.Component<{}, any> {
 				}
 			}
 		})
+
+		ipcRenderer.on('getSettings-reply', (event: Event, options: ISettings) => {
+			this.setState({settings: options})
+		})
 	}
 
 	public async componentDidMount () {
 		this.handleBackgroundScroll()
 		this.handleIpc()
 		ipcRenderer.send('trelloGetBoardData', boardId, {forceUpdate: false, refresh: false})
+		ipcRenderer.send('getSettings')
 		if (connCheck.getState()) {
 			this.update()
 		}
@@ -342,7 +352,7 @@ export default class Board extends React.Component<{}, any> {
 
 	public render () {
 		const components = this.state.boardData.values.map((list) => {
-			return <ListComponent listData={list} key={list.id}/>
+			return <ListComponent listData={list} key={list.id} settings={this.state.settings}/>
 		})
 		document.title = `${this.state.boardData.name} | To-Do app in Electron`
 		return (
