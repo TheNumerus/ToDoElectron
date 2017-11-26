@@ -70,7 +70,7 @@ function createFolder (pathToCreate: string) {
 function deleteFile (pathToDelete: string) {
 	return new Promise((resolve, reject) => {
 		fs.unlink(pathToFolder + pathToDelete, (error) => {
-			if (error) {
+			if (error && error.code !== 'EPERM') {
 				reject(error)
 			}
 			resolve(true)

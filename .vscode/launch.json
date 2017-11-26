@@ -9,6 +9,7 @@
       "preLaunchTask": "Build",
       "sourceMaps": true,
       "outFiles": [ "${workspaceRoot}/bin/**/*.js" ],
+      "smartStep": true,
       "skipFiles": [
         "<node_internals>/**/*.js"
       ],
