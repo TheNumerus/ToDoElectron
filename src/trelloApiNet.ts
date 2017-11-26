@@ -86,7 +86,7 @@ export async function getBackground (imageUrl: string, options: ImageOptions) {
 	const pathToAdd = options === ImageOptions.backgroundThumb ? 'background/thumbs' : 'background'
 	let name: string = path.join(pathToAdd, decodedName)
 	// check for extension
-	if (!imageUrl.match(/.+([.].+)/)) {
+	if (!imageUrl.match(/[.][\w]+$/)) {
 		name += '.jpg'
 	}
 	try {

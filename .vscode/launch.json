@@ -8,6 +8,7 @@
       "cwd": "${workspaceRoot}",
       "preLaunchTask": "Build",
       "sourceMaps": true,
+      "console": "integratedTerminal",
       "outFiles": [ "${workspaceRoot}/bin/**/*.js" ],
       "smartStep": true,
       "skipFiles": [
