@@ -41,8 +41,8 @@ export module TrelloInterfacesProps {
 	interface ICheckProps {
 		check: TrelloTypes.Check
 	}
+
 	interface ICommentProps {
 		commentData: TrelloTypes.Action
 	}
-
 }

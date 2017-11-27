@@ -77,7 +77,7 @@ export async function initialize () {
 	handleIpc()
 }
 
-enum Theme {
+export enum Theme {
 	light,
 	dark
 }
