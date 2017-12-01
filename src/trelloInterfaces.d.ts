@@ -115,8 +115,4 @@ export module TrelloTypes {
 		newIndex: number,
 		oldIndex: number
 	}
-
-	interface MoveCard extends SortCard {
-		targetList: string
-	}
 }

@@ -26,18 +26,14 @@ class ListComponent extends React.Component<TrelloInterfacesProps.IListProps, an
 	}
 
 	public handleSort (event) {
-		const card: HTMLElement = event.item
-		const ids = {
-			idBoard: boardId,
-			idList: this.props.listData.id,
-			idCard: card.id
-		}
-		if (event.from !== event.to) {
-			// different list
-			const to: HTMLElement = event.item
-			ipcRenderer.send('trelloMoveCard', {ids, targetList: to.id, newIndex: event.newIndex, oldIndex: event.oldIndex})
-		} else {
-			// same list
+		// this event fires twice when moving card between lists, so we filter that event out
+		if (event.to.id === this.props.listData.id) {
+			const card: HTMLElement = event.item
+			const ids = {
+				idBoard: boardId,
+				idList: event.target.id,
+				idCard: card.id
+			}
 			ipcRenderer.send('trelloSortCard', {ids, newIndex: event.newIndex, oldIndex: event.oldIndex})
 		}
 	}

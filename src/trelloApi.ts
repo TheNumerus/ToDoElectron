@@ -145,7 +145,7 @@ function handleIpcCalls () {
 		const boardData = cacheModule.calls.trello.getBoardData(arg.ids.idBoard)
 		// sort to top
 		if (arg.newIndex === 0) {
-			TrelloApiNet.updateCard(arg.ids.idCard, [['pos', 'top']])
+			TrelloApiNet.updateCard(arg.ids.idCard, [['pos', 'top'], ['idList', arg.ids.idList]])
 			return
 		}
 		let listData: TrelloTypes.ListData
@@ -155,58 +155,35 @@ function handleIpcCalls () {
 			}
 		}
 		// sort to bottom
-		if (arg.newIndex === listData.cards.length - 1) {
-			TrelloApiNet.updateCard(arg.ids.idCard, [['pos', 'bottom']])
+		if (arg.newIndex >= listData.cards.length - 1) {
+			TrelloApiNet.updateCard(arg.ids.idCard, [['pos', 'bottom'], ['idList', arg.ids.idList]])
 			return
 		}
-		// sort in middle
-		const upperIndex = listData.cards[arg.newIndex]
-		const lowerIndex = listData.cards[arg.newIndex + 1]
-		const pos = (upperIndex.pos + lowerIndex.pos) / 2
-		TrelloApiNet.updateCard(arg.ids.idCard, [['pos', pos]])
-		// now modify cache
-		const movedCard = listData.cards[arg.oldIndex]
-		listData.cards.splice(arg.oldIndex, 1)
-		listData.cards.splice(arg.newIndex, 0, movedCard)
-		for (const list in boardData.values) {
-			if (boardData.values[list].id === arg.ids.idList) {
-				boardData.values[list] = listData
-			}
-		}
-		cacheModule.calls.trello.setBoardData(arg.ids.idBoard, boardData)
-	})
 
-	ipcMain.on('trelloMoveCard', (event, arg: TrelloTypes.MoveCard) => {
-		const boardData = cacheModule.calls.trello.getBoardData(arg.ids.idBoard)
-		// sort to top
-		if (arg.newIndex === 0) {
-			TrelloApiNet.updateCard(arg.ids.idCard, [['pos', 'top'], ['idList', arg.targetList]])
-			return
+		if (arg.newIndex < arg.oldIndex) {
+			// sort up
+			const upperIndex = listData.cards[arg.newIndex - 1]
+			const lowerIndex = listData.cards[arg.newIndex]
+			const pos = (upperIndex.pos + lowerIndex.pos) / 2
+			TrelloApiNet.updateCard(arg.ids.idCard, [['pos', pos], ['idList', arg.ids.idList]])
+		} else {
+			// sort down
+			const upperIndex = listData.cards[arg.newIndex]
+			const lowerIndex = listData.cards[arg.newIndex + 1]
+			const pos = (upperIndex.pos + lowerIndex.pos) / 2
+			TrelloApiNet.updateCard(arg.ids.idCard, [['pos', pos]])
 		}
-		let listData: TrelloTypes.ListData
-		for (const list of boardData.values) {
-			if (list.id === arg.targetList) {
-				listData = list
-			}
-		}
-		// sort to bottom
-		/* if (arg.newIndex === listData.cards.length - 1) {
-			TrelloApiNet.updateCard(arg.ids.idCard, [['pos', 'bottom'], ['idList', arg.targetList]])
-			return
-		} */
-		// TODO not working
+		// now modify cache
+		updateBoardData(arg.ids.idBoard)
 	})
 	// #endregion ipc
 
 	/**
-	 * Gets all board data and sends it to renderer process
+	 * Updates cachced version of board data
 	 */
-	async function getBoardData (boardId: string, boardData: TrelloTypes.BoardData, event: Event, refresh: boolean) {
+	async function updateBoardData (boardId: string) {
+		const boardData = cacheModule.calls.trello.getBoardData(boardId)
 		const json = await TrelloApiNet.getBoardData(boardId)
-		if (!refresh) {
-			// send background color right away
-			getBackground(json.prefs, event)
-		}
 		boardData.name = json.name
 		boardData.prefs = json.prefs
 		boardData.values = json.lists
@@ -233,8 +210,7 @@ function handleIpcCalls () {
 		}
 		boardData.date = Date.now()
 		cacheModule.calls.trello.setBoardData(boardId, boardData)
-		cacheModule.saveCache()
-		event.sender.send('trelloGetBoardData-reply', boardData)
+		await cacheModule.saveCache()
 	}
 
 	async function getBackground (prefs: TrelloTypes.BoardPrefs, event: Event) {
@@ -258,12 +234,13 @@ function handleIpcCalls () {
 		})
 	}
 
-	function boardUpdate (event: Event, boardId: string, options: TrelloTypes.PageUpdateOptions) {
-		const boardData = cacheModule.calls.trello.getBoardData(boardId)
-		if (options.forceUpdate === true) {
-			getBoardData(boardId, boardData, event, options.refresh)
-		} else if (cacheModule.calls.helper.checkInvalidity(boardData)) {
-			getBoardData(boardId, boardData, event, options.refresh)
+	async function boardUpdate (event: Event, boardId: string, options: TrelloTypes.PageUpdateOptions) {
+		let boardData = cacheModule.calls.trello.getBoardData(boardId)
+		if (options.forceUpdate === true || cacheModule.calls.helper.checkInvalidity(boardData)) {
+			await updateBoardData(boardId)
+			boardData = cacheModule.calls.trello.getBoardData(boardId)
+			getBackground(boardData.prefs, event)
+			event.sender.send('trelloGetBoardData-reply', boardData)
 		} else {
 			getBackground(boardData.prefs, event)
 			event.sender.send('trelloGetBoardData-reply', boardData)
