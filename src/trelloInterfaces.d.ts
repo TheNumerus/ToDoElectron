@@ -1,10 +1,17 @@
+import { CheckState } from './trelloApi'
+
 export module TrelloTypes {
 	interface AddRequest {
 		name: string,
 		id: string
 	}
 
-	type UpdateOptions = {key: string, value: any}[]
+	type UpdateOptions = [string, any][]
+
+	interface CheckListUpdateIds {
+		cardId: string,
+		idCheckItem: string
+	}
 
 	interface PageUpdateOptions {
 		forceUpdate: boolean,
@@ -78,16 +85,16 @@ export module TrelloTypes {
 
 	interface Checklist {
 		id: string,
-		name: string
+		name: string,
 		checkItems: Check[]
 	}
 
 	interface Check {
-		name: string
-		pos: number
-		state: 'complete'|'incomplete'
+		id: string,
+		name: string,
+		pos: number,
+		state: CheckState
 	}
-
 
 	interface BoardPrefs {
 		backgroundColor: string,

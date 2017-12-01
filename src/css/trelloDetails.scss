@@ -35,14 +35,15 @@ h1{
 .cardLabel{
     margin: 0px 1px 5px;
     color: white;
-    font-size: 66%;
+    font-size: 80%;
     text-shadow: 0px 0px 5px rgba(0,0,0,0.5);
     font-weight: bold;
     border-radius: 2px;
-    padding: 1.5px 4px;
+    padding: 3px 8px;
     display: inline-block;
-    min-width: 20px;
-    min-height: 5px;
+    min-width: 30px;
+    min-height: 15px;
+    text-align: center;
 }
 
 .attContainer{
@@ -106,4 +107,17 @@ h1{
     outline: none;
     font-family: 'Roboto';
     font-size: 16px;
+}
+
+.dueLabel{
+    display: inline-block;
+    padding: 4px 5px;
+}
+
+.checkListItem{
+    font-family: 'Roboto';
+    outline: none;
+    resize: none;
+    border: none;
+    width: calc(30% - 40px);
 }

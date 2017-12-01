@@ -4,6 +4,7 @@ import * as React from 'react'
 import {URL} from 'url'
 import * as connCheck from './connectionChecker'
 import {DueStates, HelperUI} from './HelperUI'
+import { CheckState } from './trelloApi'
 import {TrelloTypes} from './trelloInterfaces'
 import {TrelloInterfacesProps} from './trelloInterfacesProps'
 const globalProperties = remote.require('./globalProperties').default
@@ -95,7 +96,7 @@ class Header extends React.Component<{}, {}> {
 	public render () {
 		return (
 			<div id='headerBoard'>
-				<button onClick={this.goBack}><i className='fa fa-arrow-left fa-2x'></i></button>
+				<button className='buttonHeader' onClick={this.goBack}><i className='fa fa-arrow-left fa-2x'></i></button>
 				<button className='buttonHeader' onClick={this.update} style={{marginLeft: 'auto'}}><i id='updateIcon' className='fa fa-refresh fa-2x'></i></button>
 			</div>
 		)
@@ -120,14 +121,57 @@ class Checklist extends React.Component<TrelloInterfacesProps.IChecklistProps, {
 	}
 }
 
-class ChecklistItem extends React.Component<TrelloInterfacesProps.ICheckProps, {}> {
+class ChecklistItem extends React.Component<TrelloInterfacesProps.ICheckProps, any> {
+	public nameInput: HTMLTextAreaElement
+	constructor (props) {
+		super(props)
+		this.onChangeValue = this.onChangeValue.bind(this)
+		this.onChangeText = this.onChangeText.bind(this)
+		this.finishEdit = this.finishEdit.bind(this)
+		this.state = {isChecked: this.checkToBool(props.check.state), name: props.check.name}
+	}
+
+	public checkToBool (input: CheckState) {
+		if (input === CheckState.complete) {
+			return true
+		}
+		return false
+	}
+
+	public boolToCheck (input: boolean): CheckState {
+		if (input) {
+			return CheckState.complete
+		}
+		return CheckState.incomplete
+	}
+
+	public onChangeValue (event: React.FormEvent<HTMLInputElement>) {
+		ipcRenderer.send('trelloUpdateChecklist', {cardId, idCheckItem: this.props.check.id}, [['state', this.boolToCheck(event.currentTarget.checked)]])
+		this.setState({isChecked: event.currentTarget.checked})
+	}
+
+	public onChangeText (event: React.FormEvent<HTMLTextAreaElement>) {
+		this.setState({name: event.currentTarget.value})
+	}
+
+	public finishEdit (event: React.FormEvent<HTMLTextAreaElement>) {
+		ipcRenderer.send('trelloUpdateChecklist', {cardId, idCheckItem: this.props.check.id}, [['name', event.currentTarget.value]])
+		this.setState({name: event.currentTarget.value})
+	}
+
 	public render () {
-		const icon = this.props.check.state === 'complete'
-			? <i className='fa fa-check-square'></i>
-			: <i className='fa fa-square'></i>
 		return (
 			<div>
-				{icon}<span>{this.props.check.name}</span>
+				<input type='checkbox' onChange={this.onChangeValue} checked={this.state.isChecked}/>
+				<textarea className='checkListItem'
+					rows={1}
+					onChange={this.onChangeText}
+					value={this.state.name}
+					onBlur={this.finishEdit}
+					ref={(input) => {
+						this.nameInput = input
+						autosize(input)
+					}}/>
 			</div>
 		)
 	}
@@ -196,7 +240,7 @@ class Attachments extends React.Component<TrelloInterfacesProps.ICardDataProps, 
 		}
 		this.setState({currentCover: changedCover})
 		ipcRenderer.send('trelloUpdateCard', this.props.cardData.id, [
-			{key: 'idAttachmentCover', value: changedCover}
+			['idAttachmentCover', changedCover]
 		])
 	}
 
@@ -231,8 +275,9 @@ class Label extends React.Component<TrelloInterfacesProps.ILabelProps, {}> {
 		const labelStyle = {
 			backgroundColor: HelperUI.returnColor(label.color)
 		}
+		const name = label.name === '' ? '\u2002' : label.name
 		return (
-			<div className='cardLabel' style={labelStyle}>{label.name}</div>
+			<div className='cardLabel' style={labelStyle}>{name}</div>
 		)
 	}
 }
@@ -249,7 +294,7 @@ class Description extends React.Component<TrelloInterfacesProps.ICardDataProps, 
 	public finishEdit (event) {
 		this.setState({desc: event.target.value})
 		ipcRenderer.send('trelloUpdateCard', this.props.cardData.id, [
-			{key: 'desc', value: this.state.desc}
+			['desc', this.state.desc]
 		])
 	}
 
@@ -292,7 +337,7 @@ class Name extends React.Component<TrelloInterfacesProps.ICardDataProps, any> {
 		this.setState({name: event.target.value})
 		if (this.state.name.length > 1) {
 			ipcRenderer.send('trelloUpdateCard', this.props.cardData.id, [
-				{key: 'name', value: this.state.name}
+				['name', this.state.name]
 			])
 		}
 	}
@@ -322,7 +367,22 @@ class Name extends React.Component<TrelloInterfacesProps.ICardDataProps, any> {
 	}
 }
 
-class DueDate extends React.Component<TrelloInterfacesProps.ICardDataProps, {}> {
+class DueDate extends React.Component<TrelloInterfacesProps.ICardDataProps, any> {
+	constructor (props) {
+		super(props)
+		this.onChange = this.onChange.bind(this)
+		this.state = {isChecked: false}
+	}
+
+	public onChange (event: React.FormEvent<HTMLInputElement>) {
+		ipcRenderer.send('trelloUpdateCard', cardId, [['dueComplete', event.currentTarget.checked]])
+		this.setState({isChecked: event.currentTarget.checked})
+	}
+
+	public componentWillReceiveProps (nextProps) {
+		this.setState({isChecked: nextProps.cardData.dueComplete})
+	}
+
 	public render () {
 		const classes = ['dueLabel']
 		const due = this.props.cardData.due
@@ -332,7 +392,7 @@ class DueDate extends React.Component<TrelloInterfacesProps.ICardDataProps, {}> 
 		const today = new Date()
 		let dateString = ` ${date.getDate()}. ${date.getMonth() + 1}. ${today.getFullYear() === date.getFullYear() ? '' : date.getFullYear()}`
 		const clock = ` - ${date.getHours()}:${date.getMinutes() > 9 ? date.getMinutes() : '0' + date.getMinutes()}`
-		if (this.props.cardData.dueComplete) {
+		if (this.state.isChecked) {
 			classes.push('dueComplete')
 		} else {
 			switch (HelperUI.returnDueState(date.getTime())) {
@@ -357,7 +417,7 @@ class DueDate extends React.Component<TrelloInterfacesProps.ICardDataProps, {}> 
 			<div className={classes.join(' ')}>
 				<i className='fa fa-calendar-o'></i>
 				{dateString}
-				<input type='checkbox'/>
+				<input type='checkbox' onChange={this.onChange} checked={this.state.isChecked}/>
 			</div>
 		)
 	}

@@ -133,6 +133,10 @@ function handleIpcCalls () {
 		TrelloApiNet.updateList(idList, options)
 	})
 
+	ipcMain.on('trelloUpdateChecklist', async (event, ids: TrelloTypes.CheckListUpdateIds, options: TrelloTypes.UpdateOptions) => {
+		TrelloApiNet.updateCheckList(ids, options)
+	})
+
 	ipcMain.on('trelloOpenCard', (event, arg: string) => {
 		windowManager.openURL('/trelloDetails.html?id=' + arg)
 	})
@@ -264,4 +268,9 @@ export enum ImageOptions {
 	background,
 	attachment,
 	backgroundThumb
+}
+
+export enum CheckState {
+	complete = 'complete',
+	incomplete = 'incomplete'
 }

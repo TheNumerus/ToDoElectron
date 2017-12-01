@@ -45,6 +45,7 @@ export function createWindow () {
 	mainWindow.on('closed', () => {
 		mainWindow = null
 	})
+	handleIpc()
 }
 
 export function save () {
@@ -58,16 +59,18 @@ export function save () {
 	settings.save()
 }
 
-ipcMain.on('goBack', (event) => {
-	if (history.length > 0) {
-		history.pop()
-		mainWindow.loadURL(history[history.length - 1])
-	}
-})
+function handleIpc () {
+	ipcMain.on('goBack', (event) => {
+		if (history.length > 0) {
+			history.pop()
+			mainWindow.loadURL(history[history.length - 1])
+		}
+	})
 
-ipcMain.on('readyToShow', (event) => {
-	mainWindow.show()
-})
+	ipcMain.on('readyToShow', (event) => {
+		mainWindow.show()
+	})
+}
 
 /**
  * Sends message to renderer process

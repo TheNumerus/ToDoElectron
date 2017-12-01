@@ -120,7 +120,7 @@ export async function getChecklist (idChecklist: string) {
 export async function updateCard (idCard: string, options: TrelloTypes.UpdateOptions) {
 	let url = `/1/cards/${idCard}?`
 	options.forEach((option) => {
-		url += `${option.key}=${encodeURIComponent(option.value)}&`
+		url += `${option[0]}=${encodeURIComponent(option[1])}&`
 	})
 	url += `key=${appKey}&token=${token}`
 	return trelloApiPutRequest(url)
@@ -132,18 +132,31 @@ export async function updateCard (idCard: string, options: TrelloTypes.UpdateOpt
 export async function updateList (idList: string, options: TrelloTypes.UpdateOptions) {
 	let url = `/1/lists/${idList}?`
 	options.forEach((option) => {
-		url += `${option.key}=${encodeURIComponent(option.value)}&`
+		url += `${option[0]}=${encodeURIComponent(option[1])}&`
 	})
 	url += `key=${appKey}&token=${token}`
 	return trelloApiPutRequest(url)
 }
+
 /**
  * Updates board
  */
 export async function updateBoard (idBoard: string, options: TrelloTypes.UpdateOptions) {
 	let url = `/1/boards/${idBoard}?`
 	options.forEach((option) => {
-		url += `${option.key}=${encodeURIComponent(option.value)}&`
+		url += `${option[0]}=${encodeURIComponent(option[1])}&`
+	})
+	url += `key=${appKey}&token=${token}`
+	return trelloApiPutRequest(url)
+}
+
+/**
+ * Updates board
+ */
+export async function updateCheckList (ids: TrelloTypes.CheckListUpdateIds, options: TrelloTypes.UpdateOptions) {
+	let url = `/1/cards/${ids.cardId}/checkItem/${ids.idCheckItem}?`
+	options.forEach((option) => {
+		url += `${option[0]}=${encodeURIComponent(option[1])}&`
 	})
 	url += `key=${appKey}&token=${token}`
 	return trelloApiPutRequest(url)

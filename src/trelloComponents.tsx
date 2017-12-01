@@ -10,7 +10,6 @@ import {ImageOptions} from './trelloApi'
 import {TrelloInterfacesProps} from './trelloInterfacesProps'
 const boardId = new URL(window.location.href).searchParams.get('id')
 const globalProperties = remote.require('./globalProperties').default
-let settings: ISettings
 
 class ListComponent extends React.Component<TrelloInterfacesProps.IListProps, any> {
 	constructor (props) {
@@ -381,10 +380,9 @@ class BoardName extends React.Component<any, any> {
 
 	public finishEdit (event) {
 		this.setState({name: event.target.value})
-		const updater = [
-			{key: 'name', value: this.state.name}
-		]
-		ipcRenderer.send('trelloUpdateBoard', this.props.boardData.id, updater)
+		ipcRenderer.send('trelloUpdateBoard', this.props.boardData.id, [
+			['name', this.state.name]
+		])
 	}
 
 	public handleChange (event) {
