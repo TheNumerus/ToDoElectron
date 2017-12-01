@@ -39,7 +39,8 @@ export module TrelloTypes {
 	interface ListData {
 		cards: CardData[],
 		id: string,
-		name: string
+		name: string,
+		pos: number
 	}
 
 	interface BoardData {
@@ -109,6 +110,15 @@ export module TrelloTypes {
 	interface SortCard {
 		ids: {
 			idCard: string,
+			idBoard: string,
+			idList: string
+		}
+		newIndex: number,
+		oldIndex: number
+	}
+
+	interface SortList {
+		ids: {
 			idBoard: string,
 			idList: string
 		}

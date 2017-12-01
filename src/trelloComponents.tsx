@@ -124,9 +124,11 @@ class ListName extends React.Component<TrelloInterfacesProps.IListProps, any> {
 
 	public finishEdit (event) {
 		this.setState({name: event.target.value})
-		ipcRenderer.send('trelloUpdateList', this.props.listData.id, [
-			['name', this.state.name]
-		])
+		if (this.props.listData.name !== event.target.value) {
+			ipcRenderer.send('trelloUpdateList', {idBoard: boardId, idList: this.props.listData.id}, [
+				['name', this.state.name]
+			])
+		}
 	}
 
 	public componentDidUpdate () {
@@ -301,6 +303,8 @@ export default class Board extends React.Component<{}, any> {
 		super(props)
 		this.update = this.update.bind(this)
 		this.goBack = this.goBack.bind(this)
+		this.addSortable = this.addSortable.bind(this)
+		this.handleSort = this.handleSort.bind(this)
 		// add empty list to speed up the process later
 		this.state = { boardData: { name: '', values: [{cards: [], name: '', id: ''}] } , settings: {}}
 	}
@@ -364,6 +368,20 @@ export default class Board extends React.Component<{}, any> {
 		ipcRenderer.send('goBack')
 	}
 
+	public addSortable (input) {
+		if (input !== null) {
+			Sortable.create(input, {animation: 150, onSort: this.handleSort})
+		}
+	}
+
+	public handleSort (event) {
+		const ids = {
+			idBoard: boardId,
+			idList: event.item.id
+		}
+		ipcRenderer.send('trelloSortList', {ids, newIndex: event.newIndex, oldIndex: event.oldIndex})
+	}
+
 	public render () {
 		const components = this.state.boardData.values.map((list) => {
 			return <ListComponent listData={list} key={list.id} settings={this.state.settings}/>
@@ -376,7 +394,7 @@ export default class Board extends React.Component<{}, any> {
 					<BoardName boardData={this.state.boardData}/>
 					<button onClick={this.update} className='buttonHeader' style={{marginLeft: 'auto'}}><i id='updateIcon' className='fa fa-refresh fa-2x'></i></button>
 				</div>
-				<div className='boardRoot'>
+				<div className='boardRoot' ref={(root) => {this.addSortable(root)}}>
 					{components}
 					<AddableList/>
 				</div>

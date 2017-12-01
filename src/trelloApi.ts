@@ -129,8 +129,9 @@ function handleIpcCalls () {
 		TrelloApiNet.updateBoard(idBoard, options)
 	})
 
-	ipcMain.on('trelloUpdateList', async (event, idList: string, options: TrelloTypes.UpdateOptions) => {
-		TrelloApiNet.updateList(idList, options)
+	ipcMain.on('trelloUpdateList', async (event, data, options: TrelloTypes.UpdateOptions) => {
+		TrelloApiNet.updateList(data.idList, options)
+		boardUpdate(event, data.idBoard, {forceUpdate: true, refresh: true})
 	})
 
 	ipcMain.on('trelloUpdateChecklist', async (event, ids: TrelloTypes.CheckListUpdateIds, options: TrelloTypes.UpdateOptions) => {
@@ -171,7 +172,36 @@ function handleIpcCalls () {
 			const upperIndex = listData.cards[arg.newIndex]
 			const lowerIndex = listData.cards[arg.newIndex + 1]
 			const pos = (upperIndex.pos + lowerIndex.pos) / 2
-			TrelloApiNet.updateCard(arg.ids.idCard, [['pos', pos]])
+			TrelloApiNet.updateCard(arg.ids.idCard, [['pos', pos], ['idList', arg.ids.idList]])
+		}
+		// now modify cache
+		updateBoardData(arg.ids.idBoard)
+	})
+
+	ipcMain.on('trelloSortList', (event, arg: TrelloTypes.SortList) => {
+		const boardData = cacheModule.calls.trello.getBoardData(arg.ids.idBoard)
+		// sort to top
+		if (arg.newIndex === 0) {
+			TrelloApiNet.updateList(arg.ids.idList, [['pos', 'top']])
+			return
+		}
+		// sort to bottom
+		if (arg.newIndex >= boardData.values.length - 1) {
+			TrelloApiNet.updateList(arg.ids.idList, [['pos', 'bottom']])
+			return
+		}
+		if (arg.newIndex < arg.oldIndex) {
+			// sort up
+			const upperIndex = boardData.values[arg.newIndex - 1]
+			const lowerIndex = boardData.values[arg.newIndex]
+			const pos = (upperIndex.pos + lowerIndex.pos) / 2
+			TrelloApiNet.updateCard(arg.ids.idList, [['pos', pos]])
+		} else {
+			// sort down
+			const upperIndex = boardData.values[arg.newIndex]
+			const lowerIndex = boardData.values[arg.newIndex + 1]
+			const pos = (upperIndex.pos + lowerIndex.pos) / 2
+			TrelloApiNet.updateCard(arg.ids.idList, [['pos', pos]])
 		}
 		// now modify cache
 		updateBoardData(arg.ids.idBoard)
