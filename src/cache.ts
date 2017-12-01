@@ -92,7 +92,7 @@ export const calls = {
 		setUsed: (value) => {
 			cache.sources.trello.used = value
 		},
-		getBoardData: (id) => {
+		getBoardData: (id): TrelloTypes.BoardData => {
 			let found = false
 			let value = null
 			cache.sources.trello.boards.values.forEach((element) => {

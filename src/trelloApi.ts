@@ -140,6 +140,62 @@ function handleIpcCalls () {
 	ipcMain.on('trelloOpenCard', (event, arg: string) => {
 		windowManager.openURL('/trelloDetails.html?id=' + arg)
 	})
+
+	ipcMain.on('trelloSortCard', (event, arg: TrelloTypes.SortCard) => {
+		const boardData = cacheModule.calls.trello.getBoardData(arg.ids.idBoard)
+		// sort to top
+		if (arg.newIndex === 0) {
+			TrelloApiNet.updateCard(arg.ids.idCard, [['pos', 'top']])
+			return
+		}
+		let listData: TrelloTypes.ListData
+		for (const list of boardData.values) {
+			if (list.id === arg.ids.idList) {
+				listData = list
+			}
+		}
+		// sort to bottom
+		if (arg.newIndex === listData.cards.length - 1) {
+			TrelloApiNet.updateCard(arg.ids.idCard, [['pos', 'bottom']])
+			return
+		}
+		// sort in middle
+		const upperIndex = listData.cards[arg.newIndex]
+		const lowerIndex = listData.cards[arg.newIndex + 1]
+		const pos = (upperIndex.pos + lowerIndex.pos) / 2
+		TrelloApiNet.updateCard(arg.ids.idCard, [['pos', pos]])
+		// now modify cache
+		const movedCard = listData.cards[arg.oldIndex]
+		listData.cards.splice(arg.oldIndex, 1)
+		listData.cards.splice(arg.newIndex, 0, movedCard)
+		for (const list in boardData.values) {
+			if (boardData.values[list].id === arg.ids.idList) {
+				boardData.values[list] = listData
+			}
+		}
+		cacheModule.calls.trello.setBoardData(arg.ids.idBoard, boardData)
+	})
+
+	ipcMain.on('trelloMoveCard', (event, arg: TrelloTypes.MoveCard) => {
+		const boardData = cacheModule.calls.trello.getBoardData(arg.ids.idBoard)
+		// sort to top
+		if (arg.newIndex === 0) {
+			TrelloApiNet.updateCard(arg.ids.idCard, [['pos', 'top'], ['idList', arg.targetList]])
+			return
+		}
+		let listData: TrelloTypes.ListData
+		for (const list of boardData.values) {
+			if (list.id === arg.targetList) {
+				listData = list
+			}
+		}
+		// sort to bottom
+		/* if (arg.newIndex === listData.cards.length - 1) {
+			TrelloApiNet.updateCard(arg.ids.idCard, [['pos', 'bottom'], ['idList', arg.targetList]])
+			return
+		} */
+		// TODO not working
+	})
 	// #endregion ipc
 
 	/**
@@ -161,6 +217,9 @@ function handleIpcCalls () {
 				if (card.idList === boardData.values[i].id) {
 					boardData.values[i].cards.push(card)
 				}
+				boardData.values[i].cards.sort((a, b) => {
+					return a.pos - b.pos
+				})
 			})
 		}
 		for (const listIndex in boardData.values) {

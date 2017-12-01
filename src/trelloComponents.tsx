@@ -1,7 +1,7 @@
 import * as autosize from 'autosize'
 import {Event, ipcRenderer, remote} from 'electron'
 import * as React from 'react'
-import * as Sortable from 'sortablejs'
+import Sortable = require('sortablejs')
 import {URL} from 'url'
 import * as connCheck from './connectionChecker'
 import {DueStates, HelperUI} from './HelperUI'
@@ -15,11 +15,30 @@ class ListComponent extends React.Component<TrelloInterfacesProps.IListProps, an
 	constructor (props) {
 		super(props)
 		this.addSortable = this.addSortable.bind(this)
+		this.handleSort = this.handleSort.bind(this)
 	}
 
 	public addSortable (input) {
 		if (input !== null) {
-			Sortable.create(input, {group: 'cards', animation: 150, ghostClass: 'cardGhost'})
+			Sortable.create(input, {animation: 150, draggable: '.cardComponent', filter: '.addCardInputContainer',
+				ghostClass: 'cardGhost', group: 'cards', onSort: this.handleSort})
+		}
+	}
+
+	public handleSort (event) {
+		const card: HTMLElement = event.item
+		const ids = {
+			idBoard: boardId,
+			idList: this.props.listData.id,
+			idCard: card.id
+		}
+		if (event.from !== event.to) {
+			// different list
+			const to: HTMLElement = event.item
+			ipcRenderer.send('trelloMoveCard', {ids, targetList: to.id, newIndex: event.newIndex, oldIndex: event.oldIndex})
+		} else {
+			// same list
+			ipcRenderer.send('trelloSortCard', {ids, newIndex: event.newIndex, oldIndex: event.oldIndex})
 		}
 	}
 

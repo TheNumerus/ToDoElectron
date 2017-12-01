@@ -32,6 +32,7 @@ export module TrelloTypes {
 		labels: Label[],
 		name: string,
 		placeholder: boolean,
+		pos: number,
 		url: string
 	}
 
@@ -103,5 +104,19 @@ export module TrelloTypes {
 	}
 	interface BoardBackgoundScaled {
 		url: string
+	}
+
+	interface SortCard {
+		ids: {
+			idCard: string,
+			idBoard: string,
+			idList: string
+		}
+		newIndex: number,
+		oldIndex: number
+	}
+
+	interface MoveCard extends SortCard {
+		targetList: string
 	}
 }
