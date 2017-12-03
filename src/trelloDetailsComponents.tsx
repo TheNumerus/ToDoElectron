@@ -1,18 +1,19 @@
 import * as autosize from 'autosize'
 import {ipcRenderer, remote, shell} from 'electron'
 import * as React from 'react'
-import {URL} from 'url'
+import * as ReactDOM from 'react-dom'
 import * as connCheck from './connectionChecker'
 import {DueStates, HelperUI} from './HelperUI'
 import { CheckState } from './trelloApi'
 import {TrelloTypes} from './trelloInterfaces'
 import {TrelloInterfacesProps} from './trelloInterfacesProps'
 const globalProperties = remote.require('./globalProperties').default
-const cardId = new URL(window.location.href).searchParams.get('id')
+let cardId
 
-export default class CardDetail extends React.Component<{}, any> {
+export default class CardDetail extends React.Component<any, any> {
 	constructor (props) {
 		super(props)
+		cardId = this.props.idCard
 		this.handleIpc()
 		ipcRenderer.send('trelloGetCardData', cardId, false)
 		if (connCheck.getState()) {
@@ -60,7 +61,7 @@ export default class CardDetail extends React.Component<{}, any> {
 		}
 		return (
 			<div className='detailsContainer'>
-				<Header/>
+				<Header idBoard={cardData.idBoard} changePage={this.props.changePage}/>
 				<div className='data'>
 					<div className='mainColumn'>
 						<Name cardData={cardData}/>
@@ -77,7 +78,7 @@ export default class CardDetail extends React.Component<{}, any> {
 	}
 }
 
-class Header extends React.Component<{}, {}> {
+class Header extends React.Component<any, {}> {
 	constructor (props) {
 		super(props)
 		this.update = this.update.bind(this)
@@ -85,7 +86,7 @@ class Header extends React.Component<{}, {}> {
 	}
 
 	public goBack () {
-		ipcRenderer.send('goBack')
+		this.props.changePage('trelloBoard', this.props.idBoard)
 	}
 
 	public update () {

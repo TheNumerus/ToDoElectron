@@ -7,20 +7,16 @@ export default class Settings extends React.Component<any, any> {
 	public render () {
 		return (
 			<div>
-				<Header/>
+				<Header changePage={this.props.changePage}/>
 				<Checkboxes/>
 			</div>
 		)
 	}
 }
 class Header extends React.Component<any, any> {
-	constructor (props) {
-		super(props)
-		this.goBack = this.goBack.bind(this)
-	}
 
-	public goBack () {
-		ipcRenderer.send('goBack')
+	public goBack = () => {
+		this.props.changePage('home')
 	}
 
 	public render () {

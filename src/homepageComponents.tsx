@@ -1,6 +1,7 @@
 import {ipcRenderer, remote} from 'electron'
 import * as path from 'path'
 import * as React from 'React'
+import * as ReactDOM from 'react-dom'
 import {HelperUI} from './HelperUI'
 import {TrelloInterfacesProps} from './trelloInterfacesProps'
 const globalProperties = remote.require('./globalProperties').default
@@ -21,20 +22,19 @@ class TrelloModule extends React.Component<any, any> {
 		this.authorize = this.authorize.bind(this)
 		this.getUserInfo = this.getUserInfo.bind(this)
 		this.getBoards = this.getBoards.bind(this)
-		this.handleIpc()
 		this.state = {data: '', updating: false}
 	}
 
 	public authorize () {
 		ipcRenderer.send('trelloAuthorize')
 	}
-	public handleIpc () {
+	public componentDidMount () {
 		ipcRenderer.on('trelloGetAllUserInfo-reply', (event, value) => {
 			this.setState({data: JSON.stringify(value)})
 		})
 		ipcRenderer.on('trelloGetBoards-reply', (event, boards) => {
 			const boardComponents = boards.values.map((board) => {
-				return <BoardButton boardData={board} key={board.id}/>
+				return <BoardButton boardData={board} key={board.id} changePage={this.props.changePage}/>
 			})
 			boardComponents.push(<AddBoardButton/>)
 			this.setState({data: boardComponents, updating: false})
@@ -80,7 +80,7 @@ class TrelloModule extends React.Component<any, any> {
 	}
 }
 
-class BoardButton extends React.Component<TrelloInterfacesProps.IBoardProps, any> {
+class BoardButton extends React.Component<TrelloInterfacesProps.IBoardButtonProps, any> {
 	public starElement
 	constructor (props) {
 		super(props)
@@ -91,7 +91,7 @@ class BoardButton extends React.Component<TrelloInterfacesProps.IBoardProps, any
 
 	public openBoard (event: React.MouseEvent<HTMLDivElement>) {
 		if (event.target !== this.starElement) {
-			ipcRenderer.send('trelloOpenBoard', this.props.boardData.id)
+			this.props.changePage('trelloBoard', this.props.boardData.id)
 		}
 	}
 
@@ -218,11 +218,10 @@ export default class Homepage extends React.Component<any, any> {
 		super(props)
 		this.clearCache = this.clearCache.bind(this)
 		this.state = {trelloAuthorized: false}
-		this.getAuthorization()
 		ipcRenderer.send('readyToShow')
 	}
 
-	public getAuthorization () {
+	public componentDidMount () {
 		ipcRenderer.send('trelloIsAuthorized')
 		ipcRenderer.on('trelloIsAuthorized-reply', (event, data) => {
 			if (data) {
@@ -239,8 +238,8 @@ export default class Homepage extends React.Component<any, any> {
 	public render () {
 		return (
 			<div>
-				<Header/>
-				<TrelloModule authorized={this.state.trelloAuthorized}/>
+				<Header changePage={this.props.changePage}/>
+				<TrelloModule authorized={this.state.trelloAuthorized} changePage={this.props.changePage}/>
 				<GoogleModule/>
 				<OfflineModule/>
 				<HelperModule/>
@@ -257,7 +256,7 @@ class Header extends React.Component<any, any> {
 	}
 
 	public goToSettings () {
-		ipcRenderer.send('goToSettings')
+		this.props.changePage('settings')
 	}
 
 	public render () {

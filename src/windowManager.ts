@@ -38,7 +38,7 @@ export function createWindow () {
 	if (size.windowMaximized) {
 		mainWindow.maximize()
 	}
-	openURL('homepage.html')
+	openURL('app.html')
 	mainWindow.on('close', () => {
 		save()
 	})

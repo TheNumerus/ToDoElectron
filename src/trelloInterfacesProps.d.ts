@@ -18,7 +18,8 @@ export module TrelloInterfacesProps {
 
 	interface ICardDataProps {
 		cardData: TrelloTypes.CardData,
-		settings?: ISettings
+		settings?: ISettings,
+		changePage?: any
 	}
 
 	interface ILabelProps {
@@ -30,9 +31,14 @@ export module TrelloInterfacesProps {
 		boardData: TrelloTypes.BoardData
 	}
 
+	interface IBoardButtonProps extends IBoardProps {
+		changePage?: any
+	}
+
 	interface IListProps {
 		listData: TrelloTypes.ListData,
-		settings?: ISettings
+		settings?: ISettings,
+		changePage?: any
 	}
 
 	interface IChecklistProps {

@@ -25,6 +25,7 @@ export module TrelloTypes {
 		dueComplete: string,
 		checklistData: Checklist[],
 		id: string,
+		idBoard: string,
 		idAttachmentCover: string,
 		idChecklists: string[],
 		labels: Label[],

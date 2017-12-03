@@ -1,6 +1,7 @@
 import * as autosize from 'autosize'
 import {Event, ipcRenderer, remote} from 'electron'
 import * as React from 'react'
+import * as ReactDOM from 'react-dom'
 import Sortable = require('sortablejs')
 import {URL} from 'url'
 import * as connCheck from './connectionChecker'
@@ -8,8 +9,8 @@ import {DueStates, HelperUI} from './HelperUI'
 import { ISettings } from './settings'
 import {ImageOptions} from './trelloApi'
 import {TrelloInterfacesProps} from './trelloInterfacesProps'
-const boardId = new URL(window.location.href).searchParams.get('id')
 const globalProperties = remote.require('./globalProperties').default
+let boardId
 
 class ListComponent extends React.Component<TrelloInterfacesProps.IListProps, any> {
 	public cardContainer
@@ -38,7 +39,7 @@ class ListComponent extends React.Component<TrelloInterfacesProps.IListProps, an
 
 	public render () {
 		const elements = this.props.listData.cards.map((card) =>
-			<CardComponent key={card.id} cardData={card} settings={this.props.settings}/>
+			<CardComponent key={card.id} cardData={card} settings={this.props.settings} changePage={this.props.changePage}/>
 		)
 		return (
 			<div className='listComponent'>
@@ -168,7 +169,7 @@ class CardComponent extends React.Component<TrelloInterfacesProps.ICardDataProps
 	}
 
 	public openCard () {
-		ipcRenderer.send('trelloOpenCard', this.props.cardData.id)
+		this.props.changePage('trelloCard', this.props.cardData.id)
 	}
 	public render () {
 		const card = this.props.cardData
@@ -323,9 +324,9 @@ class Label extends React.Component<TrelloInterfacesProps.ILabelProps, any> {
 	}
 }
 
-export default class Board extends React.Component<{}, any> {
+export default class Board extends React.Component<any, any> {
 	public boardRoot
-	public backgroundSet: boolean
+	public backgroundSet: boolean = false
 	constructor (props) {
 		super(props)
 		this.backgroundSet = false
@@ -333,6 +334,7 @@ export default class Board extends React.Component<{}, any> {
 		this.goBack = this.goBack.bind(this)
 		this.addSortable = this.addSortable.bind(this)
 		this.handleSort = this.handleSort.bind(this)
+		boardId = this.props.idBoard
 		// add empty list to speed up the process later
 		this.handleIpc()
 		this.state = { boardData: { name: '', values: [{cards: [], name: '', id: ''}] } , settings: {}}
@@ -349,7 +351,7 @@ export default class Board extends React.Component<{}, any> {
 			if (this.backgroundSet) { return }
 			// handle solid color background
 			if (imagePath[0] === '#') {
-				document.querySelector('body').style.backgroundColor = imagePath
+				document.querySelector('body').background = imagePath
 				this.backgroundSet =  true
 			} else {
 				switch (options.preview) {
@@ -358,7 +360,7 @@ export default class Board extends React.Component<{}, any> {
 					break
 				case false:
 					document.querySelector('body').background = imagePath
-					this.backgroundSet = true
+					// this.backgroundSet = true
 					break
 				default:
 					throw new Error('wrong option type in trelloSetBackground')
@@ -383,6 +385,10 @@ export default class Board extends React.Component<{}, any> {
 		}
 	}
 
+	public componentWillUnmount () {
+		document.querySelector('body').background = '#FFFFFF'
+	}
+
 	public handleBackgroundScroll () {
 		const target = document.querySelector('.boardRoot')
 		target.addEventListener('wheel', (e) => {
@@ -399,7 +405,7 @@ export default class Board extends React.Component<{}, any> {
 	}
 
 	public goBack () {
-		ipcRenderer.send('goBack')
+		this.props.changePage('home')
 	}
 
 	public addSortable (input) {
@@ -418,7 +424,7 @@ export default class Board extends React.Component<{}, any> {
 
 	public render () {
 		const components = this.state.boardData.values.map((list) => {
-			return <ListComponent listData={list} key={list.id} settings={this.state.settings}/>
+			return <ListComponent listData={list} key={list.id} settings={this.state.settings} changePage={this.props.changePage}/>
 		})
 		document.title = `${this.state.boardData.name} | To-Do app in Electron`
 		return (

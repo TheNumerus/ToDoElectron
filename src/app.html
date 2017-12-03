@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>To-Do app in Electron</title>
+		<link rel="stylesheet" href="css/myMainCss.css">
+		<link rel="stylesheet" href="css/trelloBoard.css">
+		<link href="css/trelloShared.css" rel="stylesheet">
+		<link rel="stylesheet" href="css/calendar.css">
+		<link rel="stylesheet" href="css/homepage.css">
+		<link href="css/settings.css" rel="stylesheet">
+		<link href="css/trelloDetails.css" rel="stylesheet">
+		<link rel="stylesheet" href="dependencies/font-awesome/scss/font-awesome.css">
+	</head>
+	<body>
+		<div id="container">
+		</div>
+		<script>
+			const React = require('react')
+			const ReactDOM = require('react-dom')
+			const App = require('./App').default
+			ReactDOM.render(React.createElement(App), document.querySelector('#container'))
+		</script>
+	</body>
+</html>
