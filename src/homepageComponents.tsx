@@ -36,6 +36,7 @@ class TrelloModule extends React.Component<any, any> {
 			const boardComponents = boards.values.map((board) => {
 				return <BoardButton boardData={board} key={board.id}/>
 			})
+			boardComponents.push(<AddBoardButton/>)
 			this.setState({data: boardComponents, updating: false})
 		})
 	}
@@ -80,28 +81,81 @@ class TrelloModule extends React.Component<any, any> {
 }
 
 class BoardButton extends React.Component<TrelloInterfacesProps.IBoardProps, any> {
+	public buttonElement: HTMLDivElement
 	constructor (props) {
 		super(props)
 		this.openBoard = this.openBoard.bind(this)
+		this.handleStar = this.handleStar.bind(this)
+		this.state = {starred: false}
 	}
 
-	public openBoard () {
-		ipcRenderer.send('trelloOpenBoard', this.props.boardData.id)
+	public openBoard (event: React.MouseEvent<HTMLDivElement>) {
+		if (event.target === this.buttonElement) {
+			ipcRenderer.send('trelloOpenBoard', this.props.boardData.id)
+		}
+	}
+
+	public componentWillReceiveProps (nextProps: TrelloInterfacesProps.IBoardProps) {
+		this.setState({starred: nextProps.boardData.starred})
+	}
+
+	public handleStar () {
+		// not working
+		ipcRenderer.send('trelloUpdateBoard', this.props.boardData.id, [['starred', !this.state.starred]])
+		this.setState({starred: !this.state.starred})
 	}
 
 	public render () {
-		let element = null
+		// handle background
+		let style
 		if (this.props.boardData.prefs.backgroundImage === null) {
-			element = <div className='boardBtnCover' style={{backgroundColor: this.props.boardData.prefs.backgroundColor}}></div>
+			style = {backgroundColor: this.props.boardData.prefs.backgroundColor}
 		} else {
 			const bgrImgUrl = this.props.boardData.prefs.backgroundImageScaled[0].url
 			const bgrImg = bgrImgUrl.match(/.*\/(.*[.].*)/)[1]
-			element = <img className='boardBtnCover' src={path.join(globalProperties.getPath(), 'background', 'thumbs', bgrImg)}/>
+			const pathToImage = path.join(globalProperties.getPath(), 'background', 'thumbs', bgrImg).replace(/\\/g, '/')
+			style = {backgroundImage: `url(${pathToImage})`}
+		}
+		// handle star
+		const starClasses = ['fa', 'star']
+		if (this.state.starred) {
+			starClasses.push('fa-star', 'star-full')
+		} else {
+			starClasses.push('fa-star-o', 'star-empty')
+			if (this.props.boardData.prefs.backgroundBrightness === 'dark') {
+				starClasses.push('star-empty-dark')
+			}
 		}
 		return (
-			<div className='boardBtn' onClick={this.openBoard}>
-				{element}
+			<div className='boardBtn' onClick={this.openBoard} ref={(element) => {this.buttonElement = element}}>
+				<div className='boardBtnCover' style={style}>
+					<i className={starClasses.join(' ')} onClick={this.handleStar}/>
+				</div>
 				<div className='boardBtnCaption'><span>{this.props.boardData.name}</span></div>
+			</div>
+		)
+	}
+}
+
+class AddBoardButton extends React.Component<any, any> {
+	constructor (props) {
+		super(props)
+		this.createBoard = this.createBoard.bind(this)
+	}
+
+	public createBoard () {
+		alert('Does nothing yet')
+	}
+
+	public render () {
+		const style = {
+			color: 'white',
+			margin: '10px auto'
+		}
+		return (
+			<div className='boardBtn' onClick={this.createBoard}>
+				<div className='boardBtnCover' style={{backgroundColor: '#888'}}><i className='fa fa-plus fa-4x' style={style}></i></div>
+				<div className='boardBtnCaption'><span>Create board</span></div>
 			</div>
 		)
 	}

@@ -168,16 +168,11 @@ class CardComponent extends React.Component<TrelloInterfacesProps.ICardDataProps
 	public render () {
 		const card = this.props.cardData
 		// setting these variables to null, so React won't create any DOM element
-		let labels = null
 		let desc = null
 		let comments = null
 		let attachments = null
 		let imageCover = null
 		if (card.placeholder === undefined) {
-			labels = card.labels.map((label) => {
-				return <Label key={label.id} labelData={label}/>
-			})
-
 			if (card.desc !== '') {
 				desc = <div><i className='fa fa-align-left cardInfoDescIcon'></i></div>
 			}
@@ -203,7 +198,7 @@ class CardComponent extends React.Component<TrelloInterfacesProps.ICardDataProps
 		return (
 			<div className='cardComponent' onClick={this.openCard} id={card.id} draggable={true}>
 				{imageCover}
-				{labels}
+				<LabelContainer labels={card.labels} settings={this.props.settings}/>
 				<div className='cardTitle'>{card.name}</div>
 				<div className='cardInfo'>
 					<DueDate cardData={card}/>
@@ -270,6 +265,9 @@ class CheckListBadge extends React.Component<TrelloInterfacesProps.IBadgesProps,
 
 class ImageCover extends React.Component<TrelloInterfacesProps.IAttachmentProps, any> {
 	public render () {
+		if (!this.props.settings.showCardCoverImages) {
+			return null
+		}
 		let extension: string = this.props.attData.url.match(/.+([.].+)/)[1]
 		if (this.props.settings !== undefined && !this.props.settings.animateGIFs && extension === '.gif') {
 			extension = '.png'
@@ -284,6 +282,24 @@ class ImageCover extends React.Component<TrelloInterfacesProps.IAttachmentProps,
 	}
 }
 
+class LabelContainer extends React.Component<TrelloInterfacesProps.ILabelContainerProps, any> {
+	public render () {
+		// sort labels by color
+		this.props.labels.sort((a, b) => {
+			return HelperUI.returnLabelIndex(a.color) - HelperUI.returnLabelIndex(b.color)
+		})
+		// create labels
+		const labels = this.props.labels.map((label) => {
+			return <Label key={label.id} labelData={label} settings={this.props.settings}/>
+		})
+		return (
+			<div className='labelContainer'>
+				{labels}
+			</div>
+		)
+	}
+}
+
 class Label extends React.Component<TrelloInterfacesProps.ILabelProps, any> {
 	public render () {
 		const label = this.props.labelData
@@ -292,8 +308,12 @@ class Label extends React.Component<TrelloInterfacesProps.ILabelProps, any> {
 		const labelStyle = {
 			backgroundColor: HelperUI.returnColor(label.color)
 		}
+		let name: string = ''
+		if (this.props.settings.labelNames) {
+			name = label.name
+		}
 		return (
-			<div className='cardLabel' style={labelStyle}>{label.name}</div>
+			<div className='cardLabel' style={labelStyle}>{name}</div>
 		)
 	}
 }

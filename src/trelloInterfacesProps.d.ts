@@ -22,7 +22,8 @@ export module TrelloInterfacesProps {
 	}
 
 	interface ILabelProps {
-		labelData: TrelloTypes.Label
+		labelData: TrelloTypes.Label,
+		settings?: ISettings
 	}
 
 	interface IBoardProps {
@@ -44,5 +45,10 @@ export module TrelloInterfacesProps {
 
 	interface ICommentProps {
 		commentData: TrelloTypes.Action
+	}
+
+	interface ILabelContainerProps {
+		labels: TrelloTypes.Label[]
+		settings?: ISettings
 	}
 }

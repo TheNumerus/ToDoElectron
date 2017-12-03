@@ -63,7 +63,10 @@ export function setDefaultValues (): ISettings {
 		theme: Theme.light,
 		windowMaximized: false,
 		windowX: 1600,
-		windowY: 900
+		windowY: 900,
+		labelNames: true,
+		settingsFileVersion: '1.0',
+		showCardCoverImages: true
 	}
 }
 
@@ -90,5 +93,8 @@ export interface ISettings {
 	windowMaximized?: boolean,
 	theme?: Theme,
 	useProgressBars?: boolean,
-	animateGIFs?: boolean
+	animateGIFs?: boolean,
+	labelNames?: boolean
+	settingsFileVersion?: string,
+	showCardCoverImages?: boolean
 }

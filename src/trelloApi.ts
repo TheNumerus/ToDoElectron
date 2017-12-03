@@ -55,7 +55,7 @@ function handleIpcCalls () {
 			boards.values = []
 			json.forEach((board) => {
 				if (!board.closed) {
-					boards.values.push({id: board.id, name: board.name, prefs: board.prefs})
+					boards.values.push(board)
 				}
 			})
 			boards.date = Date.now()

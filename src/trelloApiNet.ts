@@ -28,7 +28,7 @@ export async function getAllUserInfo () {
  * Get all boards
  */
 export async function getBoards (): Promise<TrelloTypes.BoardData[]> {
-	return trelloApiRequest('/1/member/me/boards?&key=' + appKey + '&token=' + token + '&fields=name,id,prefs,closed')
+	return trelloApiRequest('/1/member/me/boards?&key=' + appKey + '&token=' + token + '&fields=all')
 }
 
 /**

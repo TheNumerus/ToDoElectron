@@ -57,6 +57,10 @@ $blur: if($useblur, blur(30px), none);
                     margin: 0 auto;
                     display: inherit;
                 }
+                .labelContainer{
+                    display: flex;
+                    flex-wrap: wrap;
+                }
                 .cardLabel{
                     margin: 0px 1px 5px;
                     color: white;
@@ -66,8 +70,9 @@ $blur: if($useblur, blur(30px), none);
                     border-radius: 2px;
                     padding: 1.5px 4px;
                     display: inline-block;
-                    min-width: 20px;
+                    min-width: 32px;
                     min-height: 5px;
+                    border: 0.5px solid rgba(0,0,0,0.3);
                 }
                 .cardTitle{
                     overflow-wrap: break-word;

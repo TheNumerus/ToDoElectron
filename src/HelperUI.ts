@@ -26,6 +26,33 @@ export class HelperUI {
 		}
 	}
 
+	public static returnLabelIndex (color: string) {
+		switch (color) {
+		case 'green':
+			return 0
+		case 'yellow':
+			return 1
+		case 'orange':
+			return 2
+		case 'red':
+			return 3
+		case 'purple':
+			return 4
+		case 'blue':
+			return 5
+		case 'sky':
+			return 6
+		case 'lime':
+			return 7
+		case 'pink':
+			return 8
+		case 'black':
+			return 9
+		default:
+			return 10
+		}
+	}
+
 	public static returnDueState (time: number): DueStates {
 		const today = new Date()
 		if (wasDueToday(time)) {

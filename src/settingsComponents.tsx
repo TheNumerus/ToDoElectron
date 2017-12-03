@@ -58,7 +58,9 @@ class Checkboxes extends React.Component<any, {settings: ISettings}> {
 				<div className='lineDivider'></div>
 				<h3>Trello board view</h3>
 				<Checkbox property='useProgressBars' isChecked={this.state.settings.useProgressBars} name='Use progess bars' implemented={false}/>
+				<Checkbox property='showCardCoverImages' isChecked={this.state.settings.showCardCoverImages} name='Show cover images on cards'/>
 				<Checkbox property='animateGIFs' isChecked={this.state.settings.animateGIFs} name='Use animated images'/>
+				<Checkbox property='labelNames' isChecked={this.state.settings.labelNames} name='Use named labels'/>
 			</div>
 		)
 	}

@@ -50,7 +50,8 @@ $btnHeight: 120px;
 	.boardBtnCover{
 		width:$btnWidth;
 		height:$btnHeight;
-		object-fit:cover;
+		background-size: cover;
+		display: flex;
 	}
 	
 	.boardBtnCaption{
@@ -81,4 +82,30 @@ $btnHeight: 120px;
 @keyframes btnHoverDisable {
     from {transform:scale(1.05,1.05);}
     to {transform:scale(1.0,1.0);}
+}
+
+.star{
+	margin: 5px 5px auto auto;
+	&-empty{
+		color: black;
+		&-dark{
+			color: white;
+		}
+		&:hover{
+			opacity: 0.6;
+			color:gold;
+			&:before{
+				content: "\f005";
+			}
+		}
+	}
+	&-full{
+		color:gold;
+		&:hover{
+			opacity: 0.6;
+			&:before{
+				content: "\f006";
+			}
+		}
+	}
 }

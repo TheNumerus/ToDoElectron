@@ -48,7 +48,9 @@ export module TrelloTypes {
 		date: number,
 		name: string,
 		id: string,
+		pinned: boolean,
 		prefs: BoardPrefs,
+		starred: boolean,
 		values: ListData[]
 	}
 
@@ -99,6 +101,7 @@ export module TrelloTypes {
 	}
 
 	interface BoardPrefs {
+		backgroundBrightness: 'light' | 'dark',
 		backgroundColor: string,
 		backgroundImage: string,
 		backgroundImageScaled: Array<BoardBackgoundScaled>
