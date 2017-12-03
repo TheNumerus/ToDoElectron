@@ -130,7 +130,7 @@ function handleIpcCalls () {
 	})
 
 	ipcMain.on('trelloUpdateList', async (event, data, options: TrelloTypes.UpdateOptions) => {
-		TrelloApiNet.updateList(data.idList, options)
+		await TrelloApiNet.updateList(data.idList, options)
 		boardUpdate(event, data.idBoard, {forceUpdate: true, refresh: true})
 	})
 

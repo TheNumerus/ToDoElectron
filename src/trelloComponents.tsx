@@ -12,19 +12,17 @@ const boardId = new URL(window.location.href).searchParams.get('id')
 const globalProperties = remote.require('./globalProperties').default
 
 class ListComponent extends React.Component<TrelloInterfacesProps.IListProps, any> {
+	public cardContainer
 	constructor (props) {
 		super(props)
-		this.addSortable = this.addSortable.bind(this)
 		this.handleSort = this.handleSort.bind(this)
 	}
-
-	public addSortable (input) {
-		if (input !== null) {
-			Sortable.create(input, {animation: 150, draggable: '.cardComponent', filter: '.addCardInputContainer',
+	public componentDidMount () {
+		if (this.cardContainer !== null) {
+			Sortable.create(this.cardContainer, {animation: 150, draggable: '.cardComponent', filter: '.addCardInputContainer',
 				ghostClass: 'cardGhost', group: 'cards', onSort: this.handleSort})
 		}
 	}
-
 	public handleSort (event) {
 		// this event fires twice when moving card between lists, so we filter that event out
 		if (event.to.id === this.props.listData.id) {
@@ -45,7 +43,7 @@ class ListComponent extends React.Component<TrelloInterfacesProps.IListProps, an
 		return (
 			<div className='listComponent'>
 				<ListName listData={this.props.listData}/>
-				<div className='cardContainer' ref={(input) => { this.addSortable(input) }} id={this.props.listData.id}>
+				<div className='cardContainer' ref={(input) => {this.cardContainer = input}} id={this.props.listData.id}>
 					{elements}
 					<AddCardButton listId={this.props.listData.id}/>
 				</div>
@@ -66,6 +64,7 @@ class AddableList extends React.Component<any, any> {
 
 	public clicked () {
 		this.setState({clicked: true})
+		autosize(this.nameInput)
 	}
 
 	public finishEdit (event) {
@@ -74,13 +73,6 @@ class AddableList extends React.Component<any, any> {
 		} else {
 			this.setState({name: '', clicked: false})
 			ipcRenderer.send('trelloAddList', {name: event.target.value, idBoard: boardId})
-		}
-	}
-
-	public componentDidUpdate () {
-		autosize.update(this.nameInput)
-		if (this.state.clicked) {
-			this.nameInput.focus()
 		}
 	}
 
@@ -99,7 +91,6 @@ class AddableList extends React.Component<any, any> {
 						onBlur={this.finishEdit}
 						ref={(input) => {
 							this.nameInput = input
-							autosize(input)
 						}}/>
 				</div>
 			)
@@ -119,15 +110,29 @@ class ListName extends React.Component<TrelloInterfacesProps.IListProps, any> {
 		super(props)
 		this.finishEdit = this.finishEdit.bind(this)
 		this.handleChange = this.handleChange.bind(this)
-		this.state = {name: this.props.listData.name}
+		this.updateSize = this.updateSize.bind(this)
+		this.state = {autosize: false, name: this.props.listData.name}
 	}
 
 	public finishEdit (event) {
 		this.setState({name: event.target.value})
 		if (this.props.listData.name !== event.target.value) {
 			ipcRenderer.send('trelloUpdateList', {idBoard: boardId, idList: this.props.listData.id}, [
-				['name', this.state.name]
+				['name', event.target.value]
 			])
+		}
+	}
+
+	public componentDidMount () {
+		if (this.props.listData.name.length > 30) {
+			autosize(this.nameInput)
+			this.setState({autosize: true})
+		}
+	}
+
+	public updateSize () {
+		if (!this.state.autosize) {
+			autosize(this.nameInput)
 		}
 	}
 
@@ -139,8 +144,8 @@ class ListName extends React.Component<TrelloInterfacesProps.IListProps, any> {
 		this.setState({name: event.target.value})
 	}
 
-	public componentWillReceiveProps () {
-		this.setState({name: this.props.listData.name})
+	public componentWillReceiveProps (nextProps) {
+		this.setState({name: nextProps.listData.name})
 	}
 
 	public render () {
@@ -149,9 +154,9 @@ class ListName extends React.Component<TrelloInterfacesProps.IListProps, any> {
 			onChange={this.handleChange}
 			value={this.state.name}
 			onBlur={this.finishEdit}
+			onFocus={this.updateSize}
 			ref={(input) => {
 				this.nameInput = input
-				autosize(input)
 			}}/>
 	}
 }
@@ -319,13 +324,17 @@ class Label extends React.Component<TrelloInterfacesProps.ILabelProps, any> {
 }
 
 export default class Board extends React.Component<{}, any> {
+	public boardRoot
+	public backgroundSet: boolean
 	constructor (props) {
 		super(props)
+		this.backgroundSet = false
 		this.update = this.update.bind(this)
 		this.goBack = this.goBack.bind(this)
 		this.addSortable = this.addSortable.bind(this)
 		this.handleSort = this.handleSort.bind(this)
 		// add empty list to speed up the process later
+		this.handleIpc()
 		this.state = { boardData: { name: '', values: [{cards: [], name: '', id: ''}] } , settings: {}}
 	}
 
@@ -337,9 +346,11 @@ export default class Board extends React.Component<{}, any> {
 		})
 
 		ipcRenderer.on('trelloSetBackground', (event: Event, imagePath: string, options) => {
+			if (this.backgroundSet) { return }
 			// handle solid color background
 			if (imagePath[0] === '#') {
 				document.querySelector('body').style.backgroundColor = imagePath
+				this.backgroundSet =  true
 			} else {
 				switch (options.preview) {
 				case true:
@@ -347,6 +358,7 @@ export default class Board extends React.Component<{}, any> {
 					break
 				case false:
 					document.querySelector('body').background = imagePath
+					this.backgroundSet = true
 					break
 				default:
 					throw new Error('wrong option type in trelloSetBackground')
@@ -359,13 +371,15 @@ export default class Board extends React.Component<{}, any> {
 		})
 	}
 
-	public async componentDidMount () {
+	public componentDidMount () {
 		this.handleBackgroundScroll()
-		this.handleIpc()
 		ipcRenderer.send('trelloGetBoardData', boardId, {forceUpdate: false, refresh: false})
 		ipcRenderer.send('getSettings')
 		if (connCheck.getState()) {
 			this.update()
+		}
+		if (this.boardRoot !== null) {
+			Sortable.create(this.boardRoot, {animation: 150, onSort: this.handleSort})
 		}
 	}
 
@@ -414,7 +428,7 @@ export default class Board extends React.Component<{}, any> {
 					<BoardName boardData={this.state.boardData}/>
 					<button onClick={this.update} className='buttonHeader' style={{marginLeft: 'auto'}}><i id='updateIcon' className='fa fa-refresh fa-2x'></i></button>
 				</div>
-				<div className='boardRoot' ref={(root) => {this.addSortable(root)}}>
+				<div className='boardRoot' ref={(root) => {this.boardRoot = root}}>
 					{components}
 					<AddableList/>
 				</div>
@@ -469,6 +483,7 @@ class AddCardButton extends React.Component<any, any> {
 
 	public clicked () {
 		this.setState({clicked: true})
+		autosize(this.nameInput)
 	}
 
 	public finishEdit (event) {
@@ -479,7 +494,6 @@ class AddCardButton extends React.Component<any, any> {
 			ipcRenderer.send('trelloAddCard', {name: event.target.value, idList: this.props.listId, idBoard: boardId})
 		}
 	}
-
 	public componentDidUpdate () {
 		if (this.state.clicked) {
 			this.nameInput.focus()
@@ -506,7 +520,6 @@ class AddCardButton extends React.Component<any, any> {
 						onBlur={this.finishEdit}
 						ref={(input) => {
 							this.nameInput = input
-							autosize(input)
 						}}/>
 				</div>
 			)
