@@ -81,7 +81,7 @@ class TrelloModule extends React.Component<any, any> {
 }
 
 class BoardButton extends React.Component<TrelloInterfacesProps.IBoardProps, any> {
-	public buttonElement: HTMLDivElement
+	public starElement
 	constructor (props) {
 		super(props)
 		this.openBoard = this.openBoard.bind(this)
@@ -90,7 +90,7 @@ class BoardButton extends React.Component<TrelloInterfacesProps.IBoardProps, any
 	}
 
 	public openBoard (event: React.MouseEvent<HTMLDivElement>) {
-		if (event.target === this.buttonElement) {
+		if (event.target !== this.starElement) {
 			ipcRenderer.send('trelloOpenBoard', this.props.boardData.id)
 		}
 	}
@@ -127,9 +127,9 @@ class BoardButton extends React.Component<TrelloInterfacesProps.IBoardProps, any
 			}
 		}
 		return (
-			<div className='boardBtn' onClick={this.openBoard} ref={(element) => {this.buttonElement = element}}>
+			<div className='boardBtn' onClick={this.openBoard}>
 				<div className='boardBtnCover' style={style}>
-					<i className={starClasses.join(' ')} onClick={this.handleStar}/>
+					<i className={starClasses.join(' ')} onClick={this.handleStar} ref={(element) => {this.starElement = element}}/>
 				</div>
 				<div className='boardBtnCaption'><span>{this.props.boardData.name}</span></div>
 			</div>

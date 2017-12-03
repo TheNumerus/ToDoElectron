@@ -115,6 +115,7 @@ class Checklist extends React.Component<TrelloInterfacesProps.IChecklistProps, {
 		return (
 			<div>
 				<h5>{checklistData.name}</h5>
+				<ProgressBar checklistData={this.props.checklistData}/>
 				{items}
 			</div>
 		)
@@ -176,6 +177,25 @@ class ChecklistItem extends React.Component<TrelloInterfacesProps.ICheckProps, a
 		)
 	}
 }
+
+class ProgressBar extends React.Component<TrelloInterfacesProps.IChecklistProps, {}> {
+	public render () {
+		const divisor = this.props.checklistData.checkItems.length
+		let divident = 0
+		this.props.checklistData.checkItems.forEach((checkItem) => {
+			if (checkItem.state === 'complete') {
+				divident++
+			}
+		})
+		const width = divident / divisor * 100
+		return (
+			<div className='barContainer'>
+				<div className='bar' style={{width: `${width}%`}}></div>
+			</div>
+		)
+	}
+}
+
 class Comment extends React.Component<TrelloInterfacesProps.ICommentProps, {}> {
 	public render () {
 		const commentData = this.props.commentData

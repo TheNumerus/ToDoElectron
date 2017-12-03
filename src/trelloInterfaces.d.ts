@@ -1,5 +1,3 @@
-import { CheckState } from './trelloApi'
-
 export module TrelloTypes {
 	interface AddRequest {
 		name: string,
@@ -97,7 +95,7 @@ export module TrelloTypes {
 		id: string,
 		name: string,
 		pos: number,
-		state: CheckState
+		state: 'complete' | 'incomplete'
 	}
 
 	interface BoardPrefs {
