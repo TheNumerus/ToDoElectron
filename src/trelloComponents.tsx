@@ -353,12 +353,13 @@ export default class Board extends React.Component<any, any> {
 				document.body.style.background = imagePath
 				this.backgroundSet =  true
 			} else {
+				imagePath = `url('${imagePath}')`.replace(/\\/g, '/')
 				switch (options.preview) {
 				case true:
-					document.body.style.backgroundImage = `url(${imagePath})`
+					document.body.style.backgroundImage = imagePath
 					break
 				case false:
-					document.body.style.backgroundImage = `url(${imagePath})`
+					document.body.style.backgroundImage = imagePath
 					// this.backgroundSet = true
 					break
 				default:
