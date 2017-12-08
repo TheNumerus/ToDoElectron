@@ -1,6 +1,6 @@
 import {ipcRenderer, remote} from 'electron'
 import * as path from 'path'
-import * as React from 'React'
+import * as React from 'react'
 import * as ReactDOM from 'react-dom'
 import {HelperUI} from './HelperUI'
 import {TrelloInterfacesProps} from './trelloInterfacesProps'

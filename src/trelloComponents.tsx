@@ -351,15 +351,15 @@ export default class Board extends React.Component<any, any> {
 			if (this.backgroundSet) { return }
 			// handle solid color background
 			if (imagePath[0] === '#') {
-				document.querySelector('body').background = imagePath
+				document.body.style.background = imagePath
 				this.backgroundSet =  true
 			} else {
 				switch (options.preview) {
 				case true:
-					document.querySelector('body').background = imagePath
+					document.body.style.backgroundImage = `url(${imagePath})`
 					break
 				case false:
-					document.querySelector('body').background = imagePath
+					document.body.style.backgroundImage = `url(${imagePath})`
 					// this.backgroundSet = true
 					break
 				default:
@@ -386,7 +386,7 @@ export default class Board extends React.Component<any, any> {
 	}
 
 	public componentWillUnmount () {
-		document.querySelector('body').background = '#FFFFFF'
+		document.body.style.background = '#FFFFFF'
 	}
 
 	public handleBackgroundScroll () {

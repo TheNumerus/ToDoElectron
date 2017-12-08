@@ -32,7 +32,7 @@ export function createWindow () {
 	const size = settings.get()
 	const menu = Menu.buildFromTemplate(menuTemplate)
 	Menu.setApplicationMenu(menu)
-	mainWindow = new BrowserWindow({ height: size.windowY, minHeight: 480, minWidth: 640, show: false, width: size.windowX,
+	mainWindow = new BrowserWindow({ height: size.windowY, minHeight: 480, minWidth: 640, width: size.windowX,
 		webPreferences: {experimentalFeatures: true, nodeIntegration: true} })
 	// mainWindow.setMenuBarVisibility(false)
 	if (size.windowMaximized) {
