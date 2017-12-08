@@ -1,3 +1,4 @@
+import * as FontAwesomeIcon from '@fortawesome/react-fontawesome'
 import {ipcRenderer, remote} from 'electron'
 import * as path from 'path'
 import * as React from 'react'
@@ -70,7 +71,7 @@ class TrelloModule extends React.Component<any, any> {
 		return (
 			<div className='homeModule'>
 				<div className='moduleTitle'>
-					<i className='fa fa-trello'></i> Trello {authorized}
+					<FontAwesomeIcon icon={['fab', 'trello']}/> Trello {authorized}
 				</div>
 				{authorizeButton}
 				{authorizedEelements}
@@ -81,28 +82,14 @@ class TrelloModule extends React.Component<any, any> {
 }
 
 class BoardButton extends React.Component<TrelloInterfacesProps.IBoardButtonProps, any> {
-	public starElement
 	constructor (props) {
 		super(props)
 		this.openBoard = this.openBoard.bind(this)
-		this.handleStar = this.handleStar.bind(this)
 		this.state = {starred: false}
 	}
 
 	public openBoard (event: React.MouseEvent<HTMLDivElement>) {
-		if (event.target !== this.starElement) {
-			this.props.changePage('trelloBoard', this.props.boardData.id)
-		}
-	}
-
-	public componentWillReceiveProps (nextProps: TrelloInterfacesProps.IBoardProps) {
-		this.setState({starred: nextProps.boardData.starred})
-	}
-
-	public handleStar () {
-		// not working
-		ipcRenderer.send('trelloUpdateBoard', this.props.boardData.id, [['starred', !this.state.starred]])
-		this.setState({starred: !this.state.starred})
+		this.props.changePage('trelloBoard', this.props.boardData.id)
 	}
 
 	public render () {
@@ -116,22 +103,54 @@ class BoardButton extends React.Component<TrelloInterfacesProps.IBoardButtonProp
 			const pathToImage = path.join(globalProperties.getPath(), 'background', 'thumbs', bgrImg).replace(/\\/g, '/')
 			style = {backgroundImage: `url(${pathToImage})`}
 		}
-		// handle star
-		const starClasses = ['fa', 'star']
-		if (this.state.starred) {
-			starClasses.push('fa-star', 'star-full')
-		} else {
-			starClasses.push('fa-star-o', 'star-empty')
-			if (this.props.boardData.prefs.backgroundBrightness === 'dark') {
-				starClasses.push('star-empty-dark')
-			}
-		}
 		return (
 			<div className='boardBtn' onClick={this.openBoard}>
 				<div className='boardBtnCover' style={style}>
-					<i className={starClasses.join(' ')} onClick={this.handleStar} ref={(element) => {this.starElement = element}}/>
+					<BoardStar boardData={this.props.boardData}/>
 				</div>
 				<div className='boardBtnCaption'><span>{this.props.boardData.name}</span></div>
+			</div>
+		)
+	}
+}
+
+class BoardStar extends React.Component<any, any> {
+	constructor (props) {
+		super(props)
+		this.handleStar = this.handleStar.bind(this)
+		this.state = {starred: false, mouseOver: false}
+	}
+
+	public handleStar (event) {
+		// not working
+		ipcRenderer.send('trelloUpdateBoard', this.props.boardData.id, [['starred', !this.state.starred]])
+		this.setState({starred: !this.state.starred})
+		// stop the click event, so we don't accidentaly open board
+		event.stopPropagation()
+	}
+
+	public componentWillReceiveProps (nextProps: TrelloInterfacesProps.IBoardProps) {
+		this.setState({starred: nextProps.boardData.starred})
+	}
+
+	public render () {
+		// handle star
+		const starClasses = ['star']
+		if (this.props.boardData.prefs.backgroundBrightness === 'dark') {
+			starClasses.push('star-dark')
+		}
+		let starStateClass = 'far'
+		if (this.state.starred) {
+			starStateClass = 'fas'
+			starClasses.push('star-full')
+		}
+		const star = <FontAwesomeIcon icon={[starStateClass, 'star']} className={starClasses.join(' ')}/>
+		return (
+			<div onClick={this.handleStar}
+				onMouseEnter={() => {this.setState({mouseOver: true})}}
+				onMouseLeave={() => {this.setState({mouseOver: false})}}
+				style={{marginLeft: 'auto'}}>
+				{star}
 			</div>
 		)
 	}
@@ -148,13 +167,9 @@ class AddBoardButton extends React.Component<any, any> {
 	}
 
 	public render () {
-		const style = {
-			color: 'white',
-			margin: '10px auto'
-		}
 		return (
 			<div className='boardBtn' onClick={this.createBoard}>
-				<div className='boardBtnCover' style={{backgroundColor: '#888'}}><i className='fa fa-plus fa-4x' style={style}></i></div>
+				<div className='boardBtnCover' style={{backgroundColor: '#888'}}><FontAwesomeIcon icon='plus' size='4x' className='addBoardPlus'/></div>
 				<div className='boardBtnCaption'><span>Create board</span></div>
 			</div>
 		)
@@ -166,7 +181,7 @@ class GoogleModule extends React.Component<any, any> {
 		return (
 			<div className='homeModule'>
 				<div className='moduleTitle'>
-					<i className='fa fa-google'></i> Google Calendar - coming soon
+				<FontAwesomeIcon icon={['fab', 'google']}/> Google Calendar - coming soon
 				</div>
 			</div>
 		)
@@ -178,7 +193,7 @@ class OfflineModule extends React.Component<any, any> {
 		return (
 			<div className='homeModule'>
 				<div className='moduleTitle'>
-					<i className='fa fa-sticky-note '></i> Offline notes - coming soon
+				<FontAwesomeIcon icon='sticky-note'/> Offline notes - coming soon
 				</div>
 			</div>
 		)
@@ -204,7 +219,7 @@ class HelperModule extends React.Component<any, any> {
 		return (
 			<div className='homeModule'>
 				<div className='moduleTitle'>
-					<i className='fa fa-info-circle'></i> Helper
+				<FontAwesomeIcon icon='info-circle'/> Helper
 				</div>
 				<button className='button' onClick={this.clearCache}>Clear cache</button>
 				<button className='button' onClick={this.clearImageCache}>Clear image cache</button>
@@ -264,7 +279,7 @@ class Header extends React.Component<any, any> {
 			<div className='titleHeader'>
 				<h1>ToDoElectron</h1>
 				<button className='buttonHeader' onClick={this.goToSettings} style={{marginLeft: 'auto'}}>
-					<i className='fa fa-wrench fa-3x'></i>
+					<FontAwesomeIcon icon='wrench' size='3x'/>
 				</button>
 			</div>
 		)

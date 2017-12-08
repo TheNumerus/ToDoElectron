@@ -86,26 +86,23 @@ $btnHeight: 120px;
 
 .star{
 	margin: 5px 5px auto auto;
-	&-empty{
-		color: black;
-		&-dark{
-			color: white;
-		}
-		&:hover{
-			opacity: 0.6;
-			color:gold;
-			&:before{
-				content: "\f005";
-			}
-		}
+	color: black;
+	&-dark{
+		color: white;
+	}
+	&:hover{
+		opacity: 0.6;
+		color:gold;
 	}
 	&-full{
 		color:gold;
 		&:hover{
 			opacity: 0.6;
-			&:before{
-				content: "\f006";
-			}
 		}
 	}
+}
+
+.addBoardPlus{
+	color: white;
+	margin: 10px auto;
 }

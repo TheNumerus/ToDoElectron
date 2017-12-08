@@ -1,3 +1,4 @@
+import * as FontAwesomeIcon from '@fortawesome/react-fontawesome'
 import * as autosize from 'autosize'
 import {ipcRenderer, remote, shell} from 'electron'
 import * as React from 'react'
@@ -21,15 +22,22 @@ export default class CardDetail extends React.Component<any, any> {
 			 which returned comments and checklists twice.
 			this.update() */
 		}
-		this.state = {cardData: {name: ''}}
+		this.state = {cardData: {name: ''}, iconSpin: false}
 	}
 
 	public handleIpc () {
 		ipcRenderer.on('trelloGetCardData-reply', (event, cardData) => {
-			this.setState({cardData})
-			// stop spinning refresh icon
-			document.querySelector('#updateIcon').classList.remove('fa-spin')
+			this.setState({cardData, iconSpin: false})
 		})
+	}
+
+	public goBack = () => {
+		this.props.changePage('trelloBoard', this.state.cardData.idBoard)
+	}
+
+	public update = () => {
+		this.setState({iconSpin: true})
+		ipcRenderer.send('trelloGetCardData', cardId, true)
 	}
 
 	public render () {
@@ -61,7 +69,7 @@ export default class CardDetail extends React.Component<any, any> {
 		}
 		return (
 			<div className='detailsContainer'>
-				<Header idBoard={cardData.idBoard} changePage={this.props.changePage}/>
+				<Header goBack={this.goBack} update={this.update} iconSpin={this.state.iconSpin}/>
 				<div className='data'>
 					<div className='mainColumn'>
 						<Name cardData={cardData}/>
@@ -78,27 +86,14 @@ export default class CardDetail extends React.Component<any, any> {
 	}
 }
 
-class Header extends React.Component<any, {}> {
-	constructor (props) {
-		super(props)
-		this.update = this.update.bind(this)
-		this.goBack = this.goBack.bind(this)
-	}
-
-	public goBack () {
-		this.props.changePage('trelloBoard', this.props.idBoard)
-	}
-
-	public update () {
-		document.querySelector('#updateIcon').classList.add('fa-spin')
-		ipcRenderer.send('trelloGetCardData', cardId, true)
-	}
-
+class Header extends React.Component<any, any> {
 	public render () {
 		return (
 			<div id='headerBoard'>
-				<button className='buttonHeader' onClick={this.goBack}><i className='fa fa-arrow-left fa-2x'></i></button>
-				<button className='buttonHeader' onClick={this.update} style={{marginLeft: 'auto'}}><i id='updateIcon' className='fa fa-refresh fa-2x'></i></button>
+				<button className='buttonHeader' onClick={() => {this.props.goBack()}}><FontAwesomeIcon icon='chevron-left' size='2x'/></button>
+				<button className='buttonHeader' onClick={() => {this.props.update()}} style={{marginLeft: 'auto'}}>
+				<FontAwesomeIcon icon='sync' size='2x' spin={this.props.iconSpin}/>
+				</button>
 			</div>
 		)
 	}
@@ -436,7 +431,7 @@ class DueDate extends React.Component<TrelloInterfacesProps.ICardDataProps, any>
 		}
 		return (
 			<div className={classes.join(' ')}>
-				<i className='fa fa-calendar-o'></i>
+				<FontAwesomeIcon icon={['far', 'calendar']}/>
 				{dateString}
 				<input type='checkbox' onChange={this.onChange} checked={this.state.isChecked}/>
 			</div>

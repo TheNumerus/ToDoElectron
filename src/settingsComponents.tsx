@@ -1,3 +1,4 @@
+import * as FontAwesomeIcon from '@fortawesome/react-fontawesome'
 import {ipcRenderer} from 'electron'
 import * as React from 'react'
 import {IChangeSettings, ISettings, setDefaultValues, Theme} from './settings'
@@ -23,7 +24,7 @@ class Header extends React.Component<any, any> {
 		return (
 			<div className='titleHeader'>
 				<button className='buttonHeader' onClick={this.goBack}>
-					<i className='fa fa-arrow-left fa-2x'></i>
+					<FontAwesomeIcon icon='chevron-left' size='2x'/>
 				</button>
 				<h1>Settings</h1>
 			</div>

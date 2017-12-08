@@ -1,3 +1,4 @@
+import * as FontAwesomeIcon from '@fortawesome/react-fontawesome'
 import * as autosize from 'autosize'
 import {Event, ipcRenderer, remote} from 'electron'
 import * as React from 'react'
@@ -180,15 +181,15 @@ class CardComponent extends React.Component<TrelloInterfacesProps.ICardDataProps
 		let imageCover = null
 		if (card.placeholder === undefined) {
 			if (card.desc !== '') {
-				desc = <div><i className='fa fa-align-left cardInfoDescIcon'></i></div>
+				desc = <div><FontAwesomeIcon icon='align-left'/></div>
 			}
 
 			if (card.badges.comments > 0) {
-				comments = <div><i className='fa fa-comment-o'></i>{card.badges.comments}</div>
+				comments = <div><FontAwesomeIcon icon={['far', 'comment']}/>{card.badges.comments}</div>
 			}
 
 			if (card.badges.attachments > 0) {
-				attachments = <div><i className='fa fa-paperclip'></i>{card.badges.attachments}</div>
+				attachments = <div><FontAwesomeIcon icon='paperclip'/>{card.badges.attachments}</div>
 			}
 
 			if (card.idAttachmentCover && card.attachments) {
@@ -250,7 +251,7 @@ class DueDate extends React.Component<TrelloInterfacesProps.ICardDataProps, {}> 
 			}
 		}
 		return (
-			<div className={classes.join(' ')}><i className='fa fa-calendar-o'></i>{dateString}</div>
+			<div className={classes.join(' ')}><FontAwesomeIcon icon={['far', 'calendar']}/>{dateString}</div>
 		)
 	}
 }
@@ -262,7 +263,7 @@ class CheckListBadge extends React.Component<TrelloInterfacesProps.IBadgesProps,
 		}
 		return (
 			<div className={this.props.badges.checkItemsChecked === this.props.badges.checkItems ? 'checkFull' : ''}>
-				<i className='fa fa-check-square-o'></i>
+				<FontAwesomeIcon icon={['far', 'check-square']}/>
 				{` ${this.props.badges.checkItemsChecked}/${this.props.badges.checkItems}`}
 			</div>
 		)
@@ -337,14 +338,12 @@ export default class Board extends React.Component<any, any> {
 		boardId = this.props.idBoard
 		// add empty list to speed up the process later
 		this.handleIpc()
-		this.state = { boardData: { name: '', values: [{cards: [], name: '', id: ''}] } , settings: {}}
+		this.state = { boardData: { name: '', values: [{cards: [], name: '', id: ''}] } , settings: {}, iconSpin: false}
 	}
 
 	public handleIpc () {
 		ipcRenderer.on('trelloGetBoardData-reply', (event: Event, boardData) => {
-			this.setState({boardData})
-			// stop spinning refresh icon
-			document.querySelector('#updateIcon').classList.remove('fa-spin')
+			this.setState({boardData, iconSpin: false})
 		})
 
 		ipcRenderer.on('trelloSetBackground', (event: Event, imagePath: string, options) => {
@@ -400,7 +399,7 @@ export default class Board extends React.Component<any, any> {
 	}
 
 	public update () {
-		document.querySelector('#updateIcon').classList.add('fa-spin')
+		this.setState({iconSpin: true})
 		ipcRenderer.send('trelloGetBoardData', boardId, {forceUpdate: true, refresh: true})
 	}
 
@@ -430,9 +429,11 @@ export default class Board extends React.Component<any, any> {
 		return (
 			<div id='lists'>
 				<div id='headerBoard'>
-					<button onClick={this.goBack} className='buttonHeader'><i className='fa fa-arrow-left fa-2x'></i></button>
+					<button onClick={this.goBack} className='buttonHeader'><FontAwesomeIcon icon='chevron-left' size='2x'/></button>
 					<BoardName boardData={this.state.boardData}/>
-					<button onClick={this.update} className='buttonHeader' style={{marginLeft: 'auto'}}><i id='updateIcon' className='fa fa-refresh fa-2x'></i></button>
+					<button onClick={this.update} className='buttonHeader' style={{marginLeft: 'auto'}}>
+						<FontAwesomeIcon icon='sync' size='2x' spin={this.state.iconSpin}/>
+					</button>
 				</div>
 				<div className='boardRoot' ref={(root) => {this.boardRoot = root}}>
 					{components}
