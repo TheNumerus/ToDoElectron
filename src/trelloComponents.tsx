@@ -362,7 +362,7 @@ export default class Board extends React.Component<any, any> {
 					break
 				case false:
 					document.body.style.backgroundImage = imagePath
-					// this.backgroundSet = true
+					this.backgroundSet = true
 					break
 				default:
 					throw new Error('wrong option type in trelloSetBackground')

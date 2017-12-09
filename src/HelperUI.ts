@@ -9,7 +9,7 @@ const labelMap = new Map([
 	['lime', {color: '#51e898', pos: 7}],
 	['pink', {color: '#ff80ce', pos: 8}],
 	['black', {color: '#4d4d4d', pos: 9}],
-	['null', {color: '#808080', pos: 10}]
+	[null, {color: '#808080', pos: 10}]
 ])
 
 export function returnColor (color: string) {
