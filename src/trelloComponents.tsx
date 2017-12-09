@@ -9,6 +9,7 @@ import * as connCheck from './connectionChecker'
 import * as HelperUI from './HelperUI'
 import { ISettings } from './settings'
 import {ImageOptions} from './trelloApi'
+import { TrelloTypes } from './trelloInterfaces'
 import {TrelloInterfacesProps} from './trelloInterfacesProps'
 const globalProperties = remote.require('./globalProperties').default
 let boardId
@@ -219,112 +220,100 @@ class CardComponent extends React.Component<TrelloInterfacesProps.ICardDataProps
 	}
 }
 
-class DueDate extends React.Component<TrelloInterfacesProps.ICardDataProps, {}> {
-	public render () {
-		const classes = ['dueLabel']
-		const due = this.props.cardData.due
-		// handle non set due date
-		if (due === null) { return null }
-		const date = new Date(due)
-		const today = new Date()
-		let dateString = ` ${date.getDate()}. ${date.getMonth() + 1}. ${today.getFullYear() === date.getFullYear() ? '' : date.getFullYear()}`
-		const clock = ` - ${date.getHours()}:${date.getMinutes() > 9 ? date.getMinutes() : '0' + date.getMinutes()}`
-		if (this.props.cardData.dueComplete) {
-			classes.push('dueComplete')
-		} else {
-			switch (HelperUI.returnDueState(date.getTime())) {
-			case HelperUI.DueStates.overdueNear:
-				classes.push('dueOverdueNear')
-				dateString += clock
-				break
-			case HelperUI.DueStates.overdue:
-				classes.push('dueOverdue')
-				break
-			case HelperUI.DueStates.near:
-				classes.push('dueNear')
-				dateString += clock
-				break
-			case HelperUI.DueStates.later:
-				break
-			default:
-				throw new Error(`Wrong date on card with id ${this.props.cardData.id}`)
-			}
+const DueDate: React.SFC<TrelloInterfacesProps.ICardDataProps> = (props) => {
+	const classes = ['dueLabel']
+	const due = props.cardData.due
+	// handle non set due date
+	if (due === null) { return null }
+	const date = new Date(due)
+	const today = new Date()
+	let dateString = ` ${date.getDate()}. ${date.getMonth() + 1}. ${today.getFullYear() === date.getFullYear() ? '' : date.getFullYear()}`
+	const clock = ` - ${date.getHours()}:${date.getMinutes() > 9 ? date.getMinutes() : '0' + date.getMinutes()}`
+	if (props.cardData.dueComplete) {
+		classes.push('dueComplete')
+	} else {
+		switch (HelperUI.returnDueState(date.getTime())) {
+		case HelperUI.DueStates.overdueNear:
+			classes.push('dueOverdueNear')
+			dateString += clock
+			break
+		case HelperUI.DueStates.overdue:
+			classes.push('dueOverdue')
+			break
+		case HelperUI.DueStates.near:
+			classes.push('dueNear')
+			dateString += clock
+			break
+		case HelperUI.DueStates.later:
+			break
+		default:
+			throw new Error(`Wrong date on card with id ${props.cardData.id}`)
 		}
-		return (
-			<div className={classes.join(' ')}><FontAwesomeIcon icon={['far', 'calendar']}/>{dateString}</div>
-		)
 	}
+	return (
+		<div className={classes.join(' ')}><FontAwesomeIcon icon={['far', 'calendar']}/>{dateString}</div>
+	)
 }
 
-class CheckListBadge extends React.Component<TrelloInterfacesProps.IBadgesProps, any> {
-	public render () {
-		if (this.props.badges.checkItems === 0) {
-			return null
-		}
-		return (
-			<div className={this.props.badges.checkItemsChecked === this.props.badges.checkItems ? 'checkFull' : ''}>
-				<FontAwesomeIcon icon={['far', 'check-square']}/>
-				{` ${this.props.badges.checkItemsChecked}/${this.props.badges.checkItems}`}
-			</div>
-		)
+const CheckListBadge: React.SFC<TrelloInterfacesProps.IBadgesProps> = (props) => {
+	if (props.badges.checkItems === 0) {
+		return null
 	}
+	return (
+		<div className={props.badges.checkItemsChecked === props.badges.checkItems ? 'checkFull' : ''}>
+			<FontAwesomeIcon icon={['far', 'check-square']}/>
+			{` ${props.badges.checkItemsChecked}/${props.badges.checkItems}`}
+		</div>
+	)
 }
 
-class ImageCover extends React.Component<TrelloInterfacesProps.IAttachmentProps, any> {
-	public render () {
-		if (!this.props.settings.showCardCoverImages) {
-			return null
-		}
-		let extension: string = this.props.attData.url.match(/.+([.].+)/)[1]
-		if (this.props.settings !== undefined && !this.props.settings.animateGIFs && extension === '.gif') {
-			extension = '.png'
-		}
-		const filename = `${this.props.attData.id}${extension}`
-		const pathToImage = `${globalProperties.getPath()}attachments/${filename}`
-		return (
-			<div style={{backgroundColor: this.props.attData.edgeColor}}>
-				<img className='imgCover' src={pathToImage}/>
-			</div>
-		)
+const ImageCover: React.SFC<TrelloInterfacesProps.IAttachmentProps> = (props) => {
+	if (!props.settings.showCardCoverImages) {
+		return null
 	}
+	let extension: string = props.attData.url.match(/.+([.].+)/)[1]
+	if (props.settings !== undefined && !props.settings.animateGIFs && extension === '.gif') {
+		extension = '.png'
+	}
+	const filename = `${props.attData.id}${extension}`
+	const pathToImage = `${globalProperties.getPath()}attachments/${filename}`
+	return (
+		<div style={{backgroundColor: props.attData.edgeColor}}>
+			<img className='imgCover' src={pathToImage}/>
+		</div>
+	)
 }
 
-class LabelContainer extends React.Component<TrelloInterfacesProps.ILabelContainerProps, any> {
-	public render () {
-		// sort labels by color
-		this.props.labels.sort((a, b) => {
-			// discard uncolored labels
-			if (a.color === null || b.color === null) { return 0 }
-			return HelperUI.returnLabelIndex(a.color) - HelperUI.returnLabelIndex(b.color)
-		})
-		// create labels
-		const labels = this.props.labels.map((label) => {
-			return <Label key={label.id} labelData={label} settings={this.props.settings}/>
-		})
-		return (
-			<div className='labelContainer'>
-				{labels}
-			</div>
-		)
-	}
+const LabelContainer: React.SFC<TrelloInterfacesProps.ILabelContainerProps> = (props) => {
+	// sort labels by color
+	props.labels.sort((a, b) => {
+		// discard uncolored labels
+		if (a.color === null || b.color === null) { return 0 }
+		return HelperUI.returnLabelIndex(a.color) - HelperUI.returnLabelIndex(b.color)
+	})
+	// create labels
+	const labels = props.labels.map((label) => {
+		return <Label labelData={label} settings={props.settings} key={label.id}/>
+	})
+	return (
+		<div className='labelContainer'>
+			{labels}
+		</div>
+	)
 }
 
-class Label extends React.Component<TrelloInterfacesProps.ILabelProps, any> {
-	public render () {
-		const label = this.props.labelData
-		// if the color is set to null, the label will not show on board view
-		if (label.color === null) { return null }
-		const labelStyle = {
-			backgroundColor: HelperUI.returnColor(label.color)
-		}
-		let name: string = ''
-		if (this.props.settings.labelNames) {
-			name = label.name
-		}
-		return (
-			<div className='cardLabel' style={labelStyle}>{name}</div>
-		)
+const Label: React.SFC<TrelloInterfacesProps.ILabelProps> = (props) => {
+	if (props.labelData.color === null) {
+		return null
 	}
+	const style = { backgroundColor: HelperUI.returnColor(props.labelData.color) }
+	let name = ''
+	if (props.settings.labelNames) {
+		name = props.labelData.name
+	}
+	return (
+		<div className='cardLabel' style={style}>{name}</div>
+	)
 }
 
 export default class Board extends React.Component<any, any> {

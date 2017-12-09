@@ -20,28 +20,17 @@ class TrelloModule extends React.Component<any, any> {
 	constructor (props) {
 		super(props)
 		this.authorize = this.authorize.bind(this)
-		this.getUserInfo = this.getUserInfo.bind(this)
 		this.getBoards = this.getBoards.bind(this)
-		this.state = {data: '', updating: false}
+		this.state = {boards: [], updating: false}
 	}
 
 	public authorize () {
 		ipcRenderer.send('trelloAuthorize')
 	}
 	public componentDidMount () {
-		ipcRenderer.on('trelloGetAllUserInfo-reply', (event, value) => {
-			this.setState({data: JSON.stringify(value)})
-		})
 		ipcRenderer.on('trelloGetBoards-reply', (event, boards) => {
-			const boardComponents = boards.values.map((board) => {
-				return <BoardButton boardData={board} key={board.id} changePage={this.props.changePage}/>
-			})
-			boardComponents.push(<AddBoardButton/>)
-			this.setState({data: boardComponents, updating: false})
+			this.setState({boards, updating: false})
 		})
-	}
-	public getUserInfo () {
-		ipcRenderer.send('trelloGetAllUserInfo')
 	}
 
 	public componentWillReceiveProps (nextprops) {
@@ -59,22 +48,30 @@ class TrelloModule extends React.Component<any, any> {
 	}
 
 	public render () {
-		const showAuthBtns = this.props.authorized
-		const authorizedEelements = showAuthBtns ? [<button className='button' onClick={this.getUserInfo}>Get all user info</button>,
-			<button className='button' onClick={this.getBoards}>Get boards</button>]
-			: null
-		const authorizeButton = showAuthBtns ? null
-			: <button className='button' onClick={this.authorize}>Authorize Trello</button>
-		const authorized = showAuthBtns ? <span style={{fontSize: '50%'}}>- authorized</span>
-			: null
+		let button
+		let boards
+		let authorizedText
+		if (this.props.authorized && this.state.boards.values !== undefined) {
+			button = <button className='button' onClick={this.getBoards}>Get boards</button>
+			boards = this.state.boards.values.map((board) => {
+				return <BoardButton boardData={board} key={board.id} changePage={this.props.changePage}/>
+			})
+			boards.push(<AddBoardButton key='add'/>)
+			authorizedText = <span style={{fontSize: '50%'}}>- authorized</span>
+		} else if (this.props.authorized && this.state.boards.length === 0) {
+			boards = [<AddBoardButton key='add'/>]
+		} else {
+			button = <button className='button' onClick={this.authorize}>Authorize Trello</button>
+			boards = null
+			authorizedText = null
+		}
 		return (
 			<div className='homeModule'>
 				<div className='moduleTitle'>
-					<FontAwesomeIcon icon={['fab', 'trello']}/> Trello {authorized}
+					<FontAwesomeIcon icon={['fab', 'trello']}/> Trello {authorizedText}
 				</div>
-				{authorizeButton}
-				{authorizedEelements}
-				<div className='dataContainer'>{this.state.data}</div>
+				{button}
+				<div className='dataContainer'>{boards}</div>
 			</div>
 		)
 	}
