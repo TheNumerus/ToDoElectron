@@ -1,7 +1,4 @@
-//chrome currently (chromium 56 -61) cannot render backdrop blur properly with box shadow
-$useblur: false; //so far broken as fuck
 $shadow: 0px 5px 10px rgba(0,0,0,0.125);
-$blur: if($useblur, blur(30px), none);
 
 @keyframes fadeIn {
     from {background-color: rgba(255,255,255,0.5);}
@@ -28,7 +25,6 @@ $blur: if($useblur, blur(30px), none);
         flex: none;
         vertical-align: top;
         padding: 5px;
-        backdrop-filter: $blur;
         .listTitle{
             resize: none;
             margin: 10px 2px;
@@ -38,7 +34,7 @@ $blur: if($useblur, blur(30px), none);
             outline: none;
             font-size: 18px;
             font-weight: bold;
-            font-family: 'Roboto';
+            font-family: $font-stack;
         }
         .cardContainer{
             min-height: 10px;
@@ -111,7 +107,7 @@ $blur: if($useblur, blur(30px), none);
             resize: none;
             border: none;
             outline: none;
-            font-family: 'Roboto';
+            font-family: $font-stack;
             &.card{
                 width: 300px;
                 font-size: 100%;
@@ -143,7 +139,6 @@ $blur: if($useblur, blur(30px), none);
     display: flex;
     position: fixed;
     width: 100%;
-    backdrop-filter: $blur;
     #boardName{
         margin: 10px;
         color: white;

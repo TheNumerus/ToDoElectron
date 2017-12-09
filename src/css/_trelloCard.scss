@@ -103,7 +103,7 @@ h1{
     overflow: hidden;
     border: none;
     outline: none;
-    font-family: 'Roboto';
+    font-family: $font-stack;
     font-size: 16px;
 }
 
@@ -113,7 +113,7 @@ h1{
 }
 
 .checkListItem{
-    font-family: 'Roboto';
+    font-family: $font-stack;
     outline: none;
     resize: none;
     border: none;

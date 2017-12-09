@@ -1,0 +1,24 @@
+//chrome currently (chromium 56 -61) cannot render backdrop blur properly with box shadow
+$useblur: false; //so far broken as fuck
+$font-stack: 'Roboto', 'Arial', sans-serif;
+@font-face {
+    font-family: Roboto;
+    src: url(Roboto-Regular.ttf);
+}
+
+@font-face {
+    font-family: Montserrat;
+    src: url(Montserrat-Regular.ttf);
+}
+
+@font-face {
+    font-family: Montserrat;
+    src: url(Montserrat-SemiBold.ttf);
+    font-weight: 700;
+}
+
+@import "common";
+@import "homepage";
+@import "trello";
+@import "calendar";
+@import "settings";
