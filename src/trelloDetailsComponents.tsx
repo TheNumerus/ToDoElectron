@@ -4,7 +4,7 @@ import {ipcRenderer, remote, shell} from 'electron'
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
 import * as connCheck from './connectionChecker'
-import {DueStates, HelperUI} from './HelperUI'
+import * as HelperUI from './HelperUI'
 import { CheckState } from './trelloApi'
 import {TrelloTypes} from './trelloInterfaces'
 import {TrelloInterfacesProps} from './trelloInterfacesProps'
@@ -412,18 +412,18 @@ class DueDate extends React.Component<TrelloInterfacesProps.ICardDataProps, any>
 			classes.push('dueComplete')
 		} else {
 			switch (HelperUI.returnDueState(date.getTime())) {
-			case DueStates.overdueNear:
+			case HelperUI.DueStates.overdueNear:
 				classes.push('dueOverdueNear')
 				dateString += clock
 				break
-			case DueStates.overdue:
+			case HelperUI.DueStates.overdue:
 				classes.push('dueOverdue')
 				break
-			case DueStates.near:
+			case HelperUI.DueStates.near:
 				classes.push('dueNear')
 				dateString += clock
 				break
-			case DueStates.later:
+			case HelperUI.DueStates.later:
 				break
 			default:
 				throw new Error(`Wrong date on card with id ${this.props.cardData.id}`)

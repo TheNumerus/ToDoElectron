@@ -6,7 +6,7 @@ import * as ReactDOM from 'react-dom'
 import Sortable = require('sortablejs')
 import {URL} from 'url'
 import * as connCheck from './connectionChecker'
-import {DueStates, HelperUI} from './HelperUI'
+import * as HelperUI from './HelperUI'
 import { ISettings } from './settings'
 import {ImageOptions} from './trelloApi'
 import {TrelloInterfacesProps} from './trelloInterfacesProps'
@@ -233,18 +233,18 @@ class DueDate extends React.Component<TrelloInterfacesProps.ICardDataProps, {}> 
 			classes.push('dueComplete')
 		} else {
 			switch (HelperUI.returnDueState(date.getTime())) {
-			case DueStates.overdueNear:
+			case HelperUI.DueStates.overdueNear:
 				classes.push('dueOverdueNear')
 				dateString += clock
 				break
-			case DueStates.overdue:
+			case HelperUI.DueStates.overdue:
 				classes.push('dueOverdue')
 				break
-			case DueStates.near:
+			case HelperUI.DueStates.near:
 				classes.push('dueNear')
 				dateString += clock
 				break
-			case DueStates.later:
+			case HelperUI.DueStates.later:
 				break
 			default:
 				throw new Error(`Wrong date on card with id ${this.props.cardData.id}`)
@@ -293,6 +293,8 @@ class LabelContainer extends React.Component<TrelloInterfacesProps.ILabelContain
 	public render () {
 		// sort labels by color
 		this.props.labels.sort((a, b) => {
+			// discard uncolored labels
+			if (a.color === null || b.color === null) { return 0 }
 			return HelperUI.returnLabelIndex(a.color) - HelperUI.returnLabelIndex(b.color)
 		})
 		// create labels

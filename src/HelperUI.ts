@@ -1,69 +1,45 @@
-export class HelperUI {
-	public static returnColor (color: string) {
-		switch (color) {
-		case 'red':
-			return '#eb5a46'
-		case 'yellow':
-			return '#f2d600'
-		case 'purple':
-			return '#c377e0'
-		case 'green':
-			return '#61bd4f'
-		case 'blue':
-			return '#0079bf'
-		case 'sky':
-			return '#00c2e0'
-		case 'orange':
-			return '#ffab4a'
-		case 'pink':
-			return '#ff80ce'
-		case 'lime':
-			return '#51e898'
-		case 'black':
-			return '#4d4d4d'
-		default:
-			return 'rgba(128,128,128,0)'
-		}
-	}
+const labelMap = new Map([
+	['green', {color: '#61bd4f', pos: 0}],
+	['yellow', {color: '#f2d600', pos: 1}],
+	['orange', {color: '#ffab4a', pos: 2}],
+	['red', {color: '#eb5a46', pos: 3}],
+	['purple', {color: '#c377e0', pos: 4}],
+	['blue', {color: '#0079bf', pos: 5}],
+	['sky', {color: '#00c2e0', pos: 6}],
+	['lime', {color: '#51e898', pos: 7}],
+	['pink', {color: '#ff80ce', pos: 8}],
+	['black', {color: '#4d4d4d', pos: 9}],
+	['null', {color: '#808080', pos: 10}]
+])
 
-	public static returnLabelIndex (color: string) {
-		switch (color) {
-		case 'green':
-			return 0
-		case 'yellow':
-			return 1
-		case 'orange':
-			return 2
-		case 'red':
-			return 3
-		case 'purple':
-			return 4
-		case 'blue':
-			return 5
-		case 'sky':
-			return 6
-		case 'lime':
-			return 7
-		case 'pink':
-			return 8
-		case 'black':
-			return 9
-		default:
-			return 10
-		}
+export function returnColor (color: string) {
+	const value = labelMap.get(color)
+	if (value !== undefined) {
+		return value.color
+	} else {
+		throw new Error('Invalid color')
 	}
+}
 
-	public static returnDueState (time: number): DueStates {
-		const today = new Date()
-		if (wasDueToday(time)) {
-			return DueStates.overdueNear
-		} else if (time < today.getTime()) {
-			return DueStates.overdue
-		} else if (isTommorowOrNear(time)) {
-			return DueStates.near
-		} else {
-			return DueStates.later
-		}
+export function returnLabelIndex (color: string) {
+	const value = labelMap.get(color)
+	if (value !== undefined) {
+		return value.pos
+	} else {
+		throw new Error('Invalid color')
+	}
+}
+
+export function returnDueState (time: number): DueStates {
+	const today = new Date()
+	if (wasDueToday(time)) {
+		return DueStates.overdueNear
+	} else if (time < today.getTime()) {
+		return DueStates.overdue
+	} else if (isTommorowOrNear(time)) {
+		return DueStates.near
+	} else {
+		return DueStates.later
 	}
 }
 
