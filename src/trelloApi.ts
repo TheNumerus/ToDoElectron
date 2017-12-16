@@ -13,7 +13,7 @@ import * as windowManager from './windowManager'
 const requestURL = 'https://trello.com/1/OAuthGetRequestToken'
 const accessURL = 'https://trello.com/1/OAuthGetAccessToken'
 const authorizeURL = 'https://trello.com/1/OAuthAuthorizeToken'
-const oauth = new OAuth(requestURL, accessURL, GlobalProperties.getTrelloAppKey(), GlobalProperties.getTrelloSecretKey(), '1.0A', 'todoapp://trelloauth', 'HMAC-SHA1')
+let oauth
 let verificationToken = ''
 let homepageTrelloAuthEvent: Event = null
 // store authentification window variable here, so we can close it from another function
@@ -325,6 +325,7 @@ function callHomepageTrelloModule () {
 }
 
 export function initialize () {
+	oauth = new OAuth(requestURL, accessURL, process.env.trelloApi, process.env.trelloSecret, '1.0A', 'todoapp://trelloauth', 'HMAC-SHA1')
 	handleIpcCalls()
 	TrelloApiIO.initialize()
 	TrelloApiNet.initialize()

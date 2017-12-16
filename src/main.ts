@@ -1,3 +1,4 @@
+import * as dotenv from 'dotenv'
 import * as electron from 'electron'
 import * as connectionChecker from './connectionChecker'
 import * as dataController from './dataController'
@@ -11,6 +12,7 @@ app.commandLine.appendSwitch('--enable-experimental-web-platform-features')
  * call methods after app has loaded
  */
 app.on('ready', async () => {
+	dotenv.config({path: './.env'})
 	await dataController.initialize()
 	windowManager.createWindow()
 	protocols.registerToDoProtocol()

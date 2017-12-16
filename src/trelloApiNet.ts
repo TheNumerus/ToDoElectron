@@ -8,13 +8,14 @@ import * as settings from './settings'
 import {ImageOptions} from './trelloApi'
 import * as trelloIO from './trelloApiIO'
 import {TrelloTypes} from './trelloInterfaces'
-const appKey = globalProperties.getTrelloAppKey()
+let appKey: string
 let token
 /**
  * Initializes variables required for connection to Trello API
  */
 export function initialize () {
 	token = cacheModule.calls.trello.getToken()
+	appKey = process.env.trelloApi
 }
 // #region GETTERS
 /**
