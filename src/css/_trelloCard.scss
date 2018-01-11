@@ -57,11 +57,17 @@ h1{
                 color: #999;
                 font-size: 80%;
             }
+            .attName{
+                text-overflow: ellipsis;
+                max-width: 360px;
+                overflow: hidden;
+            }
         }
         img{
             max-width: 120px;
             max-height: 120px;
             margin-left: auto;
+            object-fit: contain;
         }
     }
 }
