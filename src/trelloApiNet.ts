@@ -10,47 +10,88 @@ import * as trelloIO from './trelloApiIO'
 import {TrelloTypes} from './trelloInterfaces'
 let appKey: string
 let token
+let queue: IQueueItem[]
 /**
  * Initializes variables required for connection to Trello API
  */
 export function initialize () {
 	token = cacheModule.calls.trello.getToken()
 	appKey = process.env.trelloApi
+	queue = []
+	setInterval(handleQueueRequests, 110)
 }
+
+async function handleQueueRequests () {
+	if (queue.length > 0) {
+		let result
+		// copy and delete queue item here, because it could be run multiple times
+		const type = queue[0].type
+		const url = queue[0].url
+		const callback = queue[0].callback
+		queue.splice(0, 1)
+		switch (type) {
+			case RequestType.GET:
+				result = await trelloApiRequest(url)
+				break
+			case RequestType.POST:
+				result = await trelloApiPostRequest(url)
+				break
+			case RequestType.PUT:
+				result = await trelloApiPutRequest(url)
+				break
+			case RequestType.GETimage:
+				result = await downloadImage(url)
+				break
+			default:
+				throw new Error('Wrong type in calls queue')
+		}
+		callback(result)
+	}
+}
+
+function queueRequest (call: IQueueItem) {
+	return new Promise<any>((resolve, reject) => {
+		queue.push({ url: call.url, type: call.type, callback: (result) => {
+			resolve(result)
+		}})
+	})
+}
+
 // #region GETTERS
 /**
  * Get all user info
  */
 export async function getAllUserInfo () {
-	return trelloApiRequest('/1/member/me?&key=' + appKey + '&token=' + token)
+	return queueRequest({url: `/1/member/me?&key=${appKey}&token=${token}`, type: RequestType.GET})
 }
 
 /**
  * Get all boards
  */
 export async function getBoards (): Promise<TrelloTypes.BoardData[]> {
-	return trelloApiRequest('/1/member/me/boards?&key=' + appKey + '&token=' + token + '&fields=all')
+	return queueRequest({url: `/1/member/me/boards?&key=${appKey}&token=${token}&fields=all`, type: RequestType.GET})
 }
 
 /**
  * Get board data
  */
 export async function getBoardData (idBoard: string) {
-	return trelloApiRequest('/1/boards/' + idBoard + '/?&key=' + appKey + '&token=' + token + '&fields=id,name,prefs&lists=open&list_fields=id,name&cards=open')
+	return queueRequest({url: `/1/boards/${idBoard}/?&key=${appKey}&token=${token}&fields=id,name,prefs&lists=open&list_fields=id,name&cards=open`,
+		type: RequestType.GET})
 }
 
 /**
  * Get attachments
  */
 export async function getAttachments (idCard: string): Promise<TrelloTypes.Attachment[]> {
-	return trelloApiRequest('/1/cards/' + idCard + '/attachments/?&key=' + appKey + '&token=' + token + '&fields=all&filter=false')
+	return queueRequest({url: `/1/cards/${idCard}/attachments/?&key=${appKey}&token=${token}&fields=all&filter=false`, type: RequestType.GET})
 }
 
 /**
  * Get card actions
  */
 export async function getActions (idCard: string): Promise<TrelloTypes.Action[]> {
-	return trelloApiRequest('/1/cards/' + idCard + '/actions/?&key=' + appKey + '&token=' + token)
+	return queueRequest({url: `/1/cards/${idCard}/actions/?&key=${appKey}&token=${token}`, type: RequestType.GET})
 }
 
 /**
@@ -68,7 +109,7 @@ export async function getImage (imageData: TrelloTypes.Attachment, options: Imag
 	} catch (e) {
 		if (e.code !== 'ENOENT') { throw e }
 		// download if needed
-		const imageBuffer = await downloadImage(imageData.url)
+		const imageBuffer = await queueRequest({url: imageData.url, type: RequestType.GETimage})
 		if (!animate && extension[1].toLowerCase() === '.gif') {
 			name = path.join('attachments', `${imageData.id}.png`)
 			trelloIO.saveImage(name, await sharp(imageBuffer).png().toBuffer())
@@ -100,7 +141,7 @@ export async function getBackground (imageUrl: string, options: ImageOptions) {
 	} catch (e) {
 		if (e.code !== 'ENOENT') { throw e }
 		// download if needed
-		trelloIO.saveImage(name, await downloadImage(imageUrl))
+		trelloIO.saveImage(name, await queueRequest({url: imageUrl, type: RequestType.GETimage}))
 		if (options === ImageOptions.backgroundThumb) {
 			return globalProperties.getPath() + name
 		}
@@ -111,7 +152,7 @@ export async function getBackground (imageUrl: string, options: ImageOptions) {
  * Gets checklists
  */
 export async function getChecklist (idChecklist: string) {
-	return trelloApiRequest('/1/checklists/' + idChecklist + '/?&key=' + appKey + '&token=' + token)
+	return await queueRequest({url: `/1/checklists/${idChecklist}/?&key=${appKey}&token=${token}`, type: RequestType.GET})
 }
 // #endregion
 // #region UPDATERS
@@ -124,7 +165,7 @@ export async function updateCard (idCard: string, options: TrelloTypes.UpdateOpt
 		url += `${option[0]}=${encodeURIComponent(option[1])}&`
 	})
 	url += `key=${appKey}&token=${token}`
-	return trelloApiPutRequest(url)
+	return queueRequest({url, type: RequestType.PUT})
 }
 
 /**
@@ -136,7 +177,7 @@ export async function updateList (idList: string, options: TrelloTypes.UpdateOpt
 		url += `${option[0]}=${encodeURIComponent(option[1])}&`
 	})
 	url += `key=${appKey}&token=${token}`
-	return trelloApiPutRequest(url)
+	return queueRequest({url, type: RequestType.PUT})
 }
 
 /**
@@ -148,7 +189,7 @@ export async function updateBoard (idBoard: string, options: TrelloTypes.UpdateO
 		url += `${option[0]}=${encodeURIComponent(option[1])}&`
 	})
 	url += `key=${appKey}&token=${token}`
-	return trelloApiPutRequest(url)
+	return queueRequest({url, type: RequestType.PUT})
 }
 
 /**
@@ -160,7 +201,7 @@ export async function updateCheckList (ids: TrelloTypes.CheckListUpdateIds, opti
 		url += `${option[0]}=${encodeURIComponent(option[1])}&`
 	})
 	url += `key=${appKey}&token=${token}`
-	return trelloApiPutRequest(url)
+	return queueRequest({url, type: RequestType.PUT})
 }
 // #endregion
 // #region ADDERS
@@ -168,14 +209,14 @@ export async function updateCheckList (ids: TrelloTypes.CheckListUpdateIds, opti
  * Adds card
  */
 export async function addCard (data: TrelloTypes.AddRequest) {
-	return trelloApiPostRequest('/1/cards?name=' + encodeURIComponent(data.name) + '&idList=' + data.id + '&key=' + appKey + '&token=' + token)
+	return queueRequest({url: `/1/cards?name=${encodeURIComponent(data.name)}&idList=${data.id}&key=${appKey}&token=${token}`, type: RequestType.PUT})
 }
 
 /**
  * Adds list
  */
 export async function addList (data: TrelloTypes.AddRequest) {
-	return trelloApiPostRequest('/1/lists?name=' + encodeURIComponent(data.name) + '&idBoard=' + data.id + '&pos=bottom&key=' + appKey + '&token=' + token)
+	return queueRequest({url: `/1/lists?name=${encodeURIComponent(data.name)}&idBoard=${data.id}&pos=bottom&key=${appKey}&token=${token}`, type: RequestType.PUT})
 }
 // #endregion
 // #region REQUESTS
@@ -290,5 +331,19 @@ function trelloApiPutRequest (url: string) {
 		request.write(JSON.stringify(false))
 		request.end()
 	})
+}
+// #endregion
+// #region TYPES
+enum RequestType {
+	GET,
+	POST,
+	PUT,
+	GETimage
+}
+
+interface IQueueItem {
+	url: string,
+	type: RequestType,
+	callback?: any
 }
 // #endregion
