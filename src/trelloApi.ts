@@ -195,13 +195,13 @@ function handleIpcCalls () {
 			const upperIndex = boardData.values[arg.newIndex - 1]
 			const lowerIndex = boardData.values[arg.newIndex]
 			const pos = (upperIndex.pos + lowerIndex.pos) / 2
-			TrelloApiNet.updateCard(arg.ids.idList, [['pos', pos]])
+			TrelloApiNet.updateList(arg.ids.idList, [['pos', pos]])
 		} else {
 			// sort down
 			const upperIndex = boardData.values[arg.newIndex]
 			const lowerIndex = boardData.values[arg.newIndex + 1]
 			const pos = (upperIndex.pos + lowerIndex.pos) / 2
-			TrelloApiNet.updateCard(arg.ids.idList, [['pos', pos]])
+			TrelloApiNet.updateList(arg.ids.idList, [['pos', pos]])
 		}
 		// now modify cache
 		updateBoardData(arg.ids.idBoard)

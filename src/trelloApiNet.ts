@@ -29,6 +29,7 @@ async function handleQueueRequests () {
 		const url = queue[0].url
 		const callback = queue[0].callback
 		queue.splice(0, 1)
+		console.log(`request ${url.substr(30, 100)} begun on ${Date.now()}`)
 		switch (type) {
 			case RequestType.GET:
 				result = await trelloApiRequest(url)
@@ -46,6 +47,7 @@ async function handleQueueRequests () {
 				throw new Error('Wrong type in calls queue')
 		}
 		callback(result)
+		console.log(`request ${url.substr(30, 100)} finished on ${Date.now()}`)
 	}
 }
 
@@ -76,7 +78,7 @@ export async function getBoards (): Promise<TrelloTypes.BoardData[]> {
  * Get board data
  */
 export async function getBoardData (idBoard: string) {
-	return queueRequest({url: `/1/boards/${idBoard}/?&key=${appKey}&token=${token}&fields=id,name,prefs&lists=open&list_fields=id,name&cards=open`,
+	return queueRequest({url: `/1/boards/${idBoard}/?&key=${appKey}&token=${token}&fields=id,name,prefs&lists=open&list_fields=id,name,pos&cards=open`,
 		type: RequestType.GET})
 }
 
@@ -209,14 +211,14 @@ export async function updateCheckList (ids: TrelloTypes.CheckListUpdateIds, opti
  * Adds card
  */
 export async function addCard (data: TrelloTypes.AddRequest) {
-	return queueRequest({url: `/1/cards?name=${encodeURIComponent(data.name)}&idList=${data.id}&key=${appKey}&token=${token}`, type: RequestType.PUT})
+	return queueRequest({url: `/1/cards?name=${encodeURIComponent(data.name)}&idList=${data.id}&key=${appKey}&token=${token}`, type: RequestType.POST})
 }
 
 /**
  * Adds list
  */
 export async function addList (data: TrelloTypes.AddRequest) {
-	return queueRequest({url: `/1/lists?name=${encodeURIComponent(data.name)}&idBoard=${data.id}&pos=bottom&key=${appKey}&token=${token}`, type: RequestType.PUT})
+	return queueRequest({url: `/1/lists?name=${encodeURIComponent(data.name)}&idBoard=${data.idBoard}&pos=bottom&key=${appKey}&token=${token}`, type: RequestType.POST})
 }
 // #endregion
 // #region REQUESTS

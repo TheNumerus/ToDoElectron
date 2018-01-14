@@ -1,7 +1,8 @@
 export module TrelloTypes {
 	interface AddRequest {
 		name: string,
-		id: string
+		id: string,
+		idBoard?: string
 	}
 
 	type UpdateOptions = [string, any][]

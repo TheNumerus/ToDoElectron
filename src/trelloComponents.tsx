@@ -44,7 +44,7 @@ class ListComponent extends React.Component<TrelloInterfacesProps.IListProps, an
 			<CardComponent key={card.id} cardData={card} settings={this.props.settings} changePage={this.props.changePage}/>
 		)
 		return (
-			<div className='listComponent'>
+			<div className='listComponent' id={this.props.listData.id}>
 				<ListName listData={this.props.listData}/>
 				<div className='cardContainer' ref={(input) => {this.cardContainer = input}} id={this.props.listData.id}>
 					{elements}
@@ -345,6 +345,10 @@ export default class Board extends React.Component<any, any> {
 				this.backgroundSet =  true
 			} else {
 				imagePath = `url('${imagePath}')`.replace(/\\/g, '/')
+				// background is broken for now
+				document.body.style.backgroundRepeat = 'no-repeat'
+				document.body.style.backgroundSize = 'cover'
+				document.body.style.backgroundAttachment = 'fixed'
 				switch (options.preview) {
 				case true:
 					document.body.style.backgroundImage = imagePath
@@ -490,7 +494,7 @@ class AddCardButton extends React.Component<any, any> {
 			this.setState({clicked: false})
 		} else {
 			this.setState({name: '', clicked: false})
-			ipcRenderer.send('trelloAddCard', {name: event.target.value, idList: this.props.listId, idBoard: boardId})
+			ipcRenderer.send('trelloAddCard', {name: event.target.value, id: this.props.listId, idBoard: boardId})
 		}
 	}
 	public componentDidUpdate () {
