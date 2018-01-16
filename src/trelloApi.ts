@@ -63,20 +63,20 @@ function handleIpcCalls () {
 			cacheModule.saveCache()
 			windowManager.sendMessage('trelloGetBoards-reply', boards)
 			// now download images in background
-			boards.values.forEach((board: TrelloTypes.BoardData) => {
-				if (board.prefs.backgroundImageScaled !== null) {
-					TrelloApiNet.getBackground(board.prefs.backgroundImageScaled[0].url, ImageOptions.backgroundThumb)
-				}
-			})
+			getBoardThumbs(boards)
 		} else {
-			boards.values.forEach((board: TrelloTypes.BoardData) => {
-				if (board.prefs.backgroundImageScaled !== null) {
-					TrelloApiNet.getBackground(board.prefs.backgroundImageScaled[0].url, ImageOptions.backgroundThumb)
-				}
-			})
 			windowManager.sendMessage('trelloGetBoards-reply', boards)
+			getBoardThumbs(boards)
 		}
 	})
+	const getBoardThumbs = async (boards) => {
+		for (const board of boards.values) {
+			if (board.prefs.backgroundImageScaled !== null) {
+				await TrelloApiNet.getBackground(board.prefs.backgroundImageScaled[0].url, ImageOptions.backgroundThumb)
+			}
+		}
+		windowManager.sendMessage('home-refresh-boardthumbs')
+	}
 
 	ipcMain.on('trelloGetBoardData', (event, boardId, options) => boardUpdate(event, boardId, options))
 
@@ -118,6 +118,8 @@ function handleIpcCalls () {
 				if (action.type === 'commentCard') { cardData.comments.push(action) }
 			})
 		}
+		// get all images
+		downloadAttachments(cardData.attachments)
 		event.sender.send('trelloGetCardData-reply', cardData)
 	})
 
@@ -220,23 +222,20 @@ function handleIpcCalls () {
 		// sort cards
 		for (let i = 0; i < json.lists.length; i++) {
 			boardData.values[i].cards = []
-			json.cards.forEach((card) => {
+			json.cards.forEach((card: TrelloTypes.CardData) => {
 				if (card.idList === boardData.values[i].id) {
 					boardData.values[i].cards.push(card)
 				}
 				boardData.values[i].cards.sort((a, b) => {
 					return a.pos - b.pos
 				})
-			})
-		}
-		for (const listIndex in boardData.values) {
-			for (const cardIndex in boardData.values[listIndex].cards) {
-				if (boardData.values[listIndex].cards[cardIndex].badges.attachments > 0) {
-					const attData = await TrelloApiNet.getAttachments(boardData.values[listIndex].cards[cardIndex].id)
-					downloadAttachments(attData)
-					boardData.values[listIndex].cards[cardIndex].attachments = attData
+				// download cover image while were at it
+				for (const attachment of card.attachments) {
+					if (card.idAttachmentCover === attachment.id) {
+						TrelloApiNet.getImage(attachment, ImageOptions.attachment)
+					}
 				}
-			}
+			})
 		}
 		boardData.date = Date.now()
 		cacheModule.calls.trello.setBoardData(boardId, boardData)

@@ -78,7 +78,7 @@ export async function getBoards (): Promise<TrelloTypes.BoardData[]> {
  * Get board data
  */
 export async function getBoardData (idBoard: string) {
-	return queueRequest({url: `/1/boards/${idBoard}/?&key=${appKey}&token=${token}&fields=id,name,prefs&lists=open&list_fields=id,name,pos&cards=open`,
+	return queueRequest({url: `/1/boards/${idBoard}/?&key=${appKey}&token=${token}&fields=id,name,prefs&lists=open&list_fields=id,name,pos&cards=open&card_attachments=true`,
 		type: RequestType.GET})
 }
 

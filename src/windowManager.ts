@@ -75,7 +75,7 @@ function handleIpc () {
 /**
  * Sends message to renderer process
  */
-export function sendMessage (channel: string, data) {
+export function sendMessage (channel: string, data?) {
 	mainWindow.webContents.send(channel, data)
 }
 

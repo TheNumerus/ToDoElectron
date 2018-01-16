@@ -81,11 +81,37 @@ class BoardButton extends React.Component<TrelloInterfacesProps.IBoardButtonProp
 	constructor (props) {
 		super(props)
 		this.openBoard = this.openBoard.bind(this)
-		this.state = {starred: false}
+		if (props.boardData.prefs.backgroundImage === null) {
+			this.state = {url: ''}
+		} else {
+			this.state = {url: this.getImagePath(props.boardData.prefs.backgroundImageScaled[0].url)}
+		}
+		this.handleIpc()
 	}
 
 	public openBoard (event: React.MouseEvent<HTMLDivElement>) {
 		this.props.changePage('trelloBoard', this.props.boardData.id)
+	}
+
+	public handleIpc () {
+		ipcRenderer.on('home-refresh-boardthumbs', () => {
+			if (this.props.boardData.prefs.backgroundImage !== null) {
+				this.setState({url: this.getImagePath()})
+			}
+		})
+	}
+
+	public getImagePath (inputURL?: string) {
+		let bgrImgUrl: string
+		let bgrImgName: string
+		if (inputURL === undefined) {
+			bgrImgUrl = this.props.boardData.prefs.backgroundImageScaled[0].url
+		} else {
+			bgrImgUrl = inputURL
+		}
+		bgrImgName = bgrImgUrl.match(/.*\/(.*[.].*)/)[1]
+		const pathToImage = path.join(globalProperties.getPath(), 'background', 'thumbs', bgrImgName).replace(/\\/g, '/')
+		return `url(${pathToImage}#${Date.now()})`
 	}
 
 	public render () {
@@ -94,10 +120,7 @@ class BoardButton extends React.Component<TrelloInterfacesProps.IBoardButtonProp
 		if (this.props.boardData.prefs.backgroundImage === null) {
 			style = {backgroundColor: this.props.boardData.prefs.backgroundColor}
 		} else {
-			const bgrImgUrl = this.props.boardData.prefs.backgroundImageScaled[0].url
-			const bgrImg = bgrImgUrl.match(/.*\/(.*[.].*)/)[1]
-			const pathToImage = path.join(globalProperties.getPath(), 'background', 'thumbs', bgrImg).replace(/\\/g, '/')
-			style = {backgroundImage: `url(${pathToImage})`}
+			style = {backgroundImage: this.state.url}
 		}
 		return (
 			<div className='boardBtn' onClick={this.openBoard}>
