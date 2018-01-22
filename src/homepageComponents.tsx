@@ -3,6 +3,7 @@ import {ipcRenderer, remote} from 'electron'
 import * as path from 'path'
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
+import * as HelperUI from './HelperUI'
 import {TrelloInterfacesProps} from './trelloInterfacesProps'
 const globalProperties = remote.require('./globalProperties').default
 
@@ -82,9 +83,9 @@ class BoardButton extends React.Component<TrelloInterfacesProps.IBoardButtonProp
 		super(props)
 		this.openBoard = this.openBoard.bind(this)
 		if (props.boardData.prefs.backgroundImage === null) {
-			this.state = {url: ''}
+			this.state = {url: '', loaded: true}
 		} else {
-			this.state = {url: this.getImagePath(props.boardData.prefs.backgroundImageScaled[0].url)}
+			this.state = {url: this.getImagePath(props.boardData.prefs.backgroundImageScaled[0].url), loaded: false}
 		}
 		this.handleIpc()
 	}
@@ -96,7 +97,7 @@ class BoardButton extends React.Component<TrelloInterfacesProps.IBoardButtonProp
 	public handleIpc () {
 		ipcRenderer.on('home-refresh-boardthumbs', () => {
 			if (this.props.boardData.prefs.backgroundImage !== null) {
-				this.setState({url: this.getImagePath()})
+				this.setState({url: this.getImagePath(), loaded: true})
 			}
 		})
 	}
@@ -119,8 +120,11 @@ class BoardButton extends React.Component<TrelloInterfacesProps.IBoardButtonProp
 		let style
 		if (this.props.boardData.prefs.backgroundImage === null) {
 			style = {backgroundColor: this.props.boardData.prefs.backgroundColor}
-		} else {
+		} else if (this.state.loaded) {
 			style = {backgroundImage: this.state.url}
+		} else {
+			style = {backgroundColor: HelperUI.mixColors(this.props.boardData.prefs.backgroundBottomColor,
+				this.props.boardData.prefs.backgroundTopColor)}
 		}
 		return (
 			<div className='boardBtn' onClick={this.openBoard}>

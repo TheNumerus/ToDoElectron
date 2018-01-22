@@ -43,6 +43,21 @@ export function returnDueState (time: number): DueStates {
 	}
 }
 
+export function mixColors (color1: string, color2: string) {
+	let resultNumber = '#'
+	for (let i = 0; i < 3; i++) {
+		const parse1 = parseInt(color1.substr(2 * i + 1, 2), 16)
+		const parse2 = parseInt(color2.substr(2 * i + 1, 2), 16)
+		const center = Math.round((parse1 + parse2) / 2)
+		if (center.toString(16).length === 1) {
+			resultNumber += `0${center.toString(16)}`
+		} else {
+			resultNumber += center.toString(16)
+		}
+	}
+	return resultNumber
+}
+
 export enum DueStates {
 	overdue,
 	overdueNear,

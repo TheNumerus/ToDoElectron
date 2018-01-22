@@ -105,7 +105,9 @@ export module TrelloTypes {
 		backgroundBrightness: 'light' | 'dark',
 		backgroundColor: string,
 		backgroundImage: string,
-		backgroundImageScaled: Array<BoardBackgoundScaled>
+		backgroundImageScaled: Array<BoardBackgoundScaled>,
+		backgroundTopColor: string,
+		backgroundBottomColor: string
 	}
 	interface BoardBackgoundScaled {
 		url: string
