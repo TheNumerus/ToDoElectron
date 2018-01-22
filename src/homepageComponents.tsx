@@ -4,6 +4,7 @@ import * as path from 'path'
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
 import * as HelperUI from './HelperUI'
+import {TrelloTypes} from './trelloInterfaces'
 import {TrelloInterfacesProps} from './trelloInterfacesProps'
 const globalProperties = remote.require('./globalProperties').default
 
@@ -22,7 +23,7 @@ class TrelloModule extends React.Component<any, any> {
 		super(props)
 		this.authorize = this.authorize.bind(this)
 		this.getBoards = this.getBoards.bind(this)
-		this.state = {boards: [], updating: false}
+		this.state = {boards: [], updating: false, thumbsLoaded: false}
 	}
 
 	public authorize () {
@@ -31,6 +32,9 @@ class TrelloModule extends React.Component<any, any> {
 	public componentDidMount () {
 		ipcRenderer.on('trelloGetBoards-reply', (event, boards) => {
 			this.setState({boards, updating: false})
+		})
+		ipcRenderer.on('home-refresh-boardthumbs', () => {
+			this.setState({thumbsLoaded: true})
 		})
 	}
 
@@ -54,8 +58,12 @@ class TrelloModule extends React.Component<any, any> {
 		let authorizedText
 		if (this.props.authorized && this.state.boards.values !== undefined) {
 			button = <button className='button' onClick={this.getBoards}>Get boards</button>
-			boards = this.state.boards.values.map((board) => {
-				return <BoardButton boardData={board} key={board.id} changePage={this.props.changePage}/>
+			boards = this.state.boards.values.map((board: TrelloTypes.BoardData) => {
+				if (board.prefs.backgroundImage === null) {
+					return <BoardButton boardData={board} key={board.id} changePage={this.props.changePage}/>
+				} else {
+					return <BoardButtonImage boardData={board} key={board.id} changePage={this.props.changePage} loaded={this.state.thumbsLoaded}/>
+				}
 			})
 			boards.push(<AddBoardButton key='add'/>)
 			authorizedText = <span style={{fontSize: '50%'}}>- authorized</span>
@@ -82,24 +90,41 @@ class BoardButton extends React.Component<TrelloInterfacesProps.IBoardButtonProp
 	constructor (props) {
 		super(props)
 		this.openBoard = this.openBoard.bind(this)
-		if (props.boardData.prefs.backgroundImage === null) {
-			this.state = {url: '', loaded: true}
-		} else {
-			this.state = {url: this.getImagePath(props.boardData.prefs.backgroundImageScaled[0].url), loaded: false}
-		}
-		this.handleIpc()
 	}
 
 	public openBoard (event: React.MouseEvent<HTMLDivElement>) {
 		this.props.changePage('trelloBoard', this.props.boardData.id)
 	}
 
-	public handleIpc () {
-		ipcRenderer.on('home-refresh-boardthumbs', () => {
-			if (this.props.boardData.prefs.backgroundImage !== null) {
-				this.setState({url: this.getImagePath(), loaded: true})
-			}
-		})
+	public render () {
+		// handle background
+		const style = {backgroundColor: this.props.boardData.prefs.backgroundColor}
+		return (
+			<div className='boardBtn' onClick={this.openBoard}>
+				<div className='boardBtnCover' style={style}>
+					<BoardStar boardData={this.props.boardData}/>
+				</div>
+				<div className='boardBtnCaption'><span>{this.props.boardData.name}</span></div>
+			</div>
+		)
+	}
+}
+
+class BoardButtonImage extends React.Component<TrelloInterfacesProps.IBoardButtonImageProps, any> {
+	public url
+	constructor (props) {
+		super(props)
+		this.openBoard = this.openBoard.bind(this)
+		this.url = this.getImagePath(props.boardData.prefs.backgroundImageScaled[0].url)
+		this.state = {imageLoaded: false}
+	}
+
+	public openBoard (event: React.MouseEvent<HTMLDivElement>) {
+		this.props.changePage('trelloBoard', this.props.boardData.id)
+	}
+
+	public imageLoaded () {
+		this.setState({imageLoaded: true})
 	}
 
 	public getImagePath (inputURL?: string) {
@@ -112,23 +137,26 @@ class BoardButton extends React.Component<TrelloInterfacesProps.IBoardButtonProp
 		}
 		bgrImgName = bgrImgUrl.match(/.*\/(.*[.].*)/)[1]
 		const pathToImage = path.join(globalProperties.getPath(), 'background', 'thumbs', bgrImgName).replace(/\\/g, '/')
-		return `url(${pathToImage}#${Date.now()})`
+		return `${pathToImage}#${Date.now()}`
+	}
+
+	public componentWillReceiveProps (nextprops) {
+		this.url = this.getImagePath(nextprops.boardData.prefs.backgroundImageScaled[0].url)
 	}
 
 	public render () {
 		// handle background
-		let style
-		if (this.props.boardData.prefs.backgroundImage === null) {
-			style = {backgroundColor: this.props.boardData.prefs.backgroundColor}
-		} else if (this.state.loaded) {
-			style = {backgroundImage: this.state.url}
-		} else {
-			style = {backgroundColor: HelperUI.mixColors(this.props.boardData.prefs.backgroundBottomColor,
+		const style = {backgroundColor: HelperUI.mixColors(this.props.boardData.prefs.backgroundBottomColor,
 				this.props.boardData.prefs.backgroundTopColor)}
+		const imageClasses = ['boardBtnCoverImage']
+		if (this.props.loaded && this.state.imageLoaded) {
+			imageClasses.push('anim')
 		}
+		const url = this.props.loaded ? this.url : ''
 		return (
 			<div className='boardBtn' onClick={this.openBoard}>
 				<div className='boardBtnCover' style={style}>
+					<img className={imageClasses.join(' ')} src={url} onLoad={() => this.imageLoaded()}/>
 					<BoardStar boardData={this.props.boardData}/>
 				</div>
 				<div className='boardBtnCaption'><span>{this.props.boardData.name}</span></div>
@@ -172,7 +200,7 @@ class BoardStar extends React.Component<any, any> {
 			<div onClick={this.handleStar}
 				onMouseEnter={() => {this.setState({mouseOver: true})}}
 				onMouseLeave={() => {this.setState({mouseOver: false})}}
-				style={{marginLeft: 'auto'}}>
+				className='starContainer'>
 				{star}
 			</div>
 		)

@@ -35,6 +35,10 @@ export module TrelloInterfacesProps {
 		changePage?: any
 	}
 
+	interface IBoardButtonImageProps extends IBoardButtonProps {
+		loaded: boolean
+	}
+
 	interface IListProps {
 		listData: TrelloTypes.ListData,
 		settings?: ISettings,

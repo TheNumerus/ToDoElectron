@@ -34,8 +34,7 @@ $btnHeight: 120px;
 .boardBtn{
 	user-select: none;
 	border-radius: 3px;
-	animation-name: btnHoverDisable;
-	animation-duration: 0.1s;
+	transition: transform 0.1s;
 	margin: 5px;
 	width:$btnWidth;
 	height:$btnHeight;
@@ -47,11 +46,34 @@ $btnHeight: 120px;
 	"."
 	"caption";
 
+	&:hover{
+		transform:scale(1.05,1.05);
+	}
+
 	.boardBtnCover{
 		width:$btnWidth;
 		height:$btnHeight;
-		background-size: cover;
 		display: flex;
+		position: relative;
+
+		.starContainer{
+			margin-left: auto;
+			grid-area:star;
+			display: inline;
+			position: absolute;
+			right: 0px;
+		}
+
+		.boardBtnCoverImage{
+			opacity: 0;
+			transition: opacity 0.2s;
+			object-fit: cover;
+			width:$btnWidth;
+			height:$btnHeight;
+			&.anim{
+				opacity: 1;
+			}
+		}
 	}
 	
 	.boardBtnCaption{
@@ -68,20 +90,9 @@ $btnHeight: 120px;
 			max-width: 160px;
 			max-height: 40px;
 		}
+		//fix for imgae transitions
+		z-index: 50;
 	}
-}
-.boardBtn:hover{
-	animation-name: btnHover;
-	animation-duration: 0.1s;
-	transform:scale(1.05,1.05);
-}
-@keyframes btnHover {
-    from {transform:scale(1.0,1.0);}
-    to {transform:scale(1.05,1.05);}
-}
-@keyframes btnHoverDisable {
-    from {transform:scale(1.05,1.05);}
-    to {transform:scale(1.0,1.0);}
 }
 
 .star{
