@@ -3,7 +3,7 @@ import {OAuth} from 'oauth'
 import * as path from 'path'
 import {URL} from 'url'
 import * as cacheModule from './cache'
-import GlobalProperties from './globalProperties'
+import * as GlobalProperties from './globalProperties'
 import * as TrelloApiIO from './trelloApiIO'
 import * as TrelloApiNet from './trelloApiNet'
 import {TrelloTypes} from './trelloInterfaces'
@@ -45,10 +45,10 @@ function handleIpcCalls () {
 		event.sender.send('trelloGetAllUserInfo-reply', await TrelloApiNet.getAllUserInfo())
 	})
 
-	ipcMain.on('trelloGetBoards', async (event) => {
+	ipcMain.on('trelloGetBoards', async (event, options) => {
 		const boards = cacheModule.calls.trello.getBoards()
 		// handle empty cache and old cache
-		if (cacheModule.calls.helper.checkInvalidity(boards)) {
+		if (cacheModule.calls.helper.checkInvalidity(boards) || (options !== undefined && options.forceUpdate)) {
 			const json = await TrelloApiNet.getBoards()
 			// format data for internal use
 			// clean up first
@@ -72,7 +72,7 @@ function handleIpcCalls () {
 	const getBoardThumbs = async (boards) => {
 		for (const board of boards.values) {
 			if (board.prefs.backgroundImageScaled !== null) {
-				await TrelloApiNet.getBackground(board.prefs.backgroundImageScaled[0].url, ImageOptions.backgroundThumb)
+				await TrelloApiNet.getBackground(board.prefs.backgroundImageScaled[1].url, ImageOptions.backgroundThumb)
 			}
 		}
 		windowManager.sendMessage('home-refresh-boardthumbs')
@@ -245,13 +245,11 @@ function handleIpcCalls () {
 	async function getBackground (prefs: TrelloTypes.BoardPrefs, event: Event) {
 		// download background if necessary
 		if (prefs.backgroundImage !== null) {
-			// we send blurry version for faster loading, in background we download full resolution image and then we send it
-			const filename = prefs.backgroundImageScaled[0].url.match(/.*\/(.*)/)[1]
-			const pathName = path.join(GlobalProperties.getPath(), 'background', 'thumbs', filename)
-			event.sender.send('trelloSetBackground', pathName, {preview: true})
-			event.sender.send('trelloSetBackground', await TrelloApiNet.getBackground(prefs.backgroundImage, ImageOptions.background), {preview: false})
+			// in background we download full resolution image and then we send it
+			await TrelloApiNet.getBackground(prefs.backgroundImage, ImageOptions.background)
+			event.sender.send('trelloSetBackground', prefs.backgroundImage)
 		} else {
-			event.sender.send('trelloSetBackground', prefs.backgroundColor, {preview: false})
+			event.sender.send('trelloSetBackground', prefs.backgroundColor)
 		}
 	}
 

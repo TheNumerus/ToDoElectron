@@ -3,10 +3,11 @@ import {ipcRenderer, remote} from 'electron'
 import * as path from 'path'
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
+import * as connCheck from './connectionChecker'
 import * as HelperUI from './HelperUI'
 import {TrelloTypes} from './trelloInterfaces'
 import {TrelloInterfacesProps} from './trelloInterfacesProps'
-const globalProperties = remote.require('./globalProperties').default
+const globalProperties = remote.require('./globalProperties')
 
 class AppInfoBar extends React.Component<any, any> {
 	public render () {
@@ -36,6 +37,11 @@ class TrelloModule extends React.Component<any, any> {
 		ipcRenderer.on('home-refresh-boardthumbs', () => {
 			this.setState({thumbsLoaded: true})
 		})
+		// update if connection found
+		if (connCheck.getState() && !this.state.updating && this.props.authorized) {
+			ipcRenderer.send('trelloGetBoards', {forceUpdate: true})
+			this.setState({updating: true})
+		}
 	}
 
 	public componentWillReceiveProps (nextprops) {
@@ -131,7 +137,7 @@ class BoardButtonImage extends React.Component<TrelloInterfacesProps.IBoardButto
 		let bgrImgUrl: string
 		let bgrImgName: string
 		if (inputURL === undefined) {
-			bgrImgUrl = this.props.boardData.prefs.backgroundImageScaled[0].url
+			bgrImgUrl = this.props.boardData.prefs.backgroundImageScaled[1].url
 		} else {
 			bgrImgUrl = inputURL
 		}
@@ -141,7 +147,7 @@ class BoardButtonImage extends React.Component<TrelloInterfacesProps.IBoardButto
 	}
 
 	public componentWillReceiveProps (nextprops) {
-		this.url = this.getImagePath(nextprops.boardData.prefs.backgroundImageScaled[0].url)
+		this.url = this.getImagePath(nextprops.boardData.prefs.backgroundImageScaled[1].url)
 	}
 
 	public render () {

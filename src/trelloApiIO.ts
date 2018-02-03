@@ -1,5 +1,5 @@
 import * as fs from 'fs'
-import globalProperties from './globalProperties'
+import * as globalProperties from './globalProperties'
 let pathToFolder
 
 /**

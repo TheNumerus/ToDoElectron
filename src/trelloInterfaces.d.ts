@@ -103,14 +103,16 @@ export module TrelloTypes {
 
 	interface BoardPrefs {
 		backgroundBrightness: 'light' | 'dark',
-		backgroundColor: string,
+		backgroundColor?: string,
 		backgroundImage: string,
 		backgroundImageScaled: Array<BoardBackgoundScaled>,
 		backgroundTopColor: string,
 		backgroundBottomColor: string
 	}
 	interface BoardBackgoundScaled {
-		url: string
+		height: number,
+		url: string,
+		width: number
 	}
 
 	interface SortCard {

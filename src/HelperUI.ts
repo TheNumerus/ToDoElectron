@@ -1,3 +1,6 @@
+import * as path from 'path'
+import * as globalProperties from './globalProperties'
+
 const labelMap = new Map([
 	['green', {color: '#61bd4f', pos: 0}],
 	['yellow', {color: '#f2d600', pos: 1}],
@@ -56,6 +59,28 @@ export function mixColors (color1: string, color2: string) {
 		}
 	}
 	return resultNumber
+}
+
+interface IimagePathOpts {
+	preview: boolean
+}
+
+export function getBgrImagePathFromURL (inputURL?: string, options?: IimagePathOpts) {
+	let bgrImgName: string
+	let pathToImage: string
+	// gets last part of the URL which should be a filename
+	bgrImgName = inputURL.match(/.*\/(.*)/)[1]
+	// checks for existence of file extension
+	if (bgrImgName.indexOf('.') === -1) {
+		bgrImgName += '.jpg'
+	}
+	if (options === undefined || !options.preview) {
+		pathToImage = path.join(globalProperties.getPath(), 'background', bgrImgName)
+	} else {
+		pathToImage = path.join(globalProperties.getPath(), 'background', 'thumbs', bgrImgName)
+	}
+	pathToImage = pathToImage.replace(/\\/g, '/')
+	return `${pathToImage}#${Date.now()}`
 }
 
 export enum DueStates {

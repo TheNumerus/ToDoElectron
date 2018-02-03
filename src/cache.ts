@@ -1,5 +1,5 @@
 import * as fs from 'fs'
-import globalProperties from './globalProperties'
+import * as globalProperties from './globalProperties'
 import {TrelloTypes} from './trelloInterfaces'
 const filename = 'userCache'
 

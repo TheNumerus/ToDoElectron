@@ -5,13 +5,14 @@ import * as React from 'react'
 import * as ReactDOM from 'react-dom'
 import Sortable = require('sortablejs')
 import {URL} from 'url'
+import * as trelloComponents from './components/trelloComponents'
 import * as connCheck from './connectionChecker'
+import * as globalProperties from './globalProperties'
 import * as HelperUI from './HelperUI'
 import { ISettings } from './settings'
 import {ImageOptions} from './trelloApi'
 import { TrelloTypes } from './trelloInterfaces'
 import {TrelloInterfacesProps} from './trelloInterfacesProps'
-const globalProperties = remote.require('./globalProperties').default
 let boardId
 
 class ListComponent extends React.Component<TrelloInterfacesProps.IListProps, any> {
@@ -318,10 +319,8 @@ const Label: React.SFC<TrelloInterfacesProps.ILabelProps> = (props) => {
 
 export default class Board extends React.Component<any, any> {
 	public boardRoot
-	public backgroundSet: boolean = false
 	constructor (props) {
 		super(props)
-		this.backgroundSet = false
 		this.update = this.update.bind(this)
 		this.goBack = this.goBack.bind(this)
 		this.addSortable = this.addSortable.bind(this)
@@ -329,38 +328,12 @@ export default class Board extends React.Component<any, any> {
 		boardId = this.props.idBoard
 		// add empty list to speed up the process later
 		this.handleIpc()
-		this.state = { boardData: { name: '', values: [{cards: [], name: '', id: ''}] } , settings: {}, iconSpin: false}
+		this.state = { boardData: { name: '', values: [{cards: [], name: '', id: ''}] }, settings: {}, iconSpin: false}
 	}
 
 	public handleIpc () {
 		ipcRenderer.on('trelloGetBoardData-reply', (event: Event, boardData) => {
 			this.setState({boardData, iconSpin: false})
-		})
-
-		ipcRenderer.on('trelloSetBackground', (event: Event, imagePath: string, options) => {
-			if (this.backgroundSet) { return }
-			// handle solid color background
-			if (imagePath[0] === '#') {
-				document.body.style.background = imagePath
-				this.backgroundSet =  true
-			} else {
-				imagePath = `url('${imagePath}')`.replace(/\\/g, '/')
-				// background is broken for now
-				document.body.style.backgroundRepeat = 'no-repeat'
-				document.body.style.backgroundSize = 'cover'
-				document.body.style.backgroundAttachment = 'fixed'
-				switch (options.preview) {
-				case true:
-					document.body.style.backgroundImage = imagePath
-					break
-				case false:
-					document.body.style.backgroundImage = imagePath
-					this.backgroundSet = true
-					break
-				default:
-					throw new Error('wrong option type in trelloSetBackground')
-				}
-			}
 		})
 
 		ipcRenderer.on('getSettings-reply', (event: Event, options: ISettings) => {
@@ -378,10 +351,6 @@ export default class Board extends React.Component<any, any> {
 		if (this.boardRoot !== null) {
 			Sortable.create(this.boardRoot, {animation: 150, onSort: this.handleSort})
 		}
-	}
-
-	public componentWillUnmount () {
-		document.body.style.background = '#FFFFFF'
 	}
 
 	public handleBackgroundScroll () {
@@ -423,17 +392,20 @@ export default class Board extends React.Component<any, any> {
 		})
 		document.title = `${this.state.boardData.name} | To-Do app in Electron`
 		return (
-			<div id='lists'>
-				<div id='headerBoard'>
-					<button onClick={this.goBack} className='buttonHeader'><FontAwesomeIcon icon='chevron-left' size='2x'/></button>
-					<BoardName boardData={this.state.boardData}/>
-					<button onClick={this.update} className='buttonHeader' style={{marginLeft: 'auto'}}>
-						<FontAwesomeIcon icon='sync' size='2x' spin={this.state.iconSpin}/>
-					</button>
-				</div>
-				<div className='boardRoot' ref={(root) => {this.boardRoot = root}}>
-					{components}
-					<AddableList/>
+			<div>
+				<trelloComponents.BoardBackground boardData={this.state.boardData}/>
+				<div id='lists'>
+					<div id='headerBoard'>
+						<button onClick={this.goBack} className='buttonHeader'><FontAwesomeIcon icon='chevron-left' size='2x'/></button>
+						<BoardName boardData={this.state.boardData}/>
+						<button onClick={this.update} className='buttonHeader' style={{marginLeft: 'auto'}}>
+							<FontAwesomeIcon icon='sync' size='2x' spin={this.state.iconSpin}/>
+						</button>
+					</div>
+					<div className='boardRoot' ref={(root) => {this.boardRoot = root}}>
+						{components}
+						<AddableList/>
+					</div>
 				</div>
 			</div>
 		)

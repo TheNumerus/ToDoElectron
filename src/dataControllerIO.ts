@@ -1,7 +1,7 @@
 import * as fs from 'fs'
 import * as path from 'path'
 import * as cacheModule from './cache'
-import globalProperties from './globalProperties'
+import * as globalProperties from './globalProperties'
 import * as settings from './settings'
 const paths = ['', 'background/', 'background/thumbs/', 'attachments/']
 let pathToFolder
