@@ -194,14 +194,14 @@ class CardComponent extends React.Component<TrelloInterfacesProps.ICardDataProps
 				attachments = <div><FontAwesomeIcon icon='paperclip'/>{card.badges.attachments}</div>
 			}
 
-			if (card.idAttachmentCover && card.attachments) {
+			if (card.idAttachmentCover && card.attachments && this.props.settings.showCardCoverImages) {
 				let attachment
 				card.attachments.forEach((element) => {
 					if (element.id === card.idAttachmentCover) {
 						attachment = element
 					}
 				})
-				imageCover = <ImageCover attData={attachment} settings={this.props.settings}/>
+				imageCover = <trelloComponents.ImageCover attData={attachment} settings={this.props.settings}/>
 			}
 		}
 		return (
@@ -264,23 +264,6 @@ const CheckListBadge: React.SFC<TrelloInterfacesProps.IBadgesProps> = (props) =>
 		<div className={props.badges.checkItemsChecked === props.badges.checkItems ? 'checkFull' : ''}>
 			<FontAwesomeIcon icon={['far', 'check-square']}/>
 			{` ${props.badges.checkItemsChecked}/${props.badges.checkItems}`}
-		</div>
-	)
-}
-
-const ImageCover: React.SFC<TrelloInterfacesProps.IAttachmentProps> = (props) => {
-	if (!props.settings.showCardCoverImages) {
-		return null
-	}
-	let extension: string = props.attData.url.match(/.+([.].+)/)[1]
-	if (props.settings !== undefined && !props.settings.animateGIFs && extension === '.gif') {
-		extension = '.png'
-	}
-	const filename = `${props.attData.id}${extension}`
-	const pathToImage = `${globalProperties.getPath()}attachments/${filename}`
-	return (
-		<div style={{backgroundColor: props.attData.edgeColor}}>
-			<img className='imgCover' src={pathToImage}/>
 		</div>
 	)
 }
