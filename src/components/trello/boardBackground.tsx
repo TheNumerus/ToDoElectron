@@ -7,7 +7,7 @@ import { TrelloTypes } from '../../TrelloInterfaces'
 export default class BoardBackground extends React.Component<IBoardBackgroundProps, IBoardBackgroundState> {
 	constructor(props) {
 		super(props)
-		this.state = {bgrDownloaded: false, bgrLoaded: false, bgrSet: false, bgrUrl: '', placeholderUrl: ''}
+		this.state = { bgrDownloaded: false, bgrLoaded: false, bgrSet: false, bgrUrl: '', placeholderUrl: '', hasError: false }
 		this.handleIpc()
 	}
 
@@ -16,14 +16,14 @@ export default class BoardBackground extends React.Component<IBoardBackgroundPro
 			if (this.state.bgrSet) {
 				return
 			} else if (this.props.boardData.prefs.backgroundColor === undefined) {
-				this.setState({bgrUrl: HelperUI.getBgrImagePathFromURL(this.props.boardData.prefs.backgroundImage, {preview: false}), bgrDownloaded: true})
+				this.setState({ bgrUrl: HelperUI.getBgrImagePathFromURL(this.props.boardData.prefs.backgroundImage, {preview: false}), bgrDownloaded: true })
 			}
 		})
 	}
 
-	public componentWillReceiveProps (nextprops) {
-		if (this.props.boardData.prefs !== undefined && this.props.boardData.prefs.backgroundColor === undefined) {
-			this.setState({placeholderUrl: HelperUI.getBgrImagePathFromURL(this.props.boardData.prefs.backgroundImageScaled[1].url, {preview: true})})
+	public componentWillReceiveProps (nextprops: IBoardBackgroundProps) {
+		if (nextprops.boardData.prefs !== undefined && nextprops.boardData.prefs.backgroundColor === undefined) {
+			this.setState({ placeholderUrl: HelperUI.getBgrImagePathFromURL(nextprops.boardData.prefs.backgroundImageScaled[1].url, {preview: true}) })
 		}
 	}
 
@@ -31,11 +31,19 @@ export default class BoardBackground extends React.Component<IBoardBackgroundPro
 		ipcRenderer.removeAllListeners('trelloSetBackground')
 	}
 
+	public componentDidCatch () {
+		this.setState({ hasError: true })
+	}
+
 	public backgroundLoaded () {
-		this.setState({bgrLoaded: true})
+		this.setState({ bgrLoaded: true })
 	}
 
 	public render () {
+		// handle error
+		if (this.state.hasError) {
+			return <div className='backgroundSolid'></div>
+		}
 		// handle non existing data
 		if (this.props.boardData.prefs === undefined) {
 			return null
@@ -59,10 +67,10 @@ export default class BoardBackground extends React.Component<IBoardBackgroundPro
 			}
 		}
 		return (
-			<div>
-				{solid}
-				{images}
-			</div>
+				<div>
+					{solid}
+					{images}
+				</div>
 		)
 	}
 }
@@ -76,5 +84,6 @@ interface IBoardBackgroundState {
 	bgrLoaded: boolean,
 	bgrSet: boolean,
 	bgrUrl: string,
+	hasError: boolean,
 	placeholderUrl: string
 }

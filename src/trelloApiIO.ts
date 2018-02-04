@@ -6,12 +6,16 @@ let pathToFolder
  * asynchronusly checks for existence of file/folder in set path
  */
 export function checkExistence (path = '') {
-	return new Promise<string>((resolve, reject) => {
-		fs.access(pathToFolder + path, fs.constants.F_OK, (error: Error) => {
+	return new Promise<boolean>((resolve, reject) => {
+		fs.access(pathToFolder + path, fs.constants.F_OK, (error: NodeJS.ErrnoException) => {
 			if (error) {
-				reject(error)
+				// ENOENT is file doesnt exist error
+				if (error.code !== 'ENOENT') {
+					reject(error)
+				}
+				resolve(false)
 			} else {
-				resolve(pathToFolder + path)
+				resolve(true)
 			}
 		})
 	})

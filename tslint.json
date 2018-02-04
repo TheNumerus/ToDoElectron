@@ -1,42 +1,42 @@
 {
-    "extends": "tslint:recommended",
-    "rules":{
-        "indent":{
-            "options":"tabs"
-        },
-        "semicolon":{
-            "options":"never"
-        },
-        "quotemark":{
-            "options":"single"
-        },
-        "space-before-function-paren":{
-            "options":[
-                {
-                    "anonymous": "always",
-                    "asyncArrow": "always",
-                    "method": "always",
-                    "named": "always"
-                }
-            ]
-        },
-        "max-classes-per-file":{
-            "options":[100]
-        },
-        "max-line-length":{
-            "options":[170]
-        },
-        "trailing-comma":{
-            "options":[
-                {
-                    "multiline":"never",
-                    "singleline":"never"
-                }
-            ]
-        },
-        "no-unused-expression": true,
-        "no-unused-variable": true,
-        "forin" :false,
-        "object-literal-sort-keys": false
-    }
+	"extends": "tslint:recommended",
+	"rules":{
+		"indent":{
+			"options":"tabs"
+		},
+		"semicolon":{
+			"options":"never"
+		},
+		"quotemark":{
+			"options":"single"
+		},
+		"space-before-function-paren":{
+			"options":[
+				{
+					"anonymous": "always",
+					"asyncArrow": "always",
+					"method": "always",
+					"named": "always"
+				}
+			]
+		},
+		"max-classes-per-file":{
+			"options":[100]
+		},
+		"max-line-length":{
+			"options":[170]
+		},
+		"trailing-comma":{
+			"options":[
+				{
+					"multiline":"never",
+					"singleline":"never"
+				}
+			]
+		},
+		"no-unused-expression": true,
+		"no-unused-variable": true,
+		"forin" :false,
+		"object-literal-sort-keys": false
+	}
 }

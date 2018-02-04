@@ -127,27 +127,22 @@ export async function getImage (imageData: TrelloTypes.Attachment, options: Imag
  * Get background and save it
  */
 export async function getBackground (imageUrl: string, options: ImageOptions) {
-	let pathnames: string[]
-	let decodedName: string
-	// seperate path into chunks and select last part
-	pathnames = new URL(imageUrl).pathname.split('/')
-	decodedName = decodeURIComponent(pathnames[pathnames.length - 1])
-	const pathToAdd = options === ImageOptions.backgroundThumb ? 'background/thumbs' : 'background'
-	let name: string = path.join(pathToAdd, decodedName)
-	// check for extension
-	if (!imageUrl.match(/[.][\w]+$/)) {
-		name += '.jpg'
+	// gets last part of the URL which should be a filename
+	let filename = imageUrl.match(/.*\/(.*)/)[1]
+	// checks for existence of file extension
+	if (filename.indexOf('.') === -1) {
+		filename += '.jpg'
 	}
-	try {
-		return await trelloIO.checkExistence(name)
-	} catch (e) {
-		if (e.code !== 'ENOENT') { throw e }
-		// download if needed
+	let name: string
+	if (options === ImageOptions.backgroundThumb) {
+		name = path.join('background', 'thumbs', filename)
+	} else {
+		name = path.join('background', filename)
+	}
+	// download if needed
+	const alreadyExists = await trelloIO.checkExistence(name)
+	if (!alreadyExists) {
 		trelloIO.saveImage(name, await queueRequest({url: imageUrl, type: RequestType.GETimage}))
-		if (options === ImageOptions.backgroundThumb) {
-			return globalProperties.getPath() + name
-		}
-		return globalProperties.getPath() + name
 	}
 }
 /**

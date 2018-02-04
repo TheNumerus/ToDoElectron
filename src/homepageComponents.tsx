@@ -121,7 +121,7 @@ class BoardButtonImage extends React.Component<TrelloInterfacesProps.IBoardButto
 	constructor (props) {
 		super(props)
 		this.openBoard = this.openBoard.bind(this)
-		this.url = this.getImagePath(props.boardData.prefs.backgroundImageScaled[0].url)
+		this.url = HelperUI.getBgrImagePathFromURL(props.boardData.prefs.backgroundImageScaled[1].url, {preview: true})
 		this.state = {imageLoaded: false}
 	}
 
@@ -133,21 +133,8 @@ class BoardButtonImage extends React.Component<TrelloInterfacesProps.IBoardButto
 		this.setState({imageLoaded: true})
 	}
 
-	public getImagePath (inputURL?: string) {
-		let bgrImgUrl: string
-		let bgrImgName: string
-		if (inputURL === undefined) {
-			bgrImgUrl = this.props.boardData.prefs.backgroundImageScaled[1].url
-		} else {
-			bgrImgUrl = inputURL
-		}
-		bgrImgName = bgrImgUrl.match(/.*\/(.*[.].*)/)[1]
-		const pathToImage = path.join(globalProperties.getPath(), 'background', 'thumbs', bgrImgName).replace(/\\/g, '/')
-		return `${pathToImage}#${Date.now()}`
-	}
-
 	public componentWillReceiveProps (nextprops) {
-		this.url = this.getImagePath(nextprops.boardData.prefs.backgroundImageScaled[1].url)
+		this.url = HelperUI.getBgrImagePathFromURL(nextprops.boardData.prefs.backgroundImageScaled[1].url, {preview: true})
 	}
 
 	public render () {
