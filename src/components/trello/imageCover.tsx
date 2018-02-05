@@ -6,7 +6,7 @@ import * as HelperUI from '../../HelperUI'
 import { ISettings } from '../../settings'
 import { TrelloTypes } from '../../TrelloInterfaces'
 
-export default class ImageCover extends React.Component<IimageCoverProps, IimageCoverState> {
+export default class ImageCover extends React.Component<IimageCoverProps, {}> {
 	public render () {
 		let extension: string = this.props.attData.url.match(/.+([.].+)/)[1]
 		if (this.props.settings !== undefined && !this.props.settings.animateGIFs && extension === '.gif') {
@@ -26,8 +26,4 @@ interface IimageCoverProps {
 	attData: TrelloTypes.Attachment
 	// TODO - remove this and use Redux
 	settings: ISettings
-}
-
-interface IimageCoverState {
-
 }

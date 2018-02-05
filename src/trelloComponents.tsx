@@ -3,8 +3,10 @@ import * as autosize from 'autosize'
 import {Event, ipcRenderer, remote} from 'electron'
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
+import { connect } from 'react-redux'
 import Sortable = require('sortablejs')
 import {URL} from 'url'
+import { changePage } from './actions'
 import * as trelloComponents from './components/trelloComponents'
 import * as connCheck from './connectionChecker'
 import * as globalProperties from './globalProperties'
@@ -42,7 +44,7 @@ class ListComponent extends React.Component<TrelloInterfacesProps.IListProps, an
 
 	public render () {
 		const elements = this.props.listData.cards.map((card) =>
-			<CardComponent key={card.id} cardData={card} settings={this.props.settings} changePage={this.props.changePage}/>
+			<trelloComponents.Card key={card.id} cardData={card} settings={this.props.settings}/>
 		)
 		return (
 			<div className='listComponent' id={this.props.listData.id}>
@@ -165,142 +167,7 @@ class ListName extends React.Component<TrelloInterfacesProps.IListProps, any> {
 	}
 }
 
-class CardComponent extends React.Component<TrelloInterfacesProps.ICardDataProps, any> {
-	constructor (props) {
-		super(props)
-		this.openCard = this.openCard.bind(this)
-	}
-
-	public openCard () {
-		this.props.changePage('trelloCard', this.props.cardData.id)
-	}
-	public render () {
-		const card = this.props.cardData
-		// setting these variables to null, so React won't create any DOM element
-		let desc = null
-		let comments = null
-		let attachments = null
-		let imageCover = null
-		if (card.placeholder === undefined) {
-			if (card.desc !== '') {
-				desc = <div><FontAwesomeIcon icon='align-left'/></div>
-			}
-
-			if (card.badges.comments > 0) {
-				comments = <div><FontAwesomeIcon icon={['far', 'comment']}/>{card.badges.comments}</div>
-			}
-
-			if (card.badges.attachments > 0) {
-				attachments = <div><FontAwesomeIcon icon='paperclip'/>{card.badges.attachments}</div>
-			}
-
-			if (card.idAttachmentCover && card.attachments && this.props.settings.showCardCoverImages) {
-				let attachment
-				card.attachments.forEach((element) => {
-					if (element.id === card.idAttachmentCover) {
-						attachment = element
-					}
-				})
-				imageCover = <trelloComponents.ImageCover attData={attachment} settings={this.props.settings}/>
-			}
-		}
-		return (
-			<div className='cardComponent' onClick={this.openCard} id={card.id} draggable={true}>
-				{imageCover}
-				<LabelContainer labels={card.labels} settings={this.props.settings}/>
-				<div className='cardTitle'>{card.name}</div>
-				<div className='cardInfo'>
-					<DueDate cardData={card}/>
-					{desc}
-					<CheckListBadge badges={card.badges}/>
-					{comments}
-					{attachments}
-				</div>
-			</div>
-		)
-	}
-}
-
-const DueDate: React.SFC<TrelloInterfacesProps.ICardDataProps> = (props) => {
-	const classes = ['dueLabel']
-	const due = props.cardData.due
-	// handle non set due date
-	if (due === null) { return null }
-	const date = new Date(due)
-	const today = new Date()
-	let dateString = ` ${date.getDate()}. ${date.getMonth() + 1}. ${today.getFullYear() === date.getFullYear() ? '' : date.getFullYear()}`
-	const clock = ` - ${date.getHours()}:${date.getMinutes() > 9 ? date.getMinutes() : '0' + date.getMinutes()}`
-	if (props.cardData.dueComplete) {
-		classes.push('dueComplete')
-	} else {
-		switch (HelperUI.returnDueState(date.getTime())) {
-		case HelperUI.DueStates.overdueNear:
-			classes.push('dueOverdueNear')
-			dateString += clock
-			break
-		case HelperUI.DueStates.overdue:
-			classes.push('dueOverdue')
-			break
-		case HelperUI.DueStates.near:
-			classes.push('dueNear')
-			dateString += clock
-			break
-		case HelperUI.DueStates.later:
-			break
-		default:
-			throw new Error(`Wrong date on card with id ${props.cardData.id}`)
-		}
-	}
-	return (
-		<div className={classes.join(' ')}><FontAwesomeIcon icon={['far', 'calendar']}/>{dateString}</div>
-	)
-}
-
-const CheckListBadge: React.SFC<TrelloInterfacesProps.IBadgesProps> = (props) => {
-	if (props.badges.checkItems === 0) {
-		return null
-	}
-	return (
-		<div className={props.badges.checkItemsChecked === props.badges.checkItems ? 'checkFull' : ''}>
-			<FontAwesomeIcon icon={['far', 'check-square']}/>
-			{` ${props.badges.checkItemsChecked}/${props.badges.checkItems}`}
-		</div>
-	)
-}
-
-const LabelContainer: React.SFC<TrelloInterfacesProps.ILabelContainerProps> = (props) => {
-	// sort labels by color
-	props.labels.sort((a, b) => {
-		// discard uncolored labels
-		if (a.color === null || b.color === null) { return 0 }
-		return HelperUI.returnLabelIndex(a.color) - HelperUI.returnLabelIndex(b.color)
-	})
-	// create labels
-	const labels = props.labels.map((label) => {
-		return <Label labelData={label} settings={props.settings} key={label.id}/>
-	})
-	return (
-		<div className='labelContainer'>
-			{labels}
-		</div>
-	)
-}
-
-const Label: React.SFC<TrelloInterfacesProps.ILabelProps> = (props) => {
-	if (props.labelData.color === null) {
-		return null
-	}
-	const style = { backgroundColor: HelperUI.returnColor(props.labelData.color) }
-	let name = ''
-	if (props.settings.labelNames) {
-		name = props.labelData.name
-	}
-	return (
-		<div className='cardLabel' style={style}>{name}</div>
-	)
-}
-
-export default class Board extends React.Component<any, any> {
+class Board extends React.Component<any, any> {
 	public boardRoot
 	constructor (props) {
 		super(props)
@@ -352,7 +219,7 @@ export default class Board extends React.Component<any, any> {
 	}
 
 	public goBack () {
-		this.props.changePage('home')
+		this.props.dispatch(changePage('HOME'))
 	}
 
 	public addSortable (input) {
@@ -371,7 +238,7 @@ export default class Board extends React.Component<any, any> {
 
 	public render () {
 		const components = this.state.boardData.values.map((list) => {
-			return <ListComponent listData={list} key={list.id} settings={this.state.settings} changePage={this.props.changePage}/>
+			return <ListComponent listData={list} key={list.id} settings={this.state.settings}/>
 		})
 		document.title = `${this.state.boardData.name} | To-Do app in Electron`
 		return (
@@ -394,6 +261,9 @@ export default class Board extends React.Component<any, any> {
 		)
 	}
 }
+
+// TODO - move to seperate file
+export default connect()(Board)
 
 class BoardName extends React.Component<any, any> {
 	constructor (props) {

@@ -1,17 +1,19 @@
 import * as FontAwesomeIcon from '@fortawesome/react-fontawesome'
 import * as autosize from 'autosize'
-import {ipcRenderer, remote, shell} from 'electron'
+import {ipcRenderer, shell} from 'electron'
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
+import { connect } from 'react-redux'
+import { changePage } from './actions'
 import * as connCheck from './connectionChecker'
+import * as globalProperties from './globalProperties'
 import * as HelperUI from './HelperUI'
 import { CheckState } from './trelloApi'
 import {TrelloTypes} from './trelloInterfaces'
 import {TrelloInterfacesProps} from './trelloInterfacesProps'
-const globalProperties = remote.require('./globalProperties').default
 let cardId
 
-export default class CardDetail extends React.Component<any, any> {
+class CardDetail extends React.Component<any, any> {
 	constructor (props) {
 		super(props)
 		cardId = this.props.idCard
@@ -32,7 +34,7 @@ export default class CardDetail extends React.Component<any, any> {
 	}
 
 	public goBack = () => {
-		this.props.changePage('trelloBoard', this.state.cardData.idBoard)
+		this.props.dispatch(changePage('TRELLO_BOARD', this.state.cardData.idBoard))
 	}
 
 	public update = () => {
@@ -85,6 +87,8 @@ export default class CardDetail extends React.Component<any, any> {
 		)
 	}
 }
+
+export default connect()(CardDetail)
 
 class Header extends React.Component<any, any> {
 	public render () {

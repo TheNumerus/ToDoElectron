@@ -3,6 +3,7 @@ import {ipcRenderer, remote} from 'electron'
 import * as path from 'path'
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
+import * as HomeComponents from './components/homeComponents'
 import * as connCheck from './connectionChecker'
 import * as HelperUI from './HelperUI'
 import {TrelloTypes} from './trelloInterfaces'
@@ -66,9 +67,9 @@ class TrelloModule extends React.Component<any, any> {
 			button = <button className='button' onClick={this.getBoards}>Get boards</button>
 			boards = this.state.boards.values.map((board: TrelloTypes.BoardData) => {
 				if (board.prefs.backgroundImage === null) {
-					return <BoardButton boardData={board} key={board.id} changePage={this.props.changePage}/>
+					return <HomeComponents.BoardButton boardData={board} key={board.id}/>
 				} else {
-					return <BoardButtonImage boardData={board} key={board.id} changePage={this.props.changePage} loaded={this.state.thumbsLoaded}/>
+					return <HomeComponents.BoardButtonImage boardData={board} key={board.id} imgDownloaded={this.state.thumbsLoaded}/>
 				}
 			})
 			boards.push(<AddBoardButton key='add'/>)
@@ -87,114 +88,6 @@ class TrelloModule extends React.Component<any, any> {
 				</div>
 				{button}
 				<div className='dataContainer'>{boards}</div>
-			</div>
-		)
-	}
-}
-
-class BoardButton extends React.Component<TrelloInterfacesProps.IBoardButtonProps, any> {
-	constructor (props) {
-		super(props)
-		this.openBoard = this.openBoard.bind(this)
-	}
-
-	public openBoard (event: React.MouseEvent<HTMLDivElement>) {
-		this.props.changePage('trelloBoard', this.props.boardData.id)
-	}
-
-	public render () {
-		// handle background
-		const style = {backgroundColor: this.props.boardData.prefs.backgroundColor}
-		return (
-			<div className='boardBtn' onClick={this.openBoard}>
-				<div className='boardBtnCover' style={style}>
-					<BoardStar boardData={this.props.boardData}/>
-				</div>
-				<div className='boardBtnCaption'><span>{this.props.boardData.name}</span></div>
-			</div>
-		)
-	}
-}
-
-class BoardButtonImage extends React.Component<TrelloInterfacesProps.IBoardButtonImageProps, any> {
-	public url
-	constructor (props) {
-		super(props)
-		this.openBoard = this.openBoard.bind(this)
-		this.url = HelperUI.getBgrImagePathFromURL(props.boardData.prefs.backgroundImageScaled[1].url, {preview: true})
-		this.state = {imageLoaded: false}
-	}
-
-	public openBoard (event: React.MouseEvent<HTMLDivElement>) {
-		this.props.changePage('trelloBoard', this.props.boardData.id)
-	}
-
-	public imageLoaded () {
-		this.setState({imageLoaded: true})
-	}
-
-	public componentWillReceiveProps (nextprops) {
-		this.url = HelperUI.getBgrImagePathFromURL(nextprops.boardData.prefs.backgroundImageScaled[1].url, {preview: true})
-	}
-
-	public render () {
-		// handle background
-		const style = {backgroundColor: HelperUI.mixColors(this.props.boardData.prefs.backgroundBottomColor,
-				this.props.boardData.prefs.backgroundTopColor)}
-		const imageClasses = ['boardBtnCoverImage']
-		if (this.props.loaded && this.state.imageLoaded) {
-			imageClasses.push('anim')
-		}
-		const url = this.props.loaded ? this.url : ''
-		return (
-			<div className='boardBtn' onClick={this.openBoard}>
-				<div className='boardBtnCover' style={style}>
-					<img className={imageClasses.join(' ')} src={url} onLoad={() => this.imageLoaded()}/>
-					<BoardStar boardData={this.props.boardData}/>
-				</div>
-				<div className='boardBtnCaption'><span>{this.props.boardData.name}</span></div>
-			</div>
-		)
-	}
-}
-
-class BoardStar extends React.Component<any, any> {
-	constructor (props) {
-		super(props)
-		this.handleStar = this.handleStar.bind(this)
-		this.state = {starred: false, mouseOver: false}
-	}
-
-	public handleStar (event) {
-		// not working
-		ipcRenderer.send('trelloUpdateBoard', this.props.boardData.id, [['starred', !this.state.starred]])
-		this.setState({starred: !this.state.starred})
-		// stop the click event, so we don't accidentaly open board
-		event.stopPropagation()
-	}
-
-	public componentWillReceiveProps (nextProps: TrelloInterfacesProps.IBoardProps) {
-		this.setState({starred: nextProps.boardData.starred})
-	}
-
-	public render () {
-		// handle star
-		const starClasses = ['star']
-		if (this.props.boardData.prefs.backgroundBrightness === 'dark') {
-			starClasses.push('star-dark')
-		}
-		let starStateClass = 'far'
-		if (this.state.starred) {
-			starStateClass = 'fas'
-			starClasses.push('star-full')
-		}
-		const star = <FontAwesomeIcon icon={[starStateClass, 'star']} className={starClasses.join(' ')}/>
-		return (
-			<div onClick={this.handleStar}
-				onMouseEnter={() => {this.setState({mouseOver: true})}}
-				onMouseLeave={() => {this.setState({mouseOver: false})}}
-				className='starContainer'>
-				{star}
 			</div>
 		)
 	}
@@ -297,34 +190,12 @@ export default class Homepage extends React.Component<any, any> {
 	public render () {
 		return (
 			<div>
-				<Header changePage={this.props.changePage}/>
-				<TrelloModule authorized={this.state.trelloAuthorized} changePage={this.props.changePage}/>
+				<HomeComponents.Header/>
+				<TrelloModule authorized={this.state.trelloAuthorized}/>
 				<GoogleModule/>
 				<OfflineModule/>
 				<HelperModule/>
 				<AppInfoBar/>
-			</div>
-		)
-	}
-}
-
-class Header extends React.Component<any, any> {
-	constructor (props) {
-		super(props)
-		this.goToSettings = this.goToSettings.bind(this)
-	}
-
-	public goToSettings () {
-		this.props.changePage('settings')
-	}
-
-	public render () {
-		return (
-			<div className='titleHeader'>
-				<h1>ToDoElectron</h1>
-				<button className='buttonHeader' onClick={this.goToSettings} style={{marginLeft: 'auto'}}>
-					<FontAwesomeIcon icon='wrench' size='3x'/>
-				</button>
 			</div>
 		)
 	}

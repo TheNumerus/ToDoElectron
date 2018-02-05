@@ -1,6 +1,7 @@
 import * as FontAwesomeIcon from '@fortawesome/react-fontawesome'
 import {ipcRenderer} from 'electron'
 import * as React from 'react'
+import * as SettingsComponents from './components/settingsComponents'
 import {IChangeSettings, ISettings, setDefaultValues, Theme} from './settings'
 import {TrelloInterfacesProps} from './trelloInterfacesProps'
 
@@ -8,25 +9,8 @@ export default class Settings extends React.Component<any, any> {
 	public render () {
 		return (
 			<div>
-				<Header changePage={this.props.changePage}/>
+				<SettingsComponents.Header/>
 				<Checkboxes/>
-			</div>
-		)
-	}
-}
-class Header extends React.Component<any, any> {
-
-	public goBack = () => {
-		this.props.changePage('home')
-	}
-
-	public render () {
-		return (
-			<div className='titleHeader'>
-				<button className='buttonHeader' onClick={this.goBack}>
-					<FontAwesomeIcon icon='chevron-left' size='2x'/>
-				</button>
-				<h1>Settings</h1>
 			</div>
 		)
 	}

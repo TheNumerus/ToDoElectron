@@ -31,11 +31,13 @@
     "@fortawesome/fontawesome-free-solid": "^5.0.0",
     "@fortawesome/react-fontawesome": "0.0.14",
     "autosize": "^4.0.0",
-    "dotenv":"~4.0.0",
+    "dotenv": "~4.0.0",
     "is-online": "~7.0.0",
     "oauth": "0.9.15",
     "react": "~16.0.0",
     "react-dom": "~16.0.0",
+    "react-redux": "^5.0.6",
+    "redux": "^3.7.2",
     "sharp": "~0.18.4",
     "sortablejs": "^1.6.1"
   }
