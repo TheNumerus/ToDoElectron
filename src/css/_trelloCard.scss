@@ -1,3 +1,5 @@
+$attWidth: 400px;
+
 #headerBoard{
     background: rgba(0,0,0,0.5);
     white-space: nowrap;
@@ -17,7 +19,7 @@ body{
     padding: 5px;
     padding-top: 58px;
     display: grid;
-    grid-template-columns: 1fr 480px;
+    grid-template-columns: 1fr $attWidth + 20px;
     grid-template-areas: 'main attachments';
     @media (max-width: 1000px){
         grid-template-rows: auto auto;
@@ -47,27 +49,91 @@ h1{
 }
 
 .attContainer{
+    position: relative;
     grid-area: attachments;
-    overflow-y: auto;
-    width: 100%;
+    overflow-y: scroll;
+    width: $attWidth + 20px;
+    height: 90vh;
     .att{
         display: flex;
+        width: $attWidth;
+        height: $attWidth * 9 / 16;
+        overflow: hidden;
+        margin-bottom: 10px;
         .attControl{
-            .attDate{
-                color: #999;
-                font-size: 80%;
+            display: grid;
+            background: rgba(60,60,60,0.85);
+            width: $attWidth;
+            transition:  height 0.5s;
+            height: 20%;
+            margin-top: auto;
+            z-index: 1;
+            .attUpperBar{
+                display: flex;
+                .attDate{
+                    transition: opacity 0.5s;
+                    opacity: 0;
+                    color: #999;
+                    font-size: 80%;
+                    margin-left: auto;
+                    padding: 5px;
+                    min-width: 95px;
+                }
+                .attName{
+                    transition: font-size 0.5s, margin-bottom 0.5s, max-width 0.5s, height 0.5s;
+                    margin-top: 5px;
+                    text-overflow: ellipsis;
+                    max-width: 380px;
+                    overflow: hidden;
+                    font-family: 'Montserrat';
+                    color: white;
+                    margin-left: 10px;
+                    font-size: 22px;
+                    margin-bottom: 10px;
+                    height: 25px;
+                }
             }
-            .attName{
-                text-overflow: ellipsis;
-                max-width: 360px;
-                overflow: hidden;
+            .attButtonBar{
+                display: grid;
+                grid-template-rows: 1fr;
+                grid-template-columns: 3fr 3fr 2fr;
+                height: 35px;
+                margin-top: auto;
+                width: $attWidth;
+                .attIcon {
+                    margin: 0 5px;
+                }
+                button{
+                    color: white;
+                    background: none;
+                    border: none;
+                    font-size: 16px;
+                    font-family: 'Roboto';
+                    outline: none;
+                }
+            }
+        }
+        &:hover{
+            .attControl{
+                height: 30%;
+            }
+            .attUpperBar{
+                .attName{
+                    font-size: 12px;
+                    max-width: 280px;
+                    height: 30px;
+                    margin-bottom: 0px;
+                }
+                .attDate{
+                    opacity: 1;
+                }
             }
         }
         img{
-            max-width: 120px;
-            max-height: 120px;
-            margin-left: auto;
-            object-fit: contain;
+            position: absolute;
+            object-fit: cover;
+            width: $attWidth;
+            max-height: $attWidth * 9 / 16;
         }
     }
 }
@@ -80,10 +146,6 @@ h1{
 .dueLabel{
     padding: 0px 4px;
     border-radius: 1px;
-}
-
-.attButtonBar{
-    display: flex;
 }
 
 .cardName{

@@ -103,13 +103,11 @@ export async function getImage (imageData: TrelloTypes.Attachment, options: Imag
 	const extension = imageData.url.match(/.+([.].+)/)
 	let name = path.join('attachments', `${imageData.id}${extension[1]}`)
 	const animate = settings.get().animateGIFs
-	try {
-		if (!animate) {
-			name = path.join('attachments', `${imageData.id}.png`)
-		}
-		return await trelloIO.checkExistence(name)
-	} catch (e) {
-		if (e.code !== 'ENOENT') { throw e }
+	if (!animate) {
+		name = path.join('attachments', `${imageData.id}.png`)
+	}
+	const exist = await trelloIO.checkExistence(name)
+	if (!exist) {
 		// download if needed
 		const imageBuffer = await queueRequest({url: imageData.url, type: RequestType.GETimage})
 		if (!animate && extension[1].toLowerCase() === '.gif') {
@@ -119,7 +117,6 @@ export async function getImage (imageData: TrelloTypes.Attachment, options: Imag
 			name = path.join('attachments', `${imageData.id}${extension[1]}`)
 			trelloIO.saveImage(name, imageBuffer)
 		}
-		return globalProperties.getPath() + name
 	}
 }
 

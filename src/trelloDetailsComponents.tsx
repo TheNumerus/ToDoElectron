@@ -1,16 +1,16 @@
 import * as FontAwesomeIcon from '@fortawesome/react-fontawesome'
 import * as autosize from 'autosize'
-import {ipcRenderer, shell} from 'electron'
+import {ipcRenderer} from 'electron'
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
 import { connect } from 'react-redux'
 import { changePage } from './actions'
+import * as trelloComponents from './components/trelloComponents'
 import * as connCheck from './connectionChecker'
-import * as globalProperties from './globalProperties'
 import * as HelperUI from './HelperUI'
 import { CheckState } from './trelloApi'
-import {TrelloTypes} from './trelloInterfaces'
-import {TrelloInterfacesProps} from './trelloInterfacesProps'
+import { TrelloTypes } from './trelloInterfaces'
+import { TrelloInterfacesProps } from './trelloInterfacesProps'
 let cardId
 
 class CardDetail extends React.Component<any, any> {
@@ -207,42 +207,6 @@ class Comment extends React.Component<TrelloInterfacesProps.ICommentProps, {}> {
 		)
 	}
 }
-class ImageAttachment extends React.Component<TrelloInterfacesProps.IAttachmentControlProps, {}> {
-	constructor (props) {
-		super(props)
-		this.changeCover = this.changeCover.bind(this)
-	}
-
-	public openImage (path: string) {
-		shell.openExternal(path)
-	}
-
-	public changeCover (idCover: string) {
-		this.props.changeCover(idCover)
-	}
-
-	public render () {
-		const extension = this.props.attData.url.match(/.+([.].+)/)
-		const filename = `${this.props.attData.id}${extension[1]}`
-		const path = `${globalProperties.getPath()}attachments/${filename}`
-		const date = new Date(this.props.attData.date)
-		const dateString = `${date.getUTCDate()}.${date.getUTCMonth() + 1}.${date.getUTCFullYear()} - ${date.getUTCHours()}:${date.getUTCMinutes()}`
-		return (
-			<div className='att'>
-				<div className='attControl'>
-					<div className='attName'>{this.props.attData.name}</div>
-					<div className='attDate'>{dateString}</div>
-					<div className='attButtonBar'>
-						<button>Comment</button>
-						<button>Remove</button>
-						<button onClick={(e) => this.changeCover(this.props.attData.id)}>{this.props.isCover ? 'Remove cover' : 'Set as cover'}</button>
-					</div>
-				</div>
-				<img onClick={(e) => this.openImage(path)} className='attThumb' src={path}/>
-			</div>
-		)
-	}
-}
 
 class Attachments extends React.Component<TrelloInterfacesProps.ICardDataProps, any> {
 	constructor (props) {
@@ -275,7 +239,7 @@ class Attachments extends React.Component<TrelloInterfacesProps.ICardDataProps, 
 		if (this.props.cardData.attachments !== undefined) {
 			attachments = this.props.cardData.attachments.map((data) => {
 				const isCover = data.id === this.state.currentCover
-				return <ImageAttachment attData={data} key={data.id} isCover={isCover} changeCover={this.changeCover}/>
+				return <trelloComponents.ImageAttachment attData={data} key={data.id} isCover={isCover} changeCover={this.changeCover}/>
 			})
 		} else {
 			return null
