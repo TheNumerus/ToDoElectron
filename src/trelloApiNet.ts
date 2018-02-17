@@ -15,7 +15,7 @@ let queue: IQueueItem[]
  * Initializes variables required for connection to Trello API
  */
 export function initialize () {
-	token = cacheModule.calls.trello.getToken()
+	token = cacheModule.getTrelloToken()
 	appKey = process.env.trelloApi
 	queue = []
 	setInterval(handleQueueRequests, 110)

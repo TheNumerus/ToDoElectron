@@ -63,9 +63,9 @@ class TrelloModule extends React.Component<any, any> {
 		let button
 		let boards
 		let authorizedText
-		if (this.props.authorized && this.state.boards.values !== undefined) {
+		if (this.props.authorized && this.state.boards !== undefined) {
 			button = <button className='button' onClick={this.getBoards}>Get boards</button>
-			boards = this.state.boards.values.map((board: TrelloTypes.BoardData) => {
+			boards = this.state.boards.map((board: TrelloTypes.BoardData) => {
 				if (board.prefs.backgroundImage === null) {
 					return <HomeComponents.BoardButton boardData={board} key={board.id}/>
 				} else {
@@ -170,16 +170,16 @@ export default class Homepage extends React.Component<any, any> {
 		super(props)
 		this.clearCache = this.clearCache.bind(this)
 		this.state = {trelloAuthorized: false}
-		ipcRenderer.send('readyToShow')
 	}
 
 	public componentDidMount () {
+		ipcRenderer.send('readyToShow')
 		ipcRenderer.send('trelloIsAuthorized')
-		ipcRenderer.on('trelloIsAuthorized-reply', (event, data) => {
-			if (data) {
+		ipcRenderer.on('trelloIsAuthorized-reply', (event, isAuthorized) => {
+			if (isAuthorized) {
 				ipcRenderer.send('trelloGetBoards')
 			}
-			this.setState({trelloAuthorized: data})
+			this.setState({trelloAuthorized: isAuthorized})
 		})
 	}
 

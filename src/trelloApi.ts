@@ -15,7 +15,6 @@ const accessURL = 'https://trello.com/1/OAuthGetAccessToken'
 const authorizeURL = 'https://trello.com/1/OAuthAuthorizeToken'
 let oauth
 let verificationToken = ''
-let homepageTrelloAuthEvent: Event = null
 // store authentification window variable here, so we can close it from another function
 let authorizeWindow: BrowserWindow
 
@@ -28,17 +27,8 @@ function handleIpcCalls () {
 		authorize()
 	})
 
-	/**
-	 * Ok, so I'm writing a little bullshit. Since I don't know any other way to to do it,
-	 * I'm just gonna write something terrible. Homepage should check on construction if trello
-	 * is authenticated, so we store the event which came for later use. Then, when the authorize
-	 * window closes, we send the reply to the same event, but this time with a true value.
-	 * The thing is, we need to store the event as a module global variable, so we can access
-	 * it from anothen function. I'm sorry if someone sees this code.  - TheNumerus 2017-10-14
-	 */
-	ipcMain.on('trelloIsAuthorized', (event) => {
-		homepageTrelloAuthEvent = event
-		event.sender.send('trelloIsAuthorized-reply', cacheModule.calls.trello.getUsed())
+	ipcMain.on('trelloIsAuthorized', () => {
+		windowManager.sendMessage('trelloIsAuthorized-reply', cacheModule.getTrelloAuthorized())
 	})
 
 	ipcMain.on('trelloGetAllUserInfo', async (event) => {
@@ -46,20 +36,19 @@ function handleIpcCalls () {
 	})
 
 	ipcMain.on('trelloGetBoards', async (event, options) => {
-		const boards = cacheModule.calls.trello.getBoards()
+		let boards = cacheModule.getTrelloBoards()
 		// handle empty cache and old cache
-		if (cacheModule.calls.helper.checkInvalidity(boards) || (options !== undefined && options.forceUpdate)) {
+		if (cacheModule.checkInvalidity('boards') || (options !== undefined && options.forceUpdate)) {
 			const json = await TrelloApiNet.getBoards()
 			// format data for internal use
 			// clean up first
-			boards.values = []
+			boards = []
 			json.forEach((board) => {
 				if (!board.closed) {
-					boards.values.push(board)
+					boards.push(board)
 				}
 			})
-			boards.date = Date.now()
-			cacheModule.calls.trello.setBoards(boards)
+			cacheModule.setTrelloBoards(boards)
 			cacheModule.saveCache()
 			windowManager.sendMessage('trelloGetBoards-reply', boards)
 			// now download images in background
@@ -69,8 +58,8 @@ function handleIpcCalls () {
 			getBoardThumbs(boards)
 		}
 	})
-	const getBoardThumbs = async (boards) => {
-		for (const board of boards.values) {
+	const getBoardThumbs = async (boards: TrelloTypes.BoardData[]) => {
+		for (const board of boards) {
 			if (board.prefs.backgroundImageScaled !== null) {
 				await TrelloApiNet.getBackground(board.prefs.backgroundImageScaled[1].url, ImageOptions.backgroundThumb)
 			}
@@ -86,7 +75,7 @@ function handleIpcCalls () {
 
 	ipcMain.on('trelloAddCard', async (event, data) => {
 		// TODO add offline card adding
-		cacheModule.calls.trello.addCard(data)
+		// cacheModule.calls.trello.addCard(data)
 		if (data.name !== '') {
 			await TrelloApiNet.addCard(data)
 			boardUpdate(event, data.idBoard, {forceUpdate: true, refresh: true})
@@ -102,7 +91,7 @@ function handleIpcCalls () {
 
 	ipcMain.on('trelloGetCardData', async (event: Event, idCard: string) => {
 		// TODO add update function
-		const cardData: TrelloTypes.CardData = cacheModule.calls.trello.getCard(idCard)
+		const cardData: TrelloTypes.CardData = cacheModule.getTrelloCardById(idCard)
 		if (cardData.idChecklists.length === 0) {
 			event.sender.send('trelloGetCardData-reply', cardData)
 		}
@@ -145,7 +134,7 @@ function handleIpcCalls () {
 	})
 
 	ipcMain.on('trelloSortCard', (event, arg: TrelloTypes.SortCard) => {
-		const boardData = cacheModule.calls.trello.getBoardData(arg.ids.idBoard)
+		const boardData = cacheModule.getTrelloBoardDataById(arg.ids.idBoard)
 		// sort to top
 		if (arg.newIndex === 0) {
 			TrelloApiNet.updateCard(arg.ids.idCard, [['pos', 'top'], ['idList', arg.ids.idList]])
@@ -181,7 +170,7 @@ function handleIpcCalls () {
 	})
 
 	ipcMain.on('trelloSortList', (event, arg: TrelloTypes.SortList) => {
-		const boardData = cacheModule.calls.trello.getBoardData(arg.ids.idBoard)
+		const boardData = cacheModule.getTrelloBoardDataById(arg.ids.idBoard)
 		// sort to top
 		if (arg.newIndex === 0) {
 			TrelloApiNet.updateList(arg.ids.idList, [['pos', 'top']])
@@ -214,7 +203,7 @@ function handleIpcCalls () {
 	 * Updates cachced version of board data
 	 */
 	async function updateBoardData (boardId: string) {
-		const boardData = cacheModule.calls.trello.getBoardData(boardId)
+		const boardData = cacheModule.getTrelloBoardDataById(boardId)
 		const json = await TrelloApiNet.getBoardData(boardId)
 		boardData.name = json.name
 		boardData.prefs = json.prefs
@@ -238,7 +227,7 @@ function handleIpcCalls () {
 			})
 		}
 		boardData.date = Date.now()
-		cacheModule.calls.trello.setBoardData(boardId, boardData)
+		cacheModule.setTrelloBoardDataById(boardId, boardData)
 		await cacheModule.saveCache()
 	}
 
@@ -262,10 +251,10 @@ function handleIpcCalls () {
 	}
 
 	async function boardUpdate (event: Event, boardId: string, options: TrelloTypes.PageUpdateOptions) {
-		let boardData = cacheModule.calls.trello.getBoardData(boardId)
-		if (options.forceUpdate === true || cacheModule.calls.helper.checkInvalidity(boardData)) {
+		let boardData = cacheModule.getTrelloBoardDataById(boardId)
+		if (options.forceUpdate === true || cacheModule.checkInvalidity(boardData)) {
 			await updateBoardData(boardId)
-			boardData = cacheModule.calls.trello.getBoardData(boardId)
+			boardData = cacheModule.getTrelloBoardDataById(boardId)
 			getBackground(boardData.prefs, event)
 			event.sender.send('trelloGetBoardData-reply', boardData)
 		} else {
@@ -309,16 +298,12 @@ export function authorizeCallback (url: string) {
 	oauth.getOAuthAccessToken(oauthToken, verificationToken, oauthVerifier, (error: Error, accessToken: string, accessTokenSecret: string, results) => {
 		if (error) {throw error}
 		// regenerate trello api access with new access tokens
-		cacheModule.calls.trello.setToken(accessToken)
-		cacheModule.calls.trello.setUsed(true)
-		callHomepageTrelloModule()
+		cacheModule.setTrelloToken(accessToken)
+		cacheModule.setTrelloAuthorized(true)
+		windowManager.sendMessage('trelloIsAuthorized-reply', true)
 		TrelloApiNet.initialize()
 		cacheModule.saveCache()
 	})
-}
-
-function callHomepageTrelloModule () {
-	homepageTrelloAuthEvent.sender.send('trelloIsAuthorized-reply', cacheModule.calls.trello.getUsed())
 }
 
 export function initialize () {
